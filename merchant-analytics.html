@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>發票載具 商家版・數據參謀 v1.3（示範小程序）</title>
+<style>
+:root{
+  --navy:#1F3352; --teal:#0E7C7B; --teal-deep:#0A5F5E;
+  --gold:#B8912F; --gold-bg:#FAF3DF;
+  --cm:#D7000F; --cm-deep:#A50011; --cm-bg:#FDECEC;
+  --ink:#1F2430; --muted:#7A8494; --line:#E6EAF0; --bg:#F4F6F9;
+  --ok:#1F9D63; --warn:#D9822B; --nuan:#C2452F;
+  --radius:14px;
+  --font:"PingFang TC","Noto Sans TC","Microsoft JhengHei","Heiti TC",sans-serif;
+  --mono:"SF Mono",ui-monospace,"JetBrains Mono",Menlo,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:var(--font);background:#20304B;color:var(--ink);min-height:100vh;
+  background-image:radial-gradient(1100px 500px at 30% -10%, #2C4368 0%, #20304B 55%);}
+.stage{max-width:430px;margin:0 auto;min-height:100vh;background:var(--bg);
+  box-shadow:0 0 60px rgba(0,0,0,.45);position:relative;padding-bottom:76px;}
+/* ---------- header ---------- */
+.hd{background:linear-gradient(160deg,#24365B 0%,var(--navy) 62%);color:#fff;padding:16px 16px 54px;position:relative;overflow:hidden}
+.hd::after{content:"";position:absolute;right:-70px;top:-70px;width:220px;height:220px;border-radius:50%;
+  background:radial-gradient(circle at 30% 30%,rgba(215,0,15,.35),rgba(215,0,15,0) 70%);}
+.eyebrow{display:flex;align-items:center;gap:8px;font-size:12px;color:#B9C6DC;letter-spacing:.06em}
+.eyebrow .vtag{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:1px 8px;font-family:var(--mono);font-size:11px}
+.hd h1{font-size:20px;margin-top:8px;font-weight:700;letter-spacing:.02em}
+.hd h1 .red{color:#FF8A93}
+.storebar{margin-top:12px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.16);
+  border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:10px}
+.storedot{width:38px;height:38px;border-radius:10px;background:var(--nuan);display:flex;align-items:center;justify-content:center;font-size:19px;flex:none}
+.storebar .nm{font-size:14px;font-weight:700}
+.storebar .sub{font-size:11px;color:#B9C6DC;margin-top:2px}
+.storebar .go{margin-left:auto;font-size:11px;color:#FFD7DA;border:1px solid rgba(255,215,218,.5);border-radius:999px;padding:3px 9px;text-decoration:none;flex:none}
+.period{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.pill{font-size:10.5px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.16);color:#D8E1EF;border-radius:999px;padding:2px 9px}
+/* ---------- body / cards ---------- */
+.bd{padding:0 12px;margin-top:-34px;position:relative}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:14px;margin-bottom:12px;box-shadow:0 6px 18px rgba(31,51,82,.06)}
+.card h3{font-size:13.5px;display:flex;align-items:center;gap:6px}
+.card h3 .tag{margin-left:auto;font-size:10px;font-weight:600;border-radius:999px;padding:2px 8px}
+.tag.l0{background:#E9F6F0;color:var(--ok)} .tag.l1{background:var(--gold-bg);color:var(--gold)}
+.tag.l3{background:var(--cm-bg);color:var(--cm)}
+.hint{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.55}
+/* KPI grid */
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:12px;box-shadow:0 6px 18px rgba(31,51,82,.06)}
+.kpi .lb{font-size:11px;color:var(--muted)}
+.kpi .v{font-family:var(--mono);font-size:21px;font-weight:700;margin-top:4px;letter-spacing:-.01em}
+.kpi .d{font-size:11px;margin-top:3px;font-weight:600}
+.up{color:var(--ok)} .down{color:var(--cm)}
+/* bars */
+.bars{display:flex;align-items:flex-end;gap:7px;height:96px;margin-top:12px}
+.bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px}
+.bar i{display:block;width:100%;border-radius:6px 6px 3px 3px;background:linear-gradient(180deg,#37507F,var(--navy));min-height:6px}
+.bar.hot i{background:linear-gradient(180deg,#FF5B66,var(--cm))}
+.bar b{font-size:9.5px;color:var(--muted);font-weight:500}
+.bar .val{font-size:9px;color:var(--navy);font-family:var(--mono)}
+/* compare rows */
+.cmp{margin-top:10px}
+.cmp .row{margin-bottom:10px}
+.cmp .lbl{display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:4px}
+.cmp .lbl b{font-weight:700}
+.track{height:9px;border-radius:999px;background:#EEF1F6;position:relative;overflow:hidden}
+.fill{position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:linear-gradient(90deg,#37507F,var(--navy))}
+.fill.me{background:linear-gradient(90deg,#FF5B66,var(--cm))}
+.tick{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--gold)}
+.legend{display:flex;gap:12px;font-size:10.5px;color:var(--muted);margin-top:6px}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+/* rank list */
+.rank{margin-top:8px}
+.rk{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:12.5px}
+.rk:last-child{border-bottom:0}
+.rk .no{width:20px;height:20px;border-radius:6px;background:#EEF1F6;color:var(--navy);font-family:var(--mono);font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:700;flex:none}
+.rk.top .no{background:var(--cm-bg);color:var(--cm)}
+.rk .gr{margin-left:auto;font-family:var(--mono);font-size:11px;font-weight:700}
+/* donut */
+.donutwrap{display:flex;align-items:center;gap:14px;margin-top:10px}
+.donut{width:104px;height:104px;flex:none}
+.dlegend{font-size:12px;line-height:2}
+.dlegend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+/* rfm */
+.rfm{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.seg{border:1px solid var(--line);border-radius:12px;padding:10px}
+.seg .t{font-size:12.5px;font-weight:700;display:flex;align-items:center;gap:5px}
+.seg .n{font-family:var(--mono);font-size:19px;font-weight:700;margin:4px 0 2px}
+.seg .m{font-size:10.5px;color:var(--muted);line-height:1.5}
+.seg button{margin-top:8px;width:100%;border:0;border-radius:9px;padding:7px 0;font-size:11.5px;font-weight:700;color:#fff;background:var(--navy);font-family:var(--font)}
+.seg.champ{background:#FFF9F0;border-color:#F2E3C8} .seg.champ button{background:var(--gold)}
+.seg.risk{background:var(--cm-bg);border-color:#F6C9CD} .seg.risk button{background:var(--cm)}
+/* funnel */
+.funnel{margin-top:10px}
+.fstep{display:flex;align-items:center;gap:9px;margin-bottom:7px}
+.fstep .fb{height:26px;border-radius:8px;background:linear-gradient(90deg,#37507F,var(--navy));color:#fff;font-size:11px;display:flex;align-items:center;padding:0 10px;white-space:nowrap}
+.fstep .fv{font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+/* AI card */
+.ai{background:linear-gradient(150deg,#FFF4F4,#FFFFFF 55%);border:1px solid #F6C9CD}
+.ai h3 .dot{width:8px;height:8px;border-radius:50%;background:var(--cm);box-shadow:0 0 0 4px rgba(215,0,15,.12)}
+.ai p{font-size:12.5px;line-height:1.75;margin-top:8px}
+.ai p b{color:var(--cm)}
+/* compare table */
+.tbl{width:100%;border-collapse:collapse;margin-top:10px;font-size:11.5px}
+.tbl th{font-size:10.5px;color:var(--muted);font-weight:600;text-align:right;padding:6px 4px;border-bottom:1px solid var(--line)}
+.tbl th:first-child,.tbl td:first-child{text-align:left}
+.tbl td{padding:8px 4px;border-bottom:1px dashed var(--line);text-align:right;font-family:var(--mono)}
+.tbl td:first-child{font-family:var(--font);font-weight:700}
+.tbl tr.me td{color:var(--cm)}
+.tbl tr:last-child td{border-bottom:0}
+.badge-me{display:inline-block;font-size:9px;background:var(--cm-bg);color:var(--cm);border-radius:6px;padding:1px 6px;margin-left:5px;font-family:var(--font);font-weight:700}
+/* notice */
+.notice{font-size:10.5px;color:var(--muted);background:#fff;border:1px dashed var(--line);border-radius:10px;padding:9px 11px;line-height:1.6;margin-bottom:12px}
+.notice b{color:var(--navy)}
+/* action card */
+.act{border-left:0;background:linear-gradient(150deg,#F2F7FF,#fff 60%);border:1px solid #D7E3F4}
+.act li{font-size:12px;line-height:1.7;margin-left:18px;margin-top:4px}
+.act li b{color:var(--navy)}
+/* tab pages */
+.page{display:none}.page.on{display:block}
+/* tabbar */
+.tabbar{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:430px;
+  background:#fff;border-top:1px solid var(--line);display:flex;z-index:30;padding-bottom:env(safe-area-inset-bottom)}
+.tab{flex:1;text-align:center;padding:9px 0 8px;font-size:10.5px;color:var(--muted);cursor:pointer;text-decoration:none}
+.tab .ic{font-size:18px;display:block;margin-bottom:2px;filter:grayscale(1);opacity:.55}
+.tab.on{color:var(--cm);font-weight:700}
+.tab.on .ic{filter:none;opacity:1}
+/* mini-program compare */
+.scorebox{display:flex;align-items:center;gap:14px;margin-top:10px}
+.scorebig{flex:none;text-align:center;padding:10px 14px;border-radius:12px;background:var(--cm-bg)}
+.scorebig .n{font-family:var(--mono);font-size:30px;font-weight:800;color:var(--cm);line-height:1}
+.scorebig .l{font-size:10px;color:var(--muted);margin-top:4px}
+.scorebig.bench{background:#F2F7FF}
+.scorebig.bench .n{color:var(--navy)}
+.vs{font-size:12px;color:var(--muted);font-weight:700;flex:none}
+.scoreinfo{font-size:11px;color:var(--muted);line-height:1.6}
+.why{margin-top:8px}
+.wr{display:flex;gap:9px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:12px;line-height:1.55}
+.wr:last-child{border-bottom:0}
+.wr .ck{flex:none;width:18px;height:18px;border-radius:50%;background:#E9F6F0;color:var(--ok);font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:800;margin-top:1px}
+.wr b{color:var(--navy)}
+.wr .out{color:var(--cm);font-weight:700;font-family:var(--mono);font-size:11px;white-space:nowrap;margin-left:auto;padding-left:8px}
+.gapwhy{font-size:10.5px;color:var(--warn);margin-top:3px}
+.fix{border:1px solid var(--line);border-radius:12px;padding:10px 11px;margin-top:9px;display:flex;gap:10px;align-items:flex-start}
+.fix .pri{flex:none;font-size:10px;font-weight:800;border-radius:7px;padding:3px 7px;margin-top:1px}
+.pri.p0{background:var(--cm);color:#fff}.pri.p1{background:var(--gold);color:#fff}.pri.p2{background:#8B97AB;color:#fff}
+.fix .fx{font-size:12px;line-height:1.55}
+.fix .fx b{color:var(--navy)}
+.fix .est{font-size:10.5px;color:var(--ok);font-weight:700;margin-top:2px}
+.fix button{flex:none;margin-left:auto;border:0;border-radius:9px;padding:7px 11px;font-size:11px;font-weight:700;color:#fff;background:var(--navy);font-family:var(--font);white-space:nowrap;align-self:center}
+.fix.hot button{background:var(--cm)}
+/* toast */
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(20px);background:rgba(31,36,48,.92);color:#fff;
+  font-size:12.5px;border-radius:999px;padding:9px 18px;opacity:0;transition:.25s;z-index:99;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.foot{font-size:10px;color:#9AA5B5;text-align:center;padding:10px 16px 18px;line-height:1.6}
+.sec{font-size:11px;color:var(--muted);letter-spacing:.14em;margin:14px 2px 8px;font-weight:700}
+
+/* ===== embed 模式（商家工作台嵌入） ===== */
+body.embed .foot{display:none}
+body.embed .stage{box-shadow:none;max-width:100%}
+
+/* ===== 膠囊選單（•••｜◉） ===== */
+.mcap{position:absolute;top:14px;right:12px;z-index:60;display:flex;align-items:center;gap:9px;background:rgba(0,0,0,.16);border:1px solid rgba(255,255,255,.32);border-radius:16px;height:30px;padding:0 12px;color:#fff;font-size:13px;backdrop-filter:blur(4px)}
+.mcap span{cursor:pointer;line-height:1;font-weight:700}
+.mcap .sep{width:1px;height:13px;background:rgba(255,255,255,.4)}
+.mcap-mask{position:absolute;inset:0;background:rgba(15,22,36,.48);z-index:80;display:none;align-items:flex-end}
+.mcap-mask.show{display:flex}
+.mcap-sheet{background:#fff;border-radius:18px 18px 0 0;padding:14px 14px 18px;width:100%;box-shadow:0 -10px 30px rgba(10,20,40,.25)}
+.mcap-sheet h5{font-size:13px;font-weight:800;color:#1F2430;margin:2px 2px 11px}
+.mcap-grid{display:flex;gap:10px}
+.mcap-act{flex:1;border:1px solid #E6EAF0;background:#F8F9FB;border-radius:14px;padding:12px 6px;font-size:11px;font-weight:800;color:#1F2430;display:flex;flex-direction:column;align-items:center;gap:7px}
+.mcap-act .ico{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:17px}
+.mcap-cancel{width:100%;margin-top:12px;border:none;background:#F1F3F6;border-radius:12px;padding:12px;font-size:13px;font-weight:800;color:#3A4550}
+body.embed .mcap,body.embed .mcap-mask{display:none}
+body.embed .storebar .go{display:none}
+
+.hd .eyebrow{padding-right:86px}
+.mcap-sheet{padding-bottom:22px}
+
+/* ===== mobile full-bleed：真機掃碼＝滿版沈浸式，與用戶版小程序一致（v1.3） ===== */
+@media (max-width:520px){
+  body{background:var(--bg);background-image:none;-webkit-text-size-adjust:100%}
+  .stage{max-width:none;margin:0;box-shadow:none;padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+  .hd{padding-top:calc(16px + env(safe-area-inset-top,0px))}
+  .mcap{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));right:12px}
+  .mcap-mask{position:fixed}
+  .tabbar{max-width:none}
+}
+</style>
+</head>
+<body>
+<div class="stage">
+<div class="mcap" id="mcap"><span onclick="mcapMenu()" title="選單">•••</span><i class="sep"></i><span onclick="mcapHome()" title="回 Demo 入口">◉</span></div>
+<div class="mcap-mask" id="mcapMask" onclick="mcapClose()">
+  <div class="mcap-sheet" onclick="event.stopPropagation()">
+    <h5>生意參謀 · 選單</h5>
+    <div class="mcap-grid">
+      <button class="mcap-act" onclick="mcapReload()"><span class="ico" style="background:#F1F0FA">↻</span>重新整理</button>
+      <button class="mcap-act" onclick="mcapLine()"><span class="ico" style="background:#E4F6E9">💬</span>分享到 LINE</button>
+      <button class="mcap-act" onclick="mcapCopy()"><span class="ico" style="background:#EAF2FB">🔗</span>複製連結</button>
+    </div>
+    <button class="mcap-cancel" onclick="mcapClose()">取消</button>
+  </div>
+</div>
+
+  <!-- ================= header ================= -->
+  <div class="hd">
+    <div class="eyebrow">發票載具・商家版 <span class="vtag">數據參謀 v1.3</span><span class="vtag" style="color:#FFD7DA;border-color:rgba(255,215,218,.4)">體驗版</span></div>
+    <h1>每一張發票，都是你的<span class="red">經營參謀</span></h1>
+    <div class="storebar">
+      <div class="storedot">🍝</div>
+      <div>
+        <div class="nm">暖暖窩義式廚房（板橋府中店）</div>
+        <div class="sub">商圈：板橋府中—新板　·　業態：義式／簡餐</div>
+      </div>
+      <a class="go" href="merchant.html">接單台 →</a>
+    </div>
+    <div class="period">
+      <span class="pill">📅 本週 07/06–07/12</span>
+      <span class="pill">🧾 發票級數據</span>
+      <span class="pill">🔒 跨店口徑已去識別化</span>
+    </div>
+  </div>
+
+  <div class="bd">
+
+    <!-- ================= 總覽 ================= -->
+    <div class="page on" id="pg-ov">
+      <div class="kpis">
+        <div class="kpi"><div class="lb">本週營收</div><div class="v">NT$286,400</div><div class="d up">▲ 12.3% vs 上週</div></div>
+        <div class="kpi"><div class="lb">訂單數</div><div class="v">1,247 單</div><div class="d up">▲ 8.1% vs 上週</div></div>
+        <div class="kpi"><div class="lb">客單價</div><div class="v">NT$230</div><div class="d up">▲ 3.9%（行業 NT$218）</div></div>
+        <div class="kpi"><div class="lb">開立發票・綁定率</div><div class="v">1,247 張</div><div class="d"><span class="up">68% 嗶載具綁定</span></div></div>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <h3>📈 七日營收趨勢 <span class="tag l0">L0 免費</span></h3>
+        <div class="bars">
+          <div class="bar"><span class="val">3.1萬</span><i style="height:44%"></i><b>一</b></div>
+          <div class="bar"><span class="val">2.8萬</span><i style="height:39%"></i><b>二</b></div>
+          <div class="bar"><span class="val">3.4萬</span><i style="height:49%"></i><b>三</b></div>
+          <div class="bar"><span class="val">3.9萬</span><i style="height:57%"></i><b>四</b></div>
+          <div class="bar hot"><span class="val">5.6萬</span><i style="height:84%"></i><b>五</b></div>
+          <div class="bar hot"><span class="val">6.3萬</span><i style="height:100%"></i><b>六</b></div>
+          <div class="bar"><span class="val">3.5萬</span><i style="height:51%"></i><b>日</b></div>
+        </div>
+        <div class="hint">週五・六晚市為峰值；<b style="color:var(--cm)">14:00–17:00 為全週最深低谷</b>（見 AI 小結建議）。</div>
+      </div>
+
+      <div class="card ai">
+        <h3><span class="dot"></span>AI 店家小結（每週一 09:00 自動送達）</h3>
+        <p>本週五晚市翻桌 <b>2.8 次</b> 創開店以來新高；<b>甜點加購率 21%</b>，高於商圈行業均值 6 個百分點——你的提拉米蘇是隱形冠軍。建議：把「主餐＋甜點」組合券投放到 <b>14:00–17:00 低谷時段</b>，並對 30 天未回訪的 335 位沉睡客發送喚醒券（見「客戶」分頁一鍵執行）。另外：你的<b>小程序經營力 68 分</b>，落後商圈標杆 21 分——有 2 件事本週就能補上（見「對比」分頁）。</p>
+      </div>
+
+      <div class="card">
+        <h3>🎟️ 本週券效（按核銷計費）<span class="tag l0">L0 免費</span></h3>
+        <div class="funnel">
+          <div class="fstep"><div class="fb" style="width:100%">發出 800 張</div></div>
+          <div class="fstep"><div class="fb" style="width:64%">領取 512 張</div><div class="fv">64.0%</div></div>
+          <div class="fstep"><div class="fb" style="width:29%;background:linear-gradient(90deg,#FF5B66,var(--cm))">核銷 233 張</div><div class="fv">45.5% ・ 僅此 233 張計費</div></div>
+        </div>
+        <div class="hint">錢只花在真的進店消費的客人——這就是「按核銷計費」。</div>
+      </div>
+    </div>
+
+    <!-- ================= 行業洞察 ================= -->
+    <div class="page" id="pg-ind">
+      <div class="notice"><b>行業口徑</b>：板橋府中—新板商圈 × 義式／簡餐業態，發票級聚合數據（樣本 137 家），已去識別化。</div>
+
+      <div class="kpis">
+        <div class="kpi"><div class="lb">商圈行業指數（週環比）</div><div class="v">+6.2%</div><div class="d up">連續 3 週正成長</div></div>
+        <div class="kpi"><div class="lb">開獎週效應（上期 6/25）</div><div class="v">+31%</div><div class="d"><span class="up">本店 +38%，跑贏大盤</span></div></div>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <h3>🏙️ 我的店 vs 行業均值 <span class="tag l1">L1 加值</span></h3>
+        <div class="cmp">
+          <div class="row"><div class="lbl"><span>客單價</span><b>NT$230 vs 218</b></div>
+            <div class="track"><div class="fill me" style="width:82%"></div><div class="tick" style="left:78%"></div></div></div>
+          <div class="row"><div class="lbl"><span>回頭率（30 天）</span><b>34% vs 27%</b></div>
+            <div class="track"><div class="fill me" style="width:68%"></div><div class="tick" style="left:54%"></div></div></div>
+          <div class="row"><div class="lbl"><span>翻桌（晚市）</span><b>2.4 vs 2.1 次</b></div>
+            <div class="track"><div class="fill me" style="width:72%"></div><div class="tick" style="left:63%"></div></div></div>
+          <div class="row"><div class="lbl"><span>甜點加購率</span><b>21% vs 15%</b></div>
+            <div class="track"><div class="fill me" style="width:63%"></div><div class="tick" style="left:45%"></div></div></div>
+        </div>
+        <div class="legend"><span><i style="background:var(--cm)"></i>本店</span><span><i style="background:var(--gold)"></i>行業均值（金線）</span></div>
+      </div>
+
+      <div class="card">
+        <h3>🍝 行業品類熱銷 Top 5（發票級品項）<span class="tag l1">L1 加值</span></h3>
+        <div class="rank">
+          <div class="rk top"><span class="no">1</span>青醬海鮮義大利麵<span class="gr up">▲ 12%</span></div>
+          <div class="rk top"><span class="no">2</span>松露野菇燉飯<span class="gr up">▲ 9%</span></div>
+          <div class="rk"><span class="no">3</span>提拉米蘇<span class="gr up">▲ 15%</span></div>
+          <div class="rk"><span class="no">4</span>氣泡冷萃・特調飲品<span class="gr up">▲ 6%</span></div>
+          <div class="rk"><span class="no">5</span>戰斧豬排餐<span class="gr down">▼ 3%</span></div>
+        </div>
+        <div class="hint">提拉米蘇全商圈熱度 ▲15%，而你的加購率已領先——<b style="color:var(--cm)">加大備貨、上組合券正是時候</b>。</div>
+      </div>
+
+      <div class="card">
+        <h3>⏰ 商圈時段熱力（行業）</h3>
+        <div class="bars" style="height:72px">
+          <div class="bar"><i style="height:18%"></i><b>10</b></div>
+          <div class="bar hot"><i style="height:88%"></i><b>12</b></div>
+          <div class="bar"><i style="height:52%"></i><b>14</b></div>
+          <div class="bar"><i style="height:30%"></i><b>16</b></div>
+          <div class="bar hot"><i style="height:100%"></i><b>18</b></div>
+          <div class="bar hot"><i style="height:76%"></i><b>20</b></div>
+          <div class="bar"><i style="height:26%"></i><b>22</b></div>
+        </div>
+        <div class="hint">午（12）晚（18–20）雙峰；下一個開獎日 <b style="color:var(--cm)">7/25（六）</b>，商圈檔期報名已開放——預估流量 +30% 起。</div>
+      </div>
+    </div>
+
+    <!-- ================= 客戶分析 ================= -->
+    <div class="page" id="pg-cus">
+      <div class="card">
+        <h3>👥 新客 × 回頭客（本月）<span class="tag l0">L0 免費</span></h3>
+        <div class="donutwrap">
+          <svg class="donut" viewBox="0 0 42 42">
+            <circle cx="21" cy="21" r="15.9" fill="none" stroke="#EEF1F6" stroke-width="7"/>
+            <circle cx="21" cy="21" r="15.9" fill="none" stroke="#D7000F" stroke-width="7"
+              stroke-dasharray="59 41" stroke-dashoffset="25" stroke-linecap="round"/>
+            <text x="21" y="20" text-anchor="middle" font-size="7.2" font-weight="700" fill="#1F2430">59%</text>
+            <text x="21" y="27.5" text-anchor="middle" font-size="3.6" fill="#7A8494">回頭客</text>
+          </svg>
+          <div class="dlegend">
+            <div><i style="background:#D7000F"></i>回頭客 59%（月均 2.1 次）</div>
+            <div><i style="background:#EEF1F6;border:1px solid #E6EAF0"></i>新客 41%・其中 62% 來自掃碼點餐</div>
+            <div style="font-size:11px;color:var(--muted)">會員綁定率 68% ・ 券夾開啟率 47%</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>🧭 RFM 客群分層（點按可一鍵發券）<span class="tag l1">L1 加值</span></h3>
+        <div class="rfm">
+          <div class="seg champ"><div class="t">👑 冠軍客</div><div class="n">186 <span style="font-size:11px">人</span></div>
+            <div class="m">月均 3.2 次・貢獻 38% 營收</div><button onclick="toast('已對 186 位冠軍客發出「專屬回饋券」（示範）')">發專屬回饋</button></div>
+          <div class="seg"><div class="t">🌱 成長客</div><div class="n">412 <span style="font-size:11px">人</span></div>
+            <div class="m">來過 1–2 次・近 14 天內</div><button onclick="toast('已發出「第二次見面券」412 張（示範）')">推第二次來店</button></div>
+          <div class="seg"><div class="t">😴 沉睡客</div><div class="n">335 <span style="font-size:11px">人</span></div>
+            <div class="m">30 天以上未回訪</div><button onclick="toast('喚醒券已排入今晚 18:00 推送（示範）')">發喚醒券</button></div>
+          <div class="seg risk"><div class="t">⚠️ 流失風險</div><div class="n">154 <span style="font-size:11px">人</span></div>
+            <div class="m">60 天未回・曾為常客</div><button onclick="toast('槓龜安慰券加碼包已發出（示範）')">安慰券加碼</button></div>
+        </div>
+        <div class="hint">分析不落地就不是產品：每一群都直連發券動作，<b style="color:var(--cm)">按核銷計費</b>、不浪費一分預算。</div>
+      </div>
+
+      <div class="card">
+        <h3>🔗 綁定 → 回訪漏斗（本月）</h3>
+        <div class="funnel">
+          <div class="fstep"><div class="fb" style="width:100%">到店開票 3,842 人</div></div>
+          <div class="fstep"><div class="fb" style="width:68%">嗶載具綁定 68%</div></div>
+          <div class="fstep"><div class="fb" style="width:54%">一鍵入會 54%</div></div>
+          <div class="fstep"><div class="fb" style="width:34%;background:linear-gradient(90deg,#FF5B66,var(--cm))">30 天回訪 34%</div></div>
+        </div>
+        <div class="hint">上班族偏午市義麵、學生偏晚市燉飯＋甜點——時段 × 品項偏好已同步到發券建議。</div>
+      </div>
+    </div>
+
+    <!-- ================= 競對分析 ================= -->
+    <div class="page" id="pg-cmp">
+      <div class="notice"><b>合規說明</b>：競對數據為<b>商圈同業態聚合、去識別化</b>口徑（競品以 A／B／C 代稱），僅供經營參考；平台不揭露任何單一店家可識別資訊。</div>
+
+      <div class="card">
+        <h3>🥊 商圈同業態對標（近 4 週）<span class="tag l3">L3 進階・體驗版已解鎖</span></h3>
+        <table class="tbl">
+          <tr><th>店家</th><th>營收指數</th><th>客單價</th><th>回頭率</th></tr>
+          <tr><td>競品 A</td><td>118</td><td>NT$258</td><td>31%</td></tr>
+          <tr class="me"><td>本店<span class="badge-me">你</span></td><td>100</td><td>NT$230</td><td>34%</td></tr>
+          <tr><td>競品 B</td><td>92</td><td>NT$212</td><td>26%</td></tr>
+          <tr><td>競品 C</td><td>74</td><td>NT$189</td><td>22%</td></tr>
+        </table>
+        <div class="hint">你的<b style="color:var(--cm)">回頭率是商圈第一</b>；營收差距主要來自 A 店的客單（甜點＋飲品組合強）。</div>
+      </div>
+
+      <div class="card">
+        <h3>🔁 共同客群與流失去向 <span class="tag l3">L3 進階</span></h3>
+        <div class="cmp">
+          <div class="row"><div class="lbl"><span>與競品 A 客群重疊</span><b>28%</b></div>
+            <div class="track"><div class="fill" style="width:28%"></div></div></div>
+          <div class="row"><div class="lbl"><span>與競品 B 客群重疊</span><b>17%</b></div>
+            <div class="track"><div class="fill" style="width:17%"></div></div></div>
+        </div>
+        <div class="hint" style="margin-top:2px">重疊客每月也去 A 店 1.1 次。你的 60 天流失客去了哪：<b>火鍋 42%・日式 24%・手搖＋輕食 18%</b>（發票品類遷徙）。</div>
+      </div>
+
+      <div class="card act">
+        <h3>🎯 本週行動建議（由競對差距自動生成）</h3>
+        <ul>
+          <li><b>跟進組合：</b>A 店客單領先來自「主餐＋甜點」；你的提拉米蘇加購率已領先行業——上組合券，把回頭率優勢變客單優勢。</li>
+          <li><b>重疊客爭奪：</b>對 28% 重疊客群投「回家吃飯券」（限平日晚市），錯開 A 店週末強檔。</li>
+          <li><b>開獎日檔期：</b>7/25 商圈聯動已開放報名，上期參與店家平均 +38%——名額剩 <b>6</b> 個。</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ================= 小程序對比 ================= -->
+    <div class="page" id="pg-mini">
+      <div class="notice"><b>對比口徑</b>：對標對象為同商圈同業態「標杆店」（去識別化）；行為數據來自小程序埋點 × 發票核銷交叉驗證，僅回自店層級。</div>
+
+      <div class="card">
+        <h3>🆚 小程序經營力：我 vs 商圈標杆 <span class="tag l1">L1 加值</span></h3>
+        <div class="scorebox">
+          <div class="scorebig"><div class="n">68</div><div class="l">我的小程序</div></div>
+          <div class="vs">vs</div>
+          <div class="scorebig bench"><div class="n">89</div><div class="l">標杆店 S</div></div>
+          <div class="scoreinfo">五維合成：掃碼滲透・入會轉化・券核銷・30 天複購・內容鮮度。<br>你的產品和他一樣——差距全在「用法」，都補得回來。</div>
+        </div>
+        <div class="cmp" style="margin-top:12px">
+          <div class="row"><div class="lbl"><span>掃碼點餐滲透</span><b>42% vs 68%</b></div>
+            <div class="track"><div class="fill me" style="width:42%"></div><div class="tick" style="left:68%"></div></div>
+            <div class="gapwhy">⚠ 桌貼只貼門口，結帳動線與等餐區沒有入口</div></div>
+          <div class="row"><div class="lbl"><span>下單→入會轉化</span><b>31% vs 54%</b></div>
+            <div class="track"><div class="fill me" style="width:31%"></div><div class="tick" style="left:54%"></div></div>
+            <div class="gapwhy">⚠ 下單完成頁沒掛「一鍵入會領券」，只靠店員口頭</div></div>
+          <div class="row"><div class="lbl"><span>券核銷率</span><b>45% vs 61%</b></div>
+            <div class="track"><div class="fill me" style="width:45%"></div><div class="tick" style="left:61%"></div></div>
+            <div class="gapwhy">⚠ 滿 150-30 門檻高於你的客單 NT$230 的下單習慣</div></div>
+          <div class="row"><div class="lbl"><span>30 天複購</span><b>34% vs 41%</b></div>
+            <div class="track"><div class="fill me" style="width:34%"></div><div class="tick" style="left:41%"></div></div>
+            <div class="gapwhy">⚠ 沒有固定喚醒節奏；標杆有「週三會員日＋開獎日檔期」</div></div>
+        </div>
+        <div class="legend"><span><i style="background:var(--cm)"></i>我的小程序</span><span><i style="background:var(--gold)"></i>標杆店 S（金線）</span></div>
+      </div>
+
+      <div class="card">
+        <h3>✅ 標杆店做對了什麼（同業態・去識別化）</h3>
+        <div class="why">
+          <div class="wr"><span class="ck">✓</span><span><b>入口鋪滿動線：</b>桌貼＋結帳台立牌＋等餐區海報，掃碼不用找</span><span class="out">滲透 68%</span></div>
+          <div class="wr"><span class="ck">✓</span><span><b>菜單首屏＝招牌＋雙人組合：</b>前三位固定放招牌與套餐，不讓客人滑到迷路</span><span class="out">客單 +12%</span></div>
+          <div class="wr"><span class="ck">✓</span><span><b>付完錢那一刻轉會員：</b>下單完成頁掛「一鍵入會領券」，順手就辦</span><span class="out">入會 54%</span></div>
+          <div class="wr"><span class="ck">✓</span><span><b>券做「低門檻高頻」：</b>滿 99-15、限週三會員日——核銷才是目的</span><span class="out">核銷 61%</span></div>
+          <div class="wr"><span class="ck">✓</span><span><b>開獎日檔期全勤＋差評 24h 回覆：</b>節拍不缺席、口碑不過夜</span><span class="out">複購 41%</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>🛠️ 你的改進方向（照抄就有效）</h3>
+        <div class="fix hot"><span class="pri p0">P0</span><div class="fx"><b>桌貼移到結帳動線＋等餐區</b>——物料包免費補發，本週到店<div class="est">預估掃碼滲透 +15pt</div></div><button onclick="toast('物料補發已登記，商圈小隊 48 小時內到店佈台（示範）')">申請物料</button></div>
+        <div class="fix hot"><span class="pri p0">P0</span><div class="fx"><b>開啟「下單完成頁一鍵入會領券」</b>——後台一個開關<div class="est">預估入會轉化 +18pt</div></div><button onclick="toast('已開啟：下單完成頁將顯示一鍵入會領券（示範）')">一鍵開啟</button></div>
+        <div class="fix"><span class="pri p1">P1</span><div class="fx"><b>菜單首屏改「招牌＋雙人組合」</b>——套用義式簡餐行業模板<div class="est">預估客單 +8–12%</div></div><button onclick="toast('行業模板已套用到草稿，確認後發布（示範）')">套用模板</button></div>
+        <div class="fix"><span class="pri p1">P1</span><div class="fx"><b>券改「滿 99-15・限週三」</b>——貼著客單設門檻，核銷才會動<div class="est">預估核銷率 +10pt</div></div><button onclick="toast('新券方案已建立：滿 99-15・週三會員日（示範）')">建立新券</button></div>
+        <div class="fix"><span class="pri p2">P2</span><div class="fx"><b>報名 7/25 開獎日檔期＋開啟分享裂變</b>——上期參與店平均 +38%<div class="est">名額剩 6 個</div></div><button onclick="toast('已報名 7/25 開獎日商圈檔期（示範）')">立即報名</button></div>
+      </div>
+    </div>
+
+    <div class="foot">示範數據・僅供體驗｜發票級數據經去識別化與商圈聚合處理｜發票載具 商家版・數據參謀 v1.3<br>同場加映：<a href="merchant.html" style="color:#7A8494">商家助手（接單台）</a> ・ <a href="user.html" style="color:#7A8494">用戶體驗版</a></div>
+  </div>
+
+  <!-- ================= tabbar ================= -->
+  <div class="tabbar">
+    <div class="tab on" data-pg="pg-ov"><span class="ic">📊</span>總覽</div>
+    <div class="tab" data-pg="pg-ind"><span class="ic">🏙️</span>行業</div>
+    <div class="tab" data-pg="pg-cus"><span class="ic">👥</span>客戶</div>
+    <div class="tab" data-pg="pg-cmp"><span class="ic">🥊</span>競對</div>
+    <div class="tab" data-pg="pg-mini"><span class="ic">🆚</span>對比</div>
+  </div>
+
+  <div class="toast" id="toast">已發送</div>
+</div>
+
+<script>
+(function(){
+  var tabs = document.querySelectorAll('.tab[data-pg]');
+  var pages = document.querySelectorAll('.page');
+  tabs.forEach(function(t){
+    t.addEventListener('click', function(){
+      tabs.forEach(function(x){ x.classList.remove('on'); });
+      pages.forEach(function(p){ p.classList.remove('on'); });
+      t.classList.add('on');
+      document.getElementById(t.getAttribute('data-pg')).classList.add('on');
+      window.scrollTo({top:0, behavior:'smooth'});
+    });
+  });
+
+  var tt;
+  window.toast = function(msg){
+    var el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(tt);
+    tt = setTimeout(function(){ el.classList.remove('show'); }, 2200);
+  };
+
+  // 與用戶端 demo 同源聯動：有人綁定會員時輕提示（延續 fapiao-demo 頻道）
+  try{
+    var bc = new BroadcastChannel('fapiao-demo');
+    bc.onmessage = function(ev){
+      var d = ev.data || {};
+      if(d.type === 'member' || d.type === 'join'){ toast('🔔 用戶端有新會員綁定，數據將於下一週期納入'); }
+      if(d.type === 'order'){ toast('🧾 新訂單已開票，營收數據即時累計（示範）'); }
+    };
+  }catch(e){}
+})();
+
+
+/* ===== 膠囊選單（v6.0）：重新整理／分享 LINE／複製連結 ===== */
+function mcapMenu(){ document.getElementById("mcapMask").classList.add("show"); }
+function mcapClose(){ document.getElementById("mcapMask").classList.remove("show"); }
+function mcapReload(){ mcapClose(); toast("↻ 正在重新整理…"); setTimeout(function(){ location.reload(); }, 380); }
+function mcapHome(){ location.href = "./index.html"; }
+function mcapLine(){
+  var url = location.href.split("#")[0];
+  mcapClose(); toast("正在打開 LINE 分享…");
+  try { window.open("https://social-plugins.line.me/lineit/share?url=" + encodeURIComponent(url), "_blank"); } catch(e){}
+}
+function mcapCopy(){
+  var url = location.href.split("#")[0];
+  mcapClose();
+  function ok(){ toast("🔗 連結已複製，貼上即可分享"); }
+  function fb(){ try{ var t=document.createElement("textarea"); t.value=url; document.body.appendChild(t); t.select(); document.execCommand("copy"); document.body.removeChild(t); ok(); }catch(e){ toast("🔗 " + url); } }
+  if (navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(url).then(ok, fb); } else { fb(); }
+}
+
+/* embed 模式 */
+if (/[?&]embed=1/.test(location.search)) document.body.classList.add("embed");
+</script>
+</body>
+</html>

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1F3352">
+<title>發票載具｜商家工作台 v4.3（聚合版・示範）</title>
+<style>
+:root{--navy:#1F3352;--navy2:#2C4368;--teal:#0E7C7B;--gold:#B8912F;--red:#D7000F;
+  --ink:#1F2430;--muted:#7A8494;--line:#E6EAF0;--bg:#F5F6F8;
+  --font:"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+button{font-family:var(--font);cursor:pointer}
+body{font-family:var(--font);background:#20304B;color:var(--ink);min-height:100vh;
+  background-image:radial-gradient(1100px 500px at 70% -10%, #2C4368 0%, #20304B 55%)}
+.stage{display:flex;flex-direction:column;align-items:center;gap:16px;padding:34px 16px 46px}
+.stage-head{color:#C9D6E8;text-align:center}
+.stage-head .eyebrow{font-size:11px;letter-spacing:.35em;color:#8FB8B4;font-weight:700}
+.stage-head h1{font-size:20px;color:#fff;font-weight:700;margin-top:6px}
+.stage-head p{font-size:12px;margin-top:6px;color:#9FB0C8}
+.phone{width:min(400px,100%);background:#000;border-radius:44px;padding:10px;
+  box-shadow:0 30px 80px rgba(0,0,0,.5),0 4px 14px rgba(0,0,0,.4)}
+.screen{position:relative;height:min(78vh,760px);min-height:620px;background:var(--bg);
+  border-radius:34px;overflow:hidden;display:flex;flex-direction:column}
+.sb{position:absolute;top:0;left:0;right:0;z-index:30;display:flex;justify-content:space-between;
+  padding:12px 22px 0;font-size:12px;font-weight:700;color:#fff;pointer-events:none}
+.view{position:absolute;inset:0;display:none;flex-direction:column}
+.view.on{display:flex}
+#login{background:linear-gradient(165deg,#24395E 0%,#1F3352 45%,#15263F 100%);color:#fff;align-items:center;justify-content:center;padding:26px;text-align:center}
+.lg-logo{width:64px;height:64px;border-radius:18px;background:linear-gradient(150deg,#D7000F,#A50011);
+  display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:900;color:#fff;
+  box-shadow:0 10px 24px rgba(215,0,15,.4);margin-bottom:14px}
+#login h2{font-size:21px;font-weight:900;letter-spacing:1px}
+#login .sub{font-size:12px;color:#AFC2DD;margin-top:6px;line-height:1.7}
+.lg-card{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);
+  border-radius:16px;padding:6px 16px;margin-top:22px;text-align:left}
+.lg-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 2px;border-bottom:1px dashed rgba(255,255,255,.16);font-size:13px}
+.lg-row:last-child{border-bottom:none}
+.lg-row span{color:#9FB4D2;font-size:11.5px}
+.lg-row b{font-weight:800}
+.lg-chip{font-size:9.5px;font-weight:800;color:#0F2A20;background:#7FD1AC;border-radius:99px;padding:2.5px 8px;vertical-align:1px}
+.lg-btn{width:100%;margin-top:18px;border:none;border-radius:14px;padding:14px;font-size:14.5px;font-weight:900;color:#fff;
+  background:linear-gradient(160deg,#FF5A66,#C4000F);box-shadow:0 5px 0 #8E000C,0 12px 22px rgba(215,0,15,.35);letter-spacing:1px}
+.lg-btn:active{transform:translateY(4px);box-shadow:0 1px 0 #8E000C}
+.lg-note{font-size:10px;color:#8FA3C2;margin-top:14px;line-height:1.8}
+#work{background:var(--bg)}
+.topbar{background:linear-gradient(120deg,#24395E,#1F3352);color:#fff;padding:44px 96px 12px 14px;display:flex;align-items:center;gap:10px}
+.topbar .logo{width:38px;height:38px;border-radius:12px;background:linear-gradient(150deg,#242D18,#55613C);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:17px;flex:0 0 38px}
+.topbar .in{flex:1;min-width:0}
+.topbar .in b{font-size:14px;display:block}
+.topbar .in small{font-size:10px;color:#AFC2DD;display:flex;gap:6px;align-items:center;margin-top:2px}
+.mk{font-size:9px;font-weight:800;color:#15263F;background:#FFD34D;border-radius:5px;padding:1.5px 6px}
+.topbar .out{font-size:10.5px;font-weight:800;color:#C9D6E8;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:99px;padding:6px 11px}
+.frames{flex:1;position:relative;background:var(--bg)}
+.frame{position:absolute;inset:0;display:none}
+.frame.on{display:block}
+.frame iframe{width:100%;height:100%;border:none;background:var(--bg)}
+.loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:var(--bg);color:var(--muted);font-size:12px;font-weight:700}
+.loading .sp{width:34px;height:34px;border-radius:50%;border:4px solid #E3E8EE;border-top-color:var(--navy);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.tabbar{display:flex;background:#fff;border-top:1px solid var(--line);padding:7px 6px calc(9px + env(safe-area-inset-bottom,0px));box-shadow:0 -6px 18px rgba(20,40,70,.08)}
+.tb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;border:none;background:none;font-size:10px;font-weight:800;color:#8B96A3;padding:4px 0;border-radius:12px}
+.tb span{font-size:20px;line-height:1}
+.tb.on{color:var(--navy)}
+.tb .nd{position:relative}
+.tb.on .nd::after{content:"";position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);width:16px;height:3px;border-radius:99px;background:var(--red)}
+.rail{width:min(400px,100%);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:13px 15px;color:#D7E1EF}
+.rail .t{font-size:12px;font-weight:800;color:#8FD0CB;letter-spacing:.2em;margin-bottom:9px}
+.rail ol{list-style:none;display:flex;flex-direction:column;gap:8px}
+.rail li{display:flex;gap:9px;font-size:11.5px;line-height:1.75}
+.rail .n{flex:0 0 20px;height:20px;border-radius:6px;background:rgba(143,208,203,.15);color:#8FD0CB;font-weight:800;font-size:10.5px;display:flex;align-items:center;justify-content:center;margin-top:2px}
+.rail b{color:#fff}
+.foot{font-size:10.5px;color:#7E8DA6;text-align:center;line-height:1.7}
+body.embed .stage{padding:0;gap:0}
+body.embed .stage-head,body.embed .rail,body.embed .foot{display:none}
+body.embed .phone{width:100%;max-width:100%;border-radius:0;padding:0;box-shadow:none;background:transparent}
+
+/* ===== 膠囊選單（•••｜◉） ===== */
+.mcap{position:absolute;top:44px;right:12px;z-index:60;display:flex;align-items:center;gap:9px;background:rgba(0,0,0,.16);border:1px solid rgba(255,255,255,.32);border-radius:16px;height:30px;padding:0 12px;color:#fff;font-size:13px;backdrop-filter:blur(4px)}
+.mcap span{cursor:pointer;line-height:1;font-weight:700}
+.mcap .sep{width:1px;height:13px;background:rgba(255,255,255,.4)}
+.mcap-mask{position:absolute;inset:0;background:rgba(15,22,36,.48);z-index:80;display:none;align-items:flex-end}
+.mcap-mask.show{display:flex}
+.mcap-sheet{background:#fff;border-radius:18px 18px 0 0;padding:14px 14px 18px;width:100%;box-shadow:0 -10px 30px rgba(10,20,40,.25)}
+.mcap-sheet h5{font-size:13px;font-weight:800;color:#1F2430;margin:2px 2px 11px}
+.mcap-grid{display:flex;gap:10px}
+.mcap-act{flex:1;border:1px solid #E6EAF0;background:#F8F9FB;border-radius:14px;padding:12px 6px;font-size:11px;font-weight:800;color:#1F2430;display:flex;flex-direction:column;align-items:center;gap:7px}
+.mcap-act .ico{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:17px}
+.mcap-cancel{width:100%;margin-top:12px;border:none;background:#F1F3F6;border-radius:12px;padding:12px;font-size:13px;font-weight:800;color:#3A4550}
+body.embed .mcap,body.embed .mcap-mask{display:none}
+
+.stoast{position:absolute;left:50%;bottom:88px;transform:translateX(-50%) translateY(8px);background:rgba(21,38,63,.94);color:#fff;font-size:12px;font-weight:700;padding:9px 16px;border-radius:99px;opacity:0;pointer-events:none;transition:all .25s;z-index:90;white-space:nowrap;max-width:92%;overflow:hidden;text-overflow:ellipsis}
+.stoast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+
+/* ===== mobile full-bleed：真機掃碼＝滿版沈浸式，與用戶版小程序一致（v4.3） ===== */
+@media (max-width:520px){
+  html,body{height:100%;overflow:hidden}
+  body{background:var(--bg);background-image:none;-webkit-text-size-adjust:100%;touch-action:manipulation}
+  .stage{padding:0;gap:0;height:100vh;height:100dvh;display:block}
+  .stage>*:not(.phone){display:none!important}
+  .phone{width:100%;height:100%;max-width:none;background:transparent;border-radius:0;padding:0;box-shadow:none}
+  .screen{border-radius:0;height:100%;min-height:0}
+  .sb{display:none}
+  .mcap{top:calc(10px + env(safe-area-inset-top,0px))}
+  #login{padding-top:calc(26px + env(safe-area-inset-top,0px))}
+  .topbar{padding-top:calc(44px + env(safe-area-inset-top,0px))}
+}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="stage-head">
+    <div class="eyebrow">發票載具 · 商家端 DEMO v4.3</div>
+    <h1>商家工作台（聚合版）｜一個主帳號 · 三個工作台</h1>
+    <p>商家助手 × 生意參謀 × 用戶端小程序預覽 —— 登入一次，來回切換</p>
+  </div>
+
+  <div class="phone"><div class="screen">
+    <div class="sb"><span>9:41</span><span>●●●&nbsp;&nbsp;5G&nbsp;▮</span></div>
+    <div class="mcap" id="mcap"><span onclick="mcapMenu()" title="選單">•••</span><i class="sep"></i><span onclick="mcapHome()" title="登出">◉</span></div>
+    <div class="stoast" id="stoast"></div>
+    <div class="mcap-mask" id="mcapMask" onclick="mcapClose()">
+      <div class="mcap-sheet" onclick="event.stopPropagation()">
+        <h5>商家工作台 · 選單</h5>
+        <div class="mcap-grid">
+          <button class="mcap-act" onclick="mcapReload()"><span class="ico" style="background:#F1F0FA">↻</span>重新整理</button>
+          <button class="mcap-act" onclick="mcapLine()"><span class="ico" style="background:#E4F6E9">💬</span>分享到 LINE</button>
+          <button class="mcap-act" onclick="mcapCopy()"><span class="ico" style="background:#EAF2FB">🔗</span>複製連結</button>
+        </div>
+        <button class="mcap-cancel" onclick="mcapClose()">取消</button>
+      </div>
+    </div>
+
+    <!-- ============ 登入 ============ -->
+    <section class="view on" id="login">
+      <div class="lg-logo">載</div>
+      <h2>商家工作台</h2>
+      <div class="sub">發票載具 商家端統一入口<br>一個主帳號，管好三件事：接單、看數、看你的店在顧客眼中的樣子</div>
+      <div class="lg-card">
+        <div class="lg-row"><span>商家主帳號</span><b>暖暖窩義式廚房 <span class="lg-chip">主帳號</span></b></div>
+        <div class="lg-row"><span>統一編號</span><b>24567890</b></div>
+        <div class="lg-row"><span>密碼</span><b>••••••••</b></div>
+      </div>
+      <button class="lg-btn" onclick="doLogin()">一鍵登入（示範帳號已預填）</button>
+      <div class="lg-note">登入後可切換：🏪 商家助手（接單／會員／發券） · 📊 生意參謀（發票級經營數據） · 📱 用戶端預覽（你的店在顧客手機裡的小程序）<br>子帳號與門市權限為提案能力，示範版以主帳號展示。</div>
+    </section>
+
+    <!-- ============ 工作台 ============ -->
+    <section class="view" id="work">
+      <div class="topbar">
+        <div class="logo">暖</div>
+        <div class="in"><b>暖暖窩義式廚房</b><small>主帳號 <span class="mk">已連 3 個工作台</span> 統編 24567890</small></div>
+        </div>
+      <div class="frames">
+        <div class="frame on" id="f0"><div class="loading" id="l0"><div class="sp"></div>載入 商家助手…</div></div>
+        <div class="frame" id="f1"><div class="loading" id="l1"><div class="sp"></div>載入 生意參謀…</div></div>
+        <div class="frame" id="f2"><div class="loading" id="l2"><div class="sp"></div>載入 用戶端預覽…</div></div>
+      </div>
+      <div class="tabbar">
+        <button class="tb on" id="tb0" onclick="sw(0)"><span class="nd">🏪</span>商家助手</button>
+        <button class="tb" id="tb1" onclick="sw(1)"><span class="nd">📊</span>生意參謀</button>
+        <button class="tb" id="tb2" onclick="sw(2)"><span class="nd">📱</span>用戶端預覽</button>
+      </div>
+    </section>
+  </div></div>
+
+  <div class="rail">
+    <div class="t">提案劇本 · 60 秒</div>
+    <ol>
+      <li><span class="n">01</span><span><b>一個主帳號</b>：商家過去要記三個入口——接單一個、看數一個、想看自己的店還得掃顧客的碼。聚合版登入一次，底部三個分頁來回切換。</span></li>
+      <li><span class="n">02</span><span><b>三個工作台</b>：🏪 商家助手＝開店／接單／會員／發券；📊 生意參謀＝發票級經營數據與 AI 小結；📱 用戶端預覽＝直接打開「暖暖窩」在顧客手機裡的小程序，所見即顧客所見。</span></li>
+      <li><span class="n">03</span><span><b>雙端聯動</b>：在「用戶端預覽」下一單，切回「商家助手」訂單即時進來（同網域 BroadcastChannel）——一支手機就能演完整生意閉環。</span></li>
+    </ol>
+  </div>
+  <div class="foot">發票載具 · 商家工作台聚合版 v4.3（內含 商家助手 v3.6 · 生意參謀 v1.3 · 用戶端 v6.0）<br>店家與數據皆為示範用途，非實際營業資訊</div>
+</div>
+
+<script>
+var SRC = [
+  "./merchant-app.html?embed=1&v=4.3",
+  "./merchant-analytics.html?embed=1&v=4.3",
+  "./user.html?embed=1&store=nuan&v=6.0"
+];
+var loaded = [false, false, false];
+var CUR = 0;
+function $(id){ return document.getElementById(id); }
+function mount(i){
+  if (loaded[i]) return;
+  loaded[i] = true;
+  var ifr = document.createElement("iframe");
+  ifr.src = SRC[i];
+  ifr.setAttribute("title", ["商家助手","生意參謀","用戶端預覽"][i]);
+  ifr.onload = function(){ var l = $("l"+i); if (l) l.style.display = "none"; };
+  setTimeout(function(){ var l = $("l"+i); if (l) l.style.display = "none"; }, 4500);
+  $("f"+i).appendChild(ifr);
+}
+function sw(i){
+  CUR = i;
+  for (var k=0;k<3;k++){
+    $("f"+k).classList.toggle("on", k===i);
+    $("tb"+k).classList.toggle("on", k===i);
+  }
+  mount(i);
+}
+function doLogin(){
+  $("login").classList.remove("on");
+  $("work").classList.add("on");
+  mount(0);
+}
+function logout(){
+  $("work").classList.remove("on");
+  $("login").classList.add("on");
+}
+if (/[?&]embed=1/.test(location.search)) document.body.classList.add("embed");
+
+/* ===== 膠囊選單：重新整理（當前工作台）／分享 LINE／複製連結；◉＝登出 ===== */
+function stoast(msg){
+  var t = $("stoast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(t._h); t._h = setTimeout(function(){ t.classList.remove("show"); }, 1900);
+}
+function mcapMenu(){ $("mcapMask").classList.add("show"); }
+function mcapClose(){ $("mcapMask").classList.remove("show"); }
+function mcapHome(){
+  mcapClose();
+  if ($("work").classList.contains("on")){ logout(); stoast("已登出，回到主帳號登入頁"); }
+}
+function mcapReload(){
+  mcapClose();
+  if (!$("work").classList.contains("on")){ location.reload(); return; }
+  var f = $("f"+CUR).querySelector("iframe");
+  if (f){
+    var l = $("l"+CUR); if (l) l.style.display = "flex";
+    try { f.contentWindow.location.reload(); } catch(e){ f.src = f.src; }
+    setTimeout(function(){ var l2 = $("l"+CUR); if (l2) l2.style.display = "none"; }, 4500);
+    stoast("↻ 已重新整理「" + ["商家助手","生意參謀","用戶端預覽"][CUR] + "」");
+  } else { location.reload(); }
+}
+function mcapLine(){
+  var url = location.href.split("#")[0];
+  mcapClose(); stoast("正在打開 LINE 分享…");
+  try { window.open("https://social-plugins.line.me/lineit/share?url=" + encodeURIComponent(url), "_blank"); } catch(e){}
+}
+function mcapCopy(){
+  var url = location.href.split("#")[0];
+  mcapClose();
+  function ok(){ stoast("🔗 連結已複製，貼上即可分享"); }
+  function fb(){ try{ var t=document.createElement("textarea"); t.value=url; document.body.appendChild(t); t.select(); document.execCommand("copy"); document.body.removeChild(t); ok(); }catch(e){ stoast("🔗 " + url); } }
+  if (navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(url).then(ok, fb); } else { fb(); }
+}
+</script>
+</body>
+</html>

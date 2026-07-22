@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>發票載具｜餐飲小程序示範</title>
+<style>
+:root{--navy:#1F3352;--teal:#0E7C7B;--gold:#B8912F;--line:rgba(255,255,255,.14);
+  --font:"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);min-height:100vh;color:#fff;background:#20304B;
+  background-image:radial-gradient(1100px 520px at 60% -10%,#2C4368 0%,#20304B 55%);
+  display:flex;align-items:center;justify-content:center;padding:28px 18px}
+.wrap{width:min(560px,100%);text-align:center}
+.eyebrow{font-size:11px;letter-spacing:.4em;color:#8FD0CB;font-weight:800}
+h1{font-size:clamp(22px,5vw,30px);margin-top:12px;font-weight:800;line-height:1.4}
+.sub{font-size:13px;color:#9FB0C8;margin-top:10px;line-height:1.8}
+.cards{display:flex;gap:14px;margin-top:30px;flex-wrap:wrap}
+a.card{flex:1;min-width:220px;text-decoration:none;color:#fff;text-align:left;
+  border:1px solid var(--line);border-radius:18px;padding:20px 18px;
+  background:rgba(255,255,255,.05);transition:transform .12s ease,background .12s ease}
+a.card:hover{transform:translateY(-3px);background:rgba(255,255,255,.09)}
+a.card:focus-visible{outline:3px solid #7FD1CC;outline-offset:3px}
+.badge{display:inline-flex;width:44px;height:44px;border-radius:12px;align-items:center;
+  justify-content:center;font-size:17px;font-weight:800;margin-bottom:14px}
+.card h2{font-size:17px;font-weight:800}
+.card p{font-size:12px;color:#B9C7DC;margin-top:7px;line-height:1.8}
+.card .go{display:inline-block;margin-top:14px;font-size:12.5px;font-weight:800;color:#8FD0CB}
+.foot{margin-top:34px;font-size:11px;color:#7E8DA6;line-height:1.9}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">發票載具 · DEMO</div>
+  <h1>餐飲小程序 示範原型</h1>
+  <div class="sub">手機直接點開體驗，或投影提案用。<br>店家與數據皆為模擬，非實際營業資訊。<br>v5.7：新增 鼎泰豐（排隊取號＋掃碼就座）與 雅詩蘭黛（宅配零售）· 三家餐飲全開「外送」。<br>v5.8：官方自營「🧪 中毒快篩」「🐣 呷健康隊」上架首頁功能架——發票驗毒、真食安比對、組隊養呷寶。<br>v5.9：兩款遊戲全面「遊戲化畫風」；商家端推出「聚合工作台 v4.0」——商家助手 × 生意參謀 × 用戶端預覽，一個主帳號來回切換。<br>v6.0：兩款遊戲全面「漫畫風」——墨線描邊＋硬陰影＋網點爆炸線；商家端全系列新增右上角「•••」選單（重新整理／分享 LINE／複製連結），商家工作台升級 v4.1。</div>
+  <div class="cards">
+    <a class="card" href="./merchant.html">
+      <span class="badge" style="background:var(--navy)">商</span>
+      <h2>商家工作台（聚合版）</h2>
+      <p>一個主帳號登入，底部分頁切換三個工作台：🏪 商家助手（開店／接單／會員／發券）、📊 生意參謀（發票級經營數據）、📱 用戶端預覽（你的店在顧客手機裡的樣子）——與用戶端即時聯動。示範店家：暖暖窩義式廚房。</p>
+      <span class="go">進入商家工作台 ›</span>
+    </a>
+    <a class="card" href="./user.html">
+      <span class="badge" style="background:var(--teal)">體</span>
+      <h2>用戶體驗版・已接第三方支付</h2>
+      <p>載具主界面內建下拉小程序中心 → 四家品牌沈浸式小程序（路易莎／暖暖窩／鼎泰豐／雅詩蘭黛）→ 預點・排隊取號・外送・宅配 → 線上付款或到店付款（線上＝付款＋開票＋對獎五合一）→ 複購與券夾。</p>
+      <span class="go">進入（已接支付）›</span>
+    </a>
+    <a class="card" href="./user-nopay.html">
+      <span class="badge" style="background:var(--gold)">未</span>
+      <h2>用戶體驗版・未接第三方支付</h2>
+      <p>同一套體驗，店家未串接支付：預點單免付款 → 到店付款＋嗶載具完成開票對獎——商家零門檻也能先上車。</p>
+      <span class="go">進入（未接支付）›</span>
+    </a>
+    <a class="card" href="./user-nopay-v6.2.html?v=6.2.1" style="border-color:#8FD0CB">
+      <span class="badge" style="background:#0E7C7B">實</span>
+      <h2>實驗分支 v6.2(未接支付+2 新功能)</h2>
+      <p>基於 v6.0 的體驗實驗(Robert):①發票時刻・健康回饋卡;②無聊快篩(快篩框架換皮第二顆)。其餘功能與 v6.0 相同。</p>
+      <span class="go">進入實驗分支 ›</span>
+    </a>
+  </div>
+  <div class="foot">CMoney 消費者事業群 · 提案示範原型（H5 模擬小程序）</div>
+</div>
+</body>
+</html>
