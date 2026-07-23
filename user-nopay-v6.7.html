@@ -1397,7 +1397,7 @@ window.onerror=function(m,s,l,c){try{if(document.body&&document.body.classList.c
               <button class="gx-btn line" onclick="toast('人格卡已生成（示範）：可分享至 LINE——每張卡自帶落地頁與歸因碼')">📤 分享人格卡，揪朋友對照</button>
             </div>
             <div class="gx-card">
-              <b style="font-size:13px;color:var(--ink)">身邊的人（LBS · 匿名聚合）</b>
+              <b style="font-size:13px;color:var(--ink)">身邊的人（商圈聚合 · 示範）</b>
               <div style="font-size:12px;color:#5B4A4C;line-height:1.75;margin-top:6px">📍 <b>府中商圈</b> 本週糖毒濃度 <b style="color:#D7000F">72</b> · 全市第 3<br>你的中毒程度，贏過同商圈 <b style="color:#D7000F">83%</b> 的上班族</div>
               <div style="height:9px"></div>
               <button class="gx-btn line" onclick="toast('好友 PK（示範）：邀請卡已生成——需對方同意後才會出對比卡（雙向同意）')">⚔️ 傳 LINE 跟朋友 PK</button>
@@ -3278,6 +3278,14 @@ function dxaMount(){
 window.addEventListener('load', dxaMount);
 </script>
 <!-- ===== /DX-AVATAR ===== -->
+
+
+<!-- ===== FIX v6.7.1(Robert):猜測頁 /100 殘影+口徑 ===== -->
+<style>
+/* text-shadow 會繼承:.dx-guessv 的漫畫描邊套到 14px 小字「/100」→ 殘影。只留大數字的描邊。 */
+.dx-guessv span:last-child{text-shadow:none !important;font-weight:800}
+</style>
+<!-- ===== /FIX ===== -->
 
 </body>
 </html>
