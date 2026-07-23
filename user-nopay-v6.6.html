@@ -3176,5 +3176,20 @@ function wcShare(){ wcTrack('wc_share'); var msg='我 '+wcAge+' 歲那年存款�
 </script>
 <!-- ===== /WC ===== -->
 
+
+<script>
+/* deep link: ?open=detox|bored|wcheck (real-home-v7 入口用) */
+(function wcDeepLink(){
+  try{
+    var o=(new URLSearchParams(location.search).get('open')||'');
+    if(!o) return;
+    setTimeout(function(){
+      if(o==='detox' && typeof openDetox==='function') openDetox();
+      else if(o==='bored' && typeof openBored==='function') openBored();
+      else if(o==='wcheck' && typeof openWc==='function') openWc();
+    }, 400);
+  }catch(e){}
+})();
+</script>
 </body>
 </html>

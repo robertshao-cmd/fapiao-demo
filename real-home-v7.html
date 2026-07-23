@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>發票載具・真實首頁 × 官方小程序(提案演示)</title>
+<style>
+
+  /* ===== iOS Color Palette (from Assets.xcassets colorsets) ===== */
+  :root {
+    --black100:#FFFFFF;--black300:#F5F5F5;--black400:#F0F0F0;
+    --black500:#D9D9D9;--black600:#BFBFBF;--black700:#8C8C8C;--black800:#595959;
+    --black900:#454545;--black1000:#262626;
+    --green100:#E6F7F6;--green200:#B0E6E2;--green300:#8ADAD4;--green400:#55C9C1;
+    --green600:#01AFA2;--green700:#019F93;--green800:#017C73;--green900:#016059;
+    --orange100:#FFF5E9;--orange300:#FFD09A;--orange600:#FF9924;--orange700:#E88B21;
+    --red100:#FFECE8;--red500:#FF6A49;--red700:#E83F19;
+    --yellow100:#FFFDE6;--yellow700:#DAAB00;
+    --skyblue:#BAE7FF;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",sans-serif;background:#0f0f1a;color:var(--black1000);display:flex;flex-wrap:wrap;justify-content:center;gap:48px;padding:48px 20px;}
+  h1{width:100%;text-align:center;color:#fff;font-size:26px;margin-bottom:4px;}
+  .sub{width:100%;text-align:center;color:var(--black700);font-size:13px;margin-bottom:24px;}
+  .wrap{display:flex;flex-direction:column;align-items:center;}
+  /* iPhone frame: 375×812 (iPhone X / 13 mini scale) */
+  .phone{width:375px;height:812px;border-radius:44px;overflow:hidden;box-shadow:0 0 0 3px #333,0 20px 60px rgba(0,0,0,0.6);position:relative;background:#fff;flex-shrink:0;display:flex;flex-direction:column;}
+  .lbl{text-align:center;color:var(--green300);font-size:12px;margin-top:10px;font-weight:500;}
+  .slbl{text-align:center;color:var(--black700);font-size:11px;margin-top:2px;}
+  /* iOS status bar: 44pt safe area top */
+  .sbar{height:44px;display:flex;align-items:center;padding:0 24px;font-size:14px;font-weight:600;justify-content:space-between;flex-shrink:0;}
+
+  /* ===== TAB BAR: iOS 64pt, white, shadow ===== */
+  .tbar{position:absolute;bottom:0;left:0;right:0;height:64px;background:var(--black100);box-shadow:0 -0.5px 0 rgba(0,0,0,0.1);display:flex;justify-content:space-around;align-items:flex-start;padding-top:6px;z-index:10;}
+  .ti{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;font-weight:400;color:var(--black800);min-width:48px;}
+  .ti.a{color:var(--green600);font-weight:400;}
+  .ti img{width:28px;height:28px;}
+
+  .scr{overflow-y:auto;overflow-x:hidden;flex:1;min-height:0;}
+  .scr::-webkit-scrollbar{display:none;}
+
+  /* ===== HOME SCREEN ===== */
+
+  /* Sky background: aspect ratio from image (near square, slightly taller) */
+  .home-bg{width:100%;position:relative;background:var(--skyblue);}
+  .home-bg img.sky{width:100%;display:block;}
+  /* Floor: 90% width, padded 3pt each side, bottom-aligned */
+  .home-bg .floor-wrap{position:absolute;bottom:0;left:5%;width:90%;padding:0 3px;}
+  .home-bg .floor-wrap img{width:100%;display:block;}
+  /* Tree: centered on floor */
+  .home-bg .tree{position:absolute;bottom:22%;left:50%;transform:translateX(-50%);width:35%;z-index:2;}
+
+  /* Navigator panel: height 38pt, top 44pt (status bar), lr 16pt */
+  .home-nav{position:absolute;top:44px;left:0;right:0;z-index:5;display:flex;justify-content:space-between;align-items:center;padding:0 16px;height:38px;}
+  .home-nav .draw{width:38px;height:38px;}
+  .home-nav .draw img{width:100%;height:100%;object-fit:contain;}
+  .home-nav-right{display:flex;align-items:center;gap:0;}
+  .home-nav-right img{width:24px;height:24px;cursor:pointer;}
+
+  /* ShortcutsTray: bg white 50% + blur, cornerRadius 16 top only */
+  .tray{width:calc(100% - 32px);margin:0 auto;position:relative;z-index:1;
+    background:rgba(255,255,255,0.5);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    border-radius:16px 16px 0 0;overflow:hidden;}
+  .tray-inner{display:flex;padding:16px 16px 8px;gap:0;overflow-x:auto;}
+  .tray-inner::-webkit-scrollbar{display:none;}
+  .fi{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:60px;width:60px;}
+  /* Icon: 60×60, bg white 70%, border white 1pt, cornerRadius 8 */
+  .fib{width:60px;height:60px;background:rgba(255,255,255,0.7);border:1px solid #FFFFFF;border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+  .fib img{width:40px;height:40px;object-fit:contain;}
+  .fib.fl img{width:100%;height:100%;border-radius:7px;}
+  .ft{font-size:12px;color:var(--black1000);text-align:center;white-space:nowrap;font-weight:400;}
+
+  /* VehicleView (Barcode Card): white bg, cornerRadius 16 bottom only, lr 16pt inset */
+  .bc{width:calc(100% - 32px);margin:0 auto;background:#fff;border-radius:0 0 16px 16px;position:relative;z-index:1;}
+  .bc-inner{padding:12px 16px 14px;}
+  .bc-upper{display:flex;align-items:center;gap:4px;min-height:20px;margin-bottom:12px;}
+  .bc-amt{font-size:14px;font-weight:700;color:#1C1C1C;}
+  .bc-arr{width:16px;height:16px;opacity:0.5;}
+  .bc-barcode{margin:0;padding:0 0 14px;}
+  .bc-bar{width:100%;height:56px;}
+  .bc-lower{display:flex;align-items:center;height:20px;}
+  .bc-stay{font-size:14px;color:var(--green600);font-weight:600;}
+  .bc-sw{width:30px;height:18px;border-radius:9px;background:var(--green600);position:relative;margin-left:4px;}
+  .bc-sw-dot{width:14px;height:14px;border-radius:50%;background:#fff;position:absolute;right:2px;top:2px;}
+  .bc-code{font-size:16px;color:#1C1C1C;margin-left:auto;}
+  .bc-copy{display:flex;align-items:center;gap:4px;font-size:14px;color:var(--green700);font-weight:600;margin-left:8px;cursor:pointer;flex-shrink:0;}
+  .bc-copy img{width:14px;height:14px;}
+
+  /* Ad banner below card: lr 20pt, height 86pt, cornerRadius 12 */
+  .home-ad{margin:16px 20px 34px;height:86px;border-radius:12px;overflow:hidden;background:#fff;}
+  .home-ad img{width:100%;height:100%;object-fit:cover;}
+
+  /* ===== INVOICE LIST (我的發票) ===== */
+  .inv-nav{height:44px;display:flex;align-items:center;justify-content:center;padding:0 0;flex-shrink:0;position:relative;}
+  .inv-nav-title{font-size:17px;font-weight:600;color:var(--black1000);}
+  .inv-nav-left{position:absolute;left:4px;display:flex;}
+  .inv-nav-right{position:absolute;right:4px;display:flex;gap:0;}
+  .inv-nav-btn{width:44px;height:44px;display:flex;align-items:center;justify-content:center;}
+  .inv-nav-btn img{width:24px;height:24px;}
+
+  /* Period switcher: top 4, spacing 16 */
+  .pc{display:flex;align-items:center;justify-content:center;gap:16px;padding:4px 0 0;}
+  .pc img{width:24px;height:24px;cursor:pointer;}
+  .pc-t{font-size:16px;font-weight:700;color:var(--black1000);}
+
+  /* Invoice Info Header: real banner image + text overlay */
+  .inv-hero{width:100%;position:relative;}
+  .inv-hero>img{width:100%;display:block;}
+  .inv-hero-content{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;padding:16px;gap:4px;}
+  .inv-cd-badge{display:inline-flex;align-self:flex-start;background:#fff;border:1px solid var(--green300);border-radius:12px;padding:0 10px;height:24px;align-items:center;font-size:14px;font-weight:700;color:var(--green700);}
+  .inv-cd-row{display:flex;align-items:center;gap:4px;}
+  .inv-cd-title{font-size:20px;font-weight:700;color:var(--black1000);}
+  .inv-cd-num{background:#fff;border-radius:6px;padding:2px 6px;font-size:24px;font-weight:700;color:var(--green700);box-shadow:-1px 1px 4px rgba(0,0,0,0.15);}
+  .inv-summary{display:flex;align-items:center;gap:6px;}
+  .inv-summary-txt{font-size:14px;font-weight:700;color:var(--black800);}
+  .inv-summary-dot{width:4px;height:4px;border-radius:50%;background:var(--black600);flex-shrink:0;}
+
+  /* Hint bar (orange): cornerRadius 8, padding h12 */
+  .pz{margin:4px 12px;padding:0 12px;min-height:28px;display:flex;align-items:center;gap:4px;background:var(--orange100);border-radius:8px;}
+  .pz-t{font-size:14px;font-weight:700;color:var(--orange700);flex:1;padding:6px 0;}
+
+  /* Invoice list: separator black500, cell height ~screenWidth/5 = 75pt */
+  .inv-l{}
+  .inv-li{display:flex;align-items:center;padding:8px 12px;gap:10px;min-height:75px;}
+  .inv-divider{height:0.5px;background:var(--black500);margin-left:16px;}
+  .inv-lic{width:56px;height:56px;border-radius:50%;flex-shrink:0;overflow:hidden;}
+  .inv-lic img{width:100%;height:100%;object-fit:cover;}
+  .inv-lin{flex:1;min-width:0;}
+  .inv-num-row{display:flex;align-items:center;gap:8px;}
+  .inv-num{font-size:16px;font-weight:700;color:#000;}
+  .inv-tag{font-size:10px;font-weight:700;border-radius:50px;padding:2px 5px;}
+  .inv-tag.carrier{background:var(--black400);color:var(--black700);}
+  .inv-tag.scanned{background:var(--green100);color:var(--green700);}
+  .inv-seller{font-size:14px;color:var(--green700);margin-top:2px;}
+  .inv-item{font-size:14px;color:var(--black1000);margin-top:1px;}
+  .inv-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
+  .inv-price{font-size:16px;color:var(--black700);}
+  .inv-date{font-size:12px;color:var(--black700);}
+
+  /* ===== CARRIER MANAGEMENT (載具管理) ===== */
+  /* Nav bar: white, title 16 medium */
+  .ca-nav{height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;background:var(--black100);}
+  .ca-nav-title{font-size:16px;font-weight:500;color:#000;}
+  .ca-nav-right{position:absolute;right:4px;display:flex;}
+  /* Tabs: 44pt height, half width each */
+  .ca-tabs{display:flex;height:44px;flex-shrink:0;position:relative;background:var(--black100);}
+  .ca-tab{flex:1;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:400;color:var(--black700);cursor:pointer;}
+  .ca-tab.a{color:var(--green600);}
+  /* SlideBar: 2pt, green600 */
+  .ca-slide{position:absolute;bottom:0;left:0;width:50%;height:2px;background:var(--green600);transition:transform 0.5s ease;}
+  /* Content area: black300 bg, 12pt inset */
+  .ca-body{flex:1;overflow-y:auto;background:var(--black300);position:relative;min-height:0;}
+  .ca-body::-webkit-scrollbar{display:none;}
+  .ca-body-bg{position:absolute;top:0;left:0;right:0;bottom:0;}
+  .ca-body-bg img{width:100%;height:100%;object-fit:cover;}
+  .ca-scroll{position:relative;z-index:1;padding:12px;}
+  .ca-ad{padding:14px 16px;background:linear-gradient(135deg,var(--green100),var(--green200));border-radius:12px;margin-bottom:12px;display:flex;align-items:center;gap:10px;}
+  .ca-ad img{width:48px;height:48px;object-fit:contain;}
+  .ca-adt{font-size:14px;font-weight:700;color:var(--green800);margin-bottom:4px;}
+  .ca-add{font-size:12px;color:var(--green900);line-height:1.5;}
+  .ca-rk{padding:10px 14px;background:var(--yellow100);border:1px solid #FAE8B0;border-radius:12px;display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+  .ca-rk img{width:28px;height:28px;}
+  .ca-rkt{font-size:13px;color:#846700;font-weight:500;}
+  .ca-cd{display:flex;align-items:center;padding:14px 16px;background:var(--black100);border:1px solid var(--black400);border-radius:12px;margin-bottom:8px;gap:12px;}
+  .ca-lo{width:44px;height:44px;border-radius:10px;overflow:hidden;flex-shrink:0;}
+  .ca-lo img{width:100%;height:100%;object-fit:cover;}
+  .ca-nm{font-size:14px;font-weight:600;color:var(--black1000);}
+  .ca-id{font-size:12px;color:var(--black700);margin-top:2px;}
+  .ca-ar{margin-left:auto;width:16px;height:16px;}
+  .ca-ar img{width:100%;height:100%;}
+
+  /* ===== SCAN SCREEN ===== */
+  .sc-bd{background:#000;flex:1;position:relative;min-height:0;}
+  .sc-nav{height:44px;display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0;background:#fff;}
+  .sc-nav img{width:24px;height:24px;}
+  .sc-nav-title{font-size:17px;font-weight:600;color:#000;}
+  .sc-nav-right{margin-left:auto;font-size:14px;color:#000;}
+  /* Scan rect: lr 71.5, height 87, bottom ~212 from bottom of sc-bd */
+  .sc-rect{position:absolute;left:71.5px;right:71.5px;height:87px;bottom:260px;z-index:2;}
+  .sc-rect img{width:100%;height:100%;object-fit:fill;}
+  /* Top-right: sound + flashlight vertical stack */
+  .sc-tr{position:absolute;top:16px;right:8px;display:flex;flex-direction:column;align-items:center;gap:8px;z-index:2;}
+  .sc-btn{display:flex;flex-direction:column;align-items:center;gap:4px;}
+  .sc-btn img{width:40px;height:40px;}
+  .sc-btn span{font-size:14px;font-weight:500;color:#fff;}
+  /* Bottom tip view */
+  .sc-tip{position:absolute;bottom:8px;left:8px;right:8px;background:rgba(0,0,0,0.3);border-radius:12px;padding:12px;display:flex;flex-direction:column;align-items:center;gap:8px;z-index:2;}
+  .sc-tip-imgs{display:flex;gap:16px;align-items:flex-end;justify-content:center;}
+  .sc-tip-imgs img{height:60px;object-fit:contain;}
+  .sc-tip-text{font-size:16px;font-weight:700;color:#fff;text-align:center;line-height:1.5;}
+
+  /* ===== PERSONAL / SETTING SCREEN ===== */
+  /* Green back: height = 812 × (218/815) ≈ 217pt */
+  .st-green{background:var(--green600);position:absolute;top:0;left:0;right:0;height:217px;}
+  /* Top panel: height 44, top 44 (below status bar), lr 20 */
+  .st-topbar{height:44px;display:flex;align-items:center;padding:0 20px;flex-shrink:0;position:relative;z-index:2;}
+  .st-barcode{display:flex;align-items:center;gap:8px;}
+  .st-barcode-text{font-size:16px;font-weight:600;color:#fff;}
+  .st-copy{background:var(--green700);border-radius:10px;padding:2px 8px;font-size:12px;font-weight:700;color:#fff;height:20px;display:flex;align-items:center;cursor:pointer;}
+  .st-topbar-right{margin-left:auto;display:flex;align-items:center;gap:20px;}
+  .st-topbar-right img{width:24px;height:24px;filter:brightness(0) invert(1);cursor:pointer;}
+  /* Body: black300, table starts 8pt below topbar */
+  .st-body{flex:1;position:relative;min-height:0;overflow-y:auto;}
+  .st-body::-webkit-scrollbar{display:none;}
+  .st-scroll{position:relative;z-index:1;padding:8px 0 0;}
+  .st-scroll::-webkit-scrollbar{display:none;}
+  /* insetGrouped table: cards with ~20pt horizontal inset */
+  .st-group{background:var(--black100);border-radius:10px;margin:0 20px 16px;overflow:hidden;}
+  .st-row{display:flex;align-items:center;padding:16px 16px;gap:8px;cursor:pointer;}
+  .st-row:not(:last-child){border-bottom:0.5px solid var(--black300);}
+  .st-row-special{font-size:16px;color:var(--green700);}
+  .st-barcode-img{padding:16px;display:flex;align-items:center;justify-content:center;border-bottom:0.5px solid var(--black300);}
+  .st-barcode-img canvas{width:100%;height:48px;}
+  .st-row-icon{width:20px;height:20px;flex-shrink:0;}
+  .st-row-icon img{width:20px;height:20px;}
+  .st-row-title{flex:1;font-size:16px;font-weight:400;color:var(--black1000);}
+  .st-row-sub{font-size:16px;color:var(--black700);}
+  .st-row-badge{background:var(--orange100);color:var(--orange700);font-size:10px;padding:2px 5px;border-radius:50px;}
+  .st-row-arrow{width:16px;height:16px;flex-shrink:0;opacity:0.3;}
+  .st-row-arrow img{width:100%;height:100%;}
+  /* Footer: section 2 has 76pt footer with privacy text */
+  .st-footer{text-align:center;padding:28px 20px 16px;}
+  .st-fv{font-size:12px;font-weight:500;color:var(--black700);}
+
+
+  .flow-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:16px 20px;cursor:pointer;transition:all .2s;flex:1;min-width:200px;max-width:280px;}
+  .flow-card:hover{background:rgba(1,175,162,0.1);border-color:var(--green600);transform:translateY(-2px);}
+  .flow-card-title{font-size:15px;font-weight:700;color:#fff;margin-bottom:4px;}
+  .flow-card-ver{font-size:11px;color:var(--green400);margin-bottom:6px;}
+  .flow-card-desc{font-size:12px;color:rgba(255,255,255,0.5);line-height:1.5;}
+  .flow-card-steps{font-size:11px;color:rgba(255,255,255,0.35);margin-top:8px;}
+  .flow-step{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:16px 20px;transition:all .2s;}
+  .flow-step:hover{border-color:rgba(255,255,255,0.15);}
+  .flow-step-num{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:var(--green600);color:#fff;font-size:12px;font-weight:700;margin-right:8px;flex-shrink:0;}
+  .flow-step-title{font-size:15px;font-weight:700;color:#fff;display:flex;align-items:center;}
+  .flow-step-file{font-size:11px;font-family:'SF Mono',Menlo,monospace;color:var(--green400);margin:6px 0 0 32px;cursor:pointer;}
+  .flow-step-file:hover{text-decoration:underline;}
+  .flow-step-desc{font-size:13px;color:rgba(255,255,255,0.7);margin:8px 0 0 32px;line-height:1.6;}
+  .flow-step-ui{margin:10px 0 0 32px;display:flex;flex-wrap:wrap;gap:6px;}
+  .flow-step-chip{font-size:11px;padding:3px 8px;border-radius:4px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#ccc;}
+  .flow-step-chip.color{display:flex;align-items:center;gap:4px;}
+  .flow-step-chip .cswatch{width:12px;height:12px;border-radius:3px;border:1px solid rgba(255,255,255,0.2);}
+  .flow-step-nav{margin:10px 0 0 32px;font-size:12px;color:rgba(255,255,255,0.5);line-height:1.6;}
+  .flow-step-nav b{color:var(--orange600);font-weight:600;}
+  .flow-arrow{display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.2);font-size:20px;padding:4px 0;}
+  /* Flow page phone layout */
+  .flow-row{display:flex;align-items:flex-start;gap:0;overflow-x:auto;padding:8px 0 24px;scroll-snap-type:x mandatory;}
+  .flow-row::-webkit-scrollbar{height:6px;}
+  .flow-row::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15);border-radius:3px;}
+  .flow-item{display:flex;flex-direction:column;align-items:center;flex-shrink:0;scroll-snap-align:center;}
+  .flow-phone{width:280px;height:606px;border-radius:33px;overflow:hidden;box-shadow:0 0 0 2px #333,0 12px 40px rgba(0,0,0,0.5);position:relative;background:#fff;display:flex;flex-direction:column;font-size:0.747em;}
+  .flow-phone *{font-size:inherit;}
+  .flow-phone .sbar{height:33px;font-size:10px;}
+  .flow-phone-lbl{text-align:center;margin-top:10px;max-width:280px;}
+  .flow-phone-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--green600);color:#fff;font-size:11px;font-weight:700;}
+  .flow-phone-title{font-size:13px;font-weight:700;color:#fff;margin-top:4px;}
+  .flow-phone-file{font-size:10px;color:var(--green400);font-family:'SF Mono',Menlo,monospace;margin-top:2px;cursor:pointer;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .flow-phone-file:hover{text-decoration:underline;}
+  .flow-connector{display:flex;align-items:center;justify-content:center;width:48px;flex-shrink:0;padding-bottom:80px;}
+  .flow-connector svg{width:32px;height:32px;}
+  /* mini nav bar for flow phones */
+  .fn{height:33px;display:flex;align-items:center;padding:0 12px;flex-shrink:0;position:relative;}
+  .fn-title{font-size:13px;font-weight:600;color:#000;position:absolute;left:50%;transform:translateX(-50%);white-space:nowrap;}
+  .fn-back{width:18px;height:18px;}
+  .fn-right{margin-left:auto;font-size:10px;color:#000;}
+  /* mini input field */
+  .finput{display:flex;align-items:center;padding:9px 10px;border:1px solid var(--black500);border-radius:6px;font-size:12px;margin-bottom:8px;}
+  .finput-label{font-size:10px;font-weight:500;color:var(--black700);margin-bottom:3px;}
+  /* mini button */
+  .fbtn{padding:10px;border-radius:18px;text-align:center;font-size:12px;font-weight:600;color:#fff;}
+
+
+  @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+  .dp-tab{padding:10px 16px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.5);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;}
+  .dp-tab.active{color:var(--green400);border-bottom-color:var(--green400);}
+  .dp-section{margin-bottom:20px;}
+  .dp-section-title{font-size:12px;font-weight:700;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+  .dp-code{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:10px 12px;font-family:'SF Mono',Menlo,monospace;font-size:12px;color:#e0e0e0;line-height:1.6;overflow-x:auto;white-space:pre-wrap;word-break:break-all;}
+  .dp-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);}
+  .dp-row:last-child{border-bottom:none;}
+  .dp-color{width:28px;height:28px;border-radius:6px;flex-shrink:0;border:1px solid rgba(255,255,255,0.15);}
+  .dp-color-name{font-size:13px;color:#ccc;flex:1;}
+  .dp-color-hex{font-size:12px;font-family:'SF Mono',Menlo,monospace;color:var(--green400);}
+  .dp-asset-row{display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(255,255,255,0.04);border-radius:8px;margin-bottom:6px;cursor:pointer;transition:background .2s;}
+  .dp-asset-row:hover{background:rgba(255,255,255,0.08);}
+  .dp-asset-thumb{width:36px;height:36px;border-radius:6px;object-fit:contain;background:rgba(255,255,255,0.06);flex-shrink:0;}
+  .dp-asset-name{font-size:13px;color:#ccc;flex:1;word-break:break-all;}
+  .dp-asset-dl{font-size:11px;color:var(--green400);font-weight:600;flex-shrink:0;}
+  .dp-event-row{padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);}
+  .dp-event-call{font-family:'SF Mono',Menlo,monospace;font-size:11px;color:var(--orange600);margin-bottom:2px;}
+  .dp-event-name{font-size:12px;color:var(--green400);font-weight:600;}
+  .dp-event-desc{font-size:12px;color:rgba(255,255,255,0.5);}
+  .dp-comp-row{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05);}
+  .dp-comp-badge{font-size:11px;font-weight:700;color:#fff;background:rgba(1,175,162,0.3);border:1px solid var(--green600);border-radius:4px;padding:2px 6px;flex-shrink:0;}
+  .dp-comp-desc{font-size:12px;color:#ccc;line-height:1.5;}
+  .dp-spec{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+  .dp-spec-item{background:rgba(255,255,255,0.04);border-radius:6px;padding:8px 10px;}
+  .dp-spec-label{font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;margin-bottom:2px;}
+  .dp-spec-val{font-size:13px;color:#fff;font-weight:600;}
+  .wrap .phone{cursor:pointer;transition:transform .15s,box-shadow .15s;}
+  .wrap .phone:hover{transform:translateY(-4px);box-shadow:0 0 0 3px #333,0 24px 70px rgba(1,175,162,0.3);}
+
+
+@keyframes fadeOut{0%{opacity:1}70%{opacity:1}100%{opacity:0}}
+@keyframes loading{0%{width:0%}50%{width:65%}100%{width:100%}}
+@keyframes dot{0%,100%{opacity:0.2}50%{opacity:1}}
+
+/* demo page layout */
+body{display:flex;flex-direction:column;align-items:center;gap:10px;padding:32px 12px;background:#0f0f1a;}
+.demo-note{color:#8ADAD4;font-size:12px;text-align:center;max-width:400px;line-height:1.7;}
+@media (max-width:420px){ body{padding:0} .phone{width:100vw;height:100dvh;border-radius:0;box-shadow:none} }
+</style>
+</head>
+<body>
+<div class="demo-note">真實 App 首頁素材(iOS 真色票/真圖標)× 提案捷徑列——點小程序圖標進入體驗</div>
+<div class="wrap">
+<div class="phone" style="background:var(--skyblue);">
+  <div class="sbar" style="background:var(--skyblue);color:var(--black800);"><span>9:41</span><span>100%</span></div>
+
+  <!-- Navigator panel: height 38, top below sbar, lr 16 -->
+  <div class="home-nav">
+    <div class="draw"><img src="https://invoicemanager-screens-dev-557076811903.asia-east1.run.app/invoicemanager_screens_assets/img_raffle_tube.png" alt="對獎"></div>
+    <div class="home-nav-right">
+      <img src="https://invoicemanager-screens-dev-557076811903.asia-east1.run.app/invoicemanager_screens_assets/svg/icon_scan.svg" alt="掃描">
+      <img src="https://invoicemanager-screens-dev-557076811903.asia-east1.run.app/invoicemanager_screens_assets/svg/tab_icon_bell.svg" alt="通知" style="margin-left:12px;">
+    </div>
+  </div>
+
+  <div class="scr" style="padding-bottom:64px;">
+    <!-- Sky background image (contains clouds) -->
+    <div class="home-bg">
+      <img class="sky" src="https://invoicemanager-screens-dev-557076811903.asia-east1.run.app/invoicemanager_screens_assets/bg_default_sky.webp" alt="sky">
+      <div class="floor-wrap">
+        <img src="https://invoicemanager-screens-dev-557076811903.asia-east1.run.app/invoicemanager_screens_assets/bg_default_floor.webp" alt="floor">
+      </div>
+      <img class="tree" src="https://invoicemanager-screens-dev-557076811903.asia-east1.run.app/invoicemanager_screens_assets/img_tree_lv5.png" alt="tree">
+    </div>
+
+    <!-- ShortcutsTray + VehicleView: connected, lr 16pt inset, cornerRadius 16 -->
+    <div class="tray">
+      <div class="tray-inner">
+        <div class="fi"><div class="fib"><img src="https://invoicemanager-screens-dev-557076811903.asia-east1.run.app/invoicemanager_screens_assets/img_my_reward.webp" alt=""></div><div class="ft">我的獎勵</div></div>
+        <div class="fi" style="margin-left:calc((375px - 32px) / 4.5 - 60px);"><div class="fib"><img src="https://invoicemanager-screens-dev-557076811903.asia-east1.run.app/invoicemanager_screens_assets/img_fortune_telling.webp" alt=""></div><div class="ft">每日運籤</div></div>
+        <div class="fi" style="margin-left:calc((375px - 32px) / 4.5 - 60px);"><div class="fib"><img src="https://invoicemanager-screens-dev-557076811903.asia-east1.run.app/invoicemanager_screens_assets/img_outcome_analysis.webp" alt=""></div><div class="ft">消費分析</div></div>
+        <div class="fi" style="margin-left:calc((375px - 32px) / 4.5 - 60px);"><div class="fib fl"><img src="https://invoicemanager-screens-dev-557076811903.asia-east1.run.app/invoicemanager_screens_assets/img_barcode_widget.webp" alt=""></div><div class="ft">造型條碼</div></div>
+        <div class="fi" style="margin-left:calc((375px - 32px) / 4.5 - 60px);"><div class="fib"><img src="https://invoicemanager-screens-dev-557076811903.asia-east1.run.app/invoicemanager_screens_assets/img_tree_record.webp" alt=""></div><div class="ft">小樹園</div></div>
+      </div>
+    </div>
+    
+    <!-- ===== 提案新增:官方小程序捷徑列(demo,點擊進小程序體驗)===== -->
+    <div class="tray" style="margin-top:10px;">
+      <div class="tray-inner" style="justify-content:flex-start;gap:0;">
+        <div class="fi" onclick="openUnit('detox')" style="cursor:pointer"><div class="fib" style="display:flex;align-items:center;justify-content:center;font-size:30px;background:#FDECEC;border-radius:14px;width:60px;height:60px;">🧪</div><div class="ft">中毒快篩</div></div>
+        <div class="fi" onclick="openUnit('bored')" style="cursor:pointer;margin-left:calc((375px - 32px) / 4.5 - 60px);"><div class="fib" style="display:flex;align-items:center;justify-content:center;font-size:30px;background:#EAF1FF;border-radius:14px;width:60px;height:60px;">😶</div><div class="ft">無聊快篩</div></div>
+        <div class="fi" onclick="openUnit('wcheck')" style="cursor:pointer;margin-left:calc((375px - 32px) / 4.5 - 60px);"><div class="fib" style="display:flex;align-items:center;justify-content:center;font-size:30px;background:#FDEDED;border-radius:14px;width:60px;height:60px;">💸</div><div class="ft">幾歲破產</div></div>
+        <div class="fi" onclick="window.open('https://dotdao-eat.cmoney.tw','_blank')" style="cursor:pointer;margin-left:calc((375px - 32px) / 4.5 - 60px);"><div class="fib" style="display:flex;align-items:center;justify-content:center;font-size:30px;background:#FBF0EC;border-radius:14px;width:60px;height:60px;">🍝</div><div class="ft">暖暖窩點單</div></div>
+      </div>
+      <div style="font-size:10px;color:#8C8C8C;padding:0 14px 10px;">官方自營小程序(提案示範)——點擊進入體驗;點單直達點到生產站</div>
+    </div>
+    <div class="bc">
+      <div class="bc-inner">
+        <div class="bc-upper">
+          <span class="bc-amt">05-06月發票 128 張</span>
+          <img class="bc-arr" src="https://invoicemanager-screens-dev-557076811903.asia-east1.run.app/invoicemanager_screens_assets/svg/ic_arrow_forward_ios_24dp.svg" alt="">
+        </div>
+        <div class="bc-barcode"><canvas class="code39-barcode" data-value="/ABC1234" style="width:100%;height:56px;"></canvas></div>
+        <div class="bc-lower">
+          <span class="bc-stay">螢幕常亮</span>
+          <div class="bc-sw"><div class="bc-sw-dot"></div></div>
+          <span class="bc-code">/ABC1234</span>
+          <div class="bc-copy">
+            <img src="https://invoicemanager-screens-dev-557076811903.asia-east1.run.app/invoicemanager_screens_assets/svg/ic_copy_filled_20dp.svg" alt="" style="filter:brightness(0) saturate(100%) invert(43%) sepia(96%) saturate(404%) hue-rotate(131deg) brightness(92%) contrast(99%);">
+            複製
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ad banner: lr 20pt, height 86pt, cornerRadius 12 -->
+    <div class="home-ad">
+      <img src="https://invoicemanager-screens-dev-557076811903.asia-east1.run.app/invoicemanager_screens_assets/img_bonus_prize.webp" alt="獎勵看板">
+    </div>
+  </div>
+
+  <div class="tbar">
+    <div class="ti a"><img src="https://invoicemanager-screens-dev-557076811903.asia-east1.run.app/invoicemanager_screens_assets/svg/tab_icon_home_pressed.svg" alt="">首頁</div>
+    <div class="ti"><img src="https://invoicemanager-screens-dev-557076811903.asia-east1.run.app/invoicemanager_screens_assets/svg/tab_icon_activity.svg" alt="">活動</div>
+    <div class="ti"><img src="https://invoicemanager-screens-dev-557076811903.asia-east1.run.app/invoicemanager_screens_assets/svg/tab_icon_carrier_mgmt.svg" alt="">載具管理</div>
+    <div class="ti"><img src="https://invoicemanager-screens-dev-557076811903.asia-east1.run.app/invoicemanager_screens_assets/svg/tab_icon_scan.svg" alt="">掃描對獎</div>
+    <div class="ti"><img src="https://invoicemanager-screens-dev-557076811903.asia-east1.run.app/invoicemanager_screens_assets/svg/tab_icon_invoice.svg" alt="">我的發票</div>
+    <div class="ti"><img src="https://invoicemanager-screens-dev-557076811903.asia-east1.run.app/invoicemanager_screens_assets/svg/tab_icon_mine.svg" alt="">個人</div>
+  </div>
+</div>
+<div class="lbl">Tab 1 - 首頁</div>
+<div class="slbl">BarcodeVC + ShortcutsTrayView + VehicleView</div>
+</div>
+
+<!-- ==================== SCREEN 2: 我的發票 ==================== -->
+
+<div class="demo-note">素材來源:invoicemanager-screens dev(內部)。提案列為 demo 疊加,非現行 App 功能。</div>
+<script>
+
+// Code39 barcode generator
+(function(){
+  const C39={
+    '0':'NnNwWnWnN','1':'WnNwNnNnW','2':'NnWwNnNnW','3':'WnWwNnNnN',
+    '4':'NnNwWnNnW','5':'WnNwWnNnN','6':'NnWwWnNnN','7':'NnNwNnWnW',
+    '8':'WnNwNnWnN','9':'NnWwNnWnN','A':'WnNnNwNnW','B':'NnWnNwNnW',
+    'C':'WnWnNwNnN','D':'NnNnWwNnW','E':'WnNnWwNnN','F':'NnWnWwNnN',
+    'G':'NnNnNwWnW','H':'WnNnNwWnN','I':'NnWnNwWnN','J':'NnNnWwWnN',
+    'K':'WnNnNnNwW','L':'NnWnNnNwW','M':'WnWnNnNwN','N':'NnNnWnNwW',
+    'O':'WnNnWnNwN','P':'NnWnWnNwN','Q':'NnNnNnWwW','R':'WnNnNnWwN',
+    'S':'NnWnNnWwN','T':'NnNnWnWwN','U':'WwNnNnNnW','V':'NwWnNnNnW',
+    'W':'WwWnNnNnN','X':'NwNnWnNnW','Y':'WwNnWnNnN','Z':'NwWnWnNnN',
+    '-':'NwNnNnWnW','.':'WwNnNnWnN',' ':'NwWnNnWnN','$':'NwNwNwNnN',
+    '/':'NwNwNnNwN','+':'NwNnNwNwN','%':'NnNwNwNwN','*':'NwNnWnWnN'
+  };
+  function encode(text){
+    let bars=[];
+    const chars='*'+text.toUpperCase()+'*';
+    for(let i=0;i<chars.length;i++){
+      if(i>0) bars.push({w:1,bar:false}); // inter-char gap
+      const pat=C39[chars[i]];
+      if(!pat) continue;
+      for(let j=0;j<9;j++){
+        const wide=pat[j]==='W'||pat[j]==='w';
+        const isBar=j%2===0;
+        bars.push({w:wide?3:1,bar:isBar});
+      }
+    }
+    return bars;
+  }
+  function drawC39(){ document.querySelectorAll('.code39-barcode').forEach(canvas=>{
+    const val=canvas.dataset.value||'';
+    const bars=encode(val);
+    const totalW=bars.reduce((s,b)=>s+b.w,0);
+    const rect=canvas.getBoundingClientRect();
+    const scale=window.devicePixelRatio||1;
+    canvas.width=rect.width*scale;
+    canvas.height=rect.height*scale;
+    const ctx=canvas.getContext('2d');
+    ctx.scale(scale,scale);
+    ctx.fillStyle='#fff';
+    ctx.fillRect(0,0,rect.width,rect.height);
+    const unitW=rect.width/totalW;
+    let x=0;
+    bars.forEach(b=>{
+      if(b.bar){
+        ctx.fillStyle='#000';
+        ctx.fillRect(x,0,b.w*unitW,rect.height);
+      }
+      x+=b.w*unitW;
+    });
+  }); } drawC39(); window.addEventListener('load', drawC39);
+})();
+
+function openUnit(k){ location.href = 'user-nopay-v6.6.html?v=6.6&open=' + k; }
+</script>
+</body>
+</html>
