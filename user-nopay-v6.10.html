@@ -2978,6 +2978,10 @@ function imGo(){ var m=imEl(); m.style.display='none'; var c=_imCont; _imCont=nu
    共用玩樂值經濟。C4 LBS 解套:v0=全量好去處列表用戶自選。切換:?exp=a|b 或頭部演示鈕。 */
 var bdScore=82, bdPts=0, bdDone={};
 var bdExp='a'; /* 0724 會議定調:先跑 A 版,B 版擱置 */
+var bdAns={wk:12,dn:9}; /* 未答走中間值 */
+function bdPick(btn,q,v){ var g=btn.parentNode;
+  g.querySelectorAll('.bd-chip').forEach(function(c){ c.classList.remove('on'); });
+  btn.classList.add('on'); bdAns[q]=v; bdTrack('bd_pick',{q:q,v:v}); }
 function bdTrack(ev,extra){ try{ console.log('[track]', ev, Object.assign({exp:bdExp},extra||{})); }catch(e){} }
 function bdPtsRender(){ var ps=document.querySelectorAll('.bdP'), bs=document.querySelectorAll('.bdBar'), i;
   for(i=0;i<ps.length;i++) ps[i].textContent=bdPts;
@@ -2992,11 +2996,11 @@ function bdEl(){
   + '<div class="gx-body">'
   + '<div id="bdV0"><div class="bd-hero"><div class="big" style="font-size:84px">😶</div><h3>你的日子,規律到可以被預測</h3>'
   + '<p>你的發票已經寫好答案</p></div>'
-  + '<div style="height:12px"></div><button class="gx-btn" onclick="bdScan()">我敢測</button></div>'
+  + '<div style="height:12px"></div><button class="gx-btn" onclick="bdShow(6)">我敢測</button></div>'
   + '<div id="bdV1" style="display:none"><div class="gx-card" style="text-align:center">'
   + '<div style="font-size:12.5px;font-weight:800;color:#5D6B85" id="bdScanTxt">吸入發票中…</div></div></div>'
   + '<div id="bdV2" style="display:none">'
-  + '<div class="gx-card"><div class="bd-score"><b>'+bdScore+'</b><span style="font-size:14px;color:#7A88A3"> /100 無聊值</span></div>'
+  + '<div class="gx-card"><div class="bd-score"><b id="bdScoreN">'+bdScore+'</b><span style="font-size:14px;color:#7A88A3"> /100 無聊值</span></div>'
   + '<div style="text-align:center;font-size:14px;font-weight:900;color:#1E2B45">生活半徑 1.2 km<br><span style="font-size:12px;color:#8A5A00">你的全世界,走路 15 分鐘就到了</span></div>'
   + '<div style="margin-top:10px;font-size:12.5px;line-height:2;color:#3A4560">'
   + '🏪 人生的 <b>62%</b> 在超商結帳<br>'
@@ -3009,13 +3013,14 @@ function bdEl(){
   + '<div style="height:8px"></div><button class="gx-btn line" onclick="bdShare()">😶 曬無聊值,揪人一起出走</button></div>'
   + '<div id="bdV3" style="display:none">'
   + bdPtsBox()
+  + '<div class="gx-note" style="margin:2px 2px 8px;font-weight:800;color:#8A5A00">半徑 1.2 km 的解法只有一種:往外踩</div>'
   + '<div class="gx-card"><b style="font-size:13px;color:#1E2B45">📍 附近的解悶處方(示範)</b>'
   + '<div class="bd-rx"><span class="lg">🌆</span><span class="in"><b>象山夜景步道</b><small>走出 800m 舒適圈 · 4.2km · 捷運 20 分</small></span><button class="vf" onclick="bdVerify(this,0,30)">就衝這家</button></div>'
   + '<div class="bd-rx"><span class="lg">♨️</span><span class="in"><b>北投溫泉手作體驗</b><small>新店嘗試 +1 · 8.5km · 捷運 35 分</small></span><button class="vf" onclick="bdVerify(this,1,35)">就衝這家</button></div>'
   + '<div class="bd-rx"><span class="lg">🛶</span><span class="in"><b>大稻埕河岸市集</b><small>週末半徑 ×6 · 5.1km · 公車 25 分</small></span><button class="vf" onclick="bdVerify(this,2,35)">就衝這家</button></div>'
   + '<div class="gx-note" style="margin-top:6px">推薦只做正面(解悶處方)。地點與距離為示範。</div></div>'
   + '<button class="gx-btn line" onclick="bdShowAll()">🗺 看全部好去處(自己挑)</button>'
-  + '<div style="height:8px"></div><button class="gx-btn line" onclick="bdShare()">分享處方,揪人同行</button></div>'
+  + '<div style="height:8px"></div><button class="gx-btn line" onclick="bdShare()">😶 曬無聊值,揪人出走</button></div>'
   + '<div id="bdV4" style="display:none"><div class="bd-hero"><div class="big">🏃</div><h3>這週,出走一次</h3>'
   + '<p>不用測驗——你的發票已經替你選好 3 個任務</p></div>'
   + bdPtsBox()
@@ -3037,11 +3042,26 @@ function bdEl(){
   + '<div class="bd-rx"><span class="lg">🚴</span><span class="in"><b>社子島河濱單車</b><small>士林區</small></span><button class="vf" onclick="bdVerify(this,25,15)">就衝這家</button></div>'
   + '<div class="gx-note" style="margin-top:6px">全量列表、自己挑。地點為示範。</div></div>'
   + '<button class="gx-btn line" onclick="bdBack()">← 回上一頁</button></div>'
+  + '<div id="bdV6" style="display:none">'
+  + '<div class="gx-card"><b style="font-size:13.5px;color:#1E2B45">先老實回答,等下發票會對答案</b>'
+  + '<div style="font-size:12.5px;font-weight:800;color:#5D6B85;margin:12px 0 6px">Q1 · 週末你通常人在哪?</div>'
+  + '<div class="bd-qs">'
+  + '<button class="bd-chip" onclick="bdPick(this,&quot;wk&quot;,16)">家裡</button>'
+  + '<button class="bd-chip" onclick="bdPick(this,&quot;wk&quot;,18)">樓下超商</button>'
+  + '<button class="bd-chip" onclick="bdPick(this,&quot;wk&quot;,4)">外面晃</button>'
+  + '<button class="bd-chip" onclick="bdPick(this,&quot;wk&quot;,9)">看心情</button></div>'
+  + '<div style="font-size:12.5px;font-weight:800;color:#5D6B85;margin:12px 0 6px">Q2 · 晚餐通常怎麼來?</div>'
+  + '<div class="bd-qs">'
+  + '<button class="bd-chip" onclick="bdPick(this,&quot;dn&quot;,12)">外送</button>'
+  + '<button class="bd-chip" onclick="bdPick(this,&quot;dn&quot;,14)">超商解決</button>'
+  + '<button class="bd-chip" onclick="bdPick(this,&quot;dn&quot;,5)">自己煮</button>'
+  + '<button class="bd-chip" onclick="bdPick(this,&quot;dn&quot;,2)">揪人吃</button></div></div>'
+  + '<button class="gx-btn" onclick="bdScan()">好了,驗我的發票</button></div>'
   + '</div>';
   document.getElementById('detox').parentNode.appendChild(s);
   return s;
 }
-function bdShow(n){ bdEl(); for(var i=0;i<6;i++){ var v=document.getElementById('bdV'+i); if(v) v.style.display=(i===n)?'':'none'; } $("app").scrollTop=0; }
+function bdShow(n){ bdEl(); for(var i=0;i<7;i++){ var v=document.getElementById('bdV'+i); if(v) v.style.display=(i===n)?'':'none'; } $("app").scrollTop=0; }
 function bdHome(){ return bdExp==='b'?4:0; }
 function openBored(){ bdEl(); if ($("drawer").classList.contains("open")) closeDrawer(); go('bored'); bdShow(bdHome()); bdTrack('bd_view'); }
 function bdFlip(){ bdExp = bdExp==='a'?'b':'a'; var b=document.getElementById('bdExpBtn'); if(b) b.textContent='實驗組 '+bdExp.toUpperCase()+'(演示切換)'; bdShow(bdHome()); toast('已切換到方案 '+bdExp.toUpperCase()+'(演示)'); bdTrack('bd_flip'); }
@@ -3050,7 +3070,10 @@ function bdBack(){ var h=bdHome(); var vh=document.getElementById('bdV'+h);
   if(vh && vh.style.display!=='none'){ go('home'); } else { bdShow(h); } }
 function bdScan(){ bdTrack('bd_scan_start'); bdShow(1); var t=['吸入發票中…','計算同店重複率…','量測週末移動半徑…','比對新店嘗試次數…'], i=0;
   var el=document.getElementById('bdScanTxt');
-  var h=setInterval(function(){ i++; if(i<t.length){ el.textContent=t[i]; } else { clearInterval(h); bdShow(2); bdTrack('bd_result'); } }, 650); }
+  var h=setInterval(function(){ i++; if(i<t.length){ el.textContent=t[i]; } else { clearInterval(h);
+    bdScore = 55 + (bdAns.wk||0) + (bdAns.dn||0); /* 答案驅動(示範模型):55+週末+晚餐 */
+    var n=document.getElementById('bdScoreN'); if(n) n.textContent=bdScore;
+    bdShow(2); bdTrack('bd_result',{score:bdScore}); } }, 650); }
 function bdVerify(btn,i,p){ if(bdDone[i]){ toast('已經在你的出走清單裡了(示範)'); return; }
   bdDone[i]=true; bdPts=Math.min(100,bdPts+p); bdPtsRender(); bdTrack('bd_verify',{item:i,pts:bdPts});
   if(btn && btn.textContent){ btn.textContent='✅ 已排入'; btn.classList.add('done'); }
@@ -3384,6 +3407,9 @@ var qrcode=function(){function i(t,r){function a(t,r){g=function(t){for(var r=ne
 .sk-share{background:#E4001A;color:#fff}
 .sk-dl{background:#fff;border:1.5px solid #D8DEE6;color:#33404F}
 .vf.done{background:#9BB3A6!important;color:#fff}
+.bd-qs{display:flex;gap:8px;flex-wrap:wrap}
+.bd-chip{font-size:13px;background:#fff;border:1.5px solid #D8DEE6;border-radius:99px;padding:10px 14px;color:#33404F;font-weight:700;min-height:44px}
+.bd-chip.on{border-color:#2B4BD7;color:#2B4BD7;background:#EDF1FE}
 #umMask{position:absolute;inset:0;background:rgba(15,20,30,.45);display:none;align-items:flex-end;z-index:96}
 #umMask.on{display:flex}
 .um-sheet{width:100%;background:#fff;border-radius:18px 18px 0 0;padding:10px 12px calc(14px + env(safe-area-inset-bottom,0px))}
@@ -3590,9 +3616,10 @@ window.addEventListener('load', function(){
   var NAVS={dx:[],bd:[],wc:[]};
   var _dx=dxShow, _bd=bdShow, _wc=wcShow, POP=false;
   function push(k,v){ var st=NAVS[k]; if(st[st.length-1]!==v){ st.push(v); if(!POP){ try{ history.pushState({nv:1},''); }catch(e){} } } }
-  window.dxShow=function(v){ push('dx',v); _dx(v); };
-  window.bdShow=function(n){ push('bd',n); _bd(n); };
-  window.wcShow=function(n){ push('wc',n); _wc(n); };
+  /* 過場頁(掃描動畫)不進返回堆疊:dx v2 / bd 1 / wc 2 */
+  window.dxShow=function(v){ if(v!=='v2') push('dx',v); _dx(v); };
+  window.bdShow=function(n){ if(n!==1) push('bd',n); _bd(n); };
+  window.wcShow=function(n){ if(n!==2) push('wc',n); _wc(n); };
   function backOf(k,raw){ var st=NAVS[k]; st.pop(); var prev=st[st.length-1];
     if(prev===undefined){ go('home'); } else { POP=true; raw(prev); POP=false; } }
   window.dxBack=function(){ backOf('dx',_dx); };
