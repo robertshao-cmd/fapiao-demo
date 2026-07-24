@@ -3050,7 +3050,7 @@ function bdVerify(i,p){ if(bdDone[i]){ toast('這一項已核銷過(示範)'); r
   bdDone[i]=true; bdPts=Math.min(100,bdPts+p); bdPtsRender(); bdTrack('bd_verify',{item:i,pts:bdPts});
   toast(bdPts>=100 ? '🏅 玩樂值 100!「出走者」徽章解鎖(示範)——下一步:22 縣市點燈' : '✅ 發票已核銷(示範):玩樂值 +'+p);
 }
-function bdShare(){ bdTrack('bd_share'); var msg = bdExp==='b' ? '我這週的出走挑戰:換一家店・走出 1.2km・揪一個人——一起?' : '我的無聊值 '+bdScore+'/100,生活半徑只有 1.2km——救我,一起出走!';
+function bdShare(){ bdTrack('bd_share'); var lk=(typeof skLink==='function')?skLink('bored'):''; var msg = (bdExp==='b' ? '我這週的出走挑戰:換一家店・走出 1.2km・揪一個人——一起? ' : '我的無聊值 '+bdScore+'/100,生活半徑只有 1.2km——救我,一起出走! ')+lk;
   if (typeof fapiao!=='undefined' && fapiao.share){ fapiao.share({title:msg}, function(res){
     if(res && res.code===0){ return; }
     if(navigator.share){ navigator.share({title:'無聊快篩',text:msg}).catch(function(){}); return; }
@@ -3166,7 +3166,7 @@ function wcSave(btn,i,amt){ if(wcSaved[i]){ toast('這一項已啟用(示範)');
   document.getElementById('wcSum').textContent='$'+wcSaveSum.toLocaleString();
   wcTrack('wc_save_on',{item:i,sum:wcSaveSum});
   toast('🛡 已啟用(示範):每月預計省下 $'+amt.toLocaleString()); }
-function wcShare(){ wcTrack('wc_share'); var msg='我 '+wcAge+' 歲那年存款歸零……你撐到幾歲?來測:幾歲破產';
+function wcShare(){ wcTrack('wc_share'); var msg='我 '+wcAge+' 歲那年存款歸零……你撐到幾歲?來測:'+((typeof skLink==='function')?skLink('wcheck'):'幾歲破產');
   if (typeof fapiao!=='undefined' && fapiao.share){ fapiao.share({title:msg}, function(res){
     if(res && res.code===0){ return; }
     if(navigator.share){ navigator.share({title:'幾歲破產',text:msg}).catch(function(){}); return; }
@@ -3390,6 +3390,10 @@ window.addEventListener('load', function(){ uxTierRadar(); uxFoldNearby(); uxLif
 /* Share-Kit:各社群圖卡尺寸(FIXLOG #4)
    IG 限動/Threads 直式 1080×1920(9:16)・IG/Threads 貼文 1080×1350(4:5)
    LINE/IG 正方 1080×1080・Messenger/連結卡 1200×630(1.91:1) */
+/* 回鏈:分享文案必帶對應單元直達連結(收到的人一鍵進,不用自己找)。
+   demo=Pages 深連結;正式版=載具 deep link(fapiao://miniapp?...)+deferred deep link(未安裝→商店→還原上下文)。 */
+var SK_BASE='https://robertshao-cmd.github.io/fapiao-demo/user-nopay-v6.9.html?v=6.9';
+function skLink(unit){ return SK_BASE + '&open=' + (unit||'detox'); }
 var SK_PRESETS = [
   {k:'story', label:'IG 限動 9:16', w:1080, h:1920},
   {k:'feed',  label:'IG/Threads 貼文 4:5', w:1080, h:1350},
@@ -3425,10 +3429,10 @@ function skData(){
   var acc = (typeof dxaTopPoison==='function')? dxaTopPoison() : '🧋';
   if(skState.kind==='persona'){
     return { emoji:'🐜', sub:'螞蟻人 × 酥脆星人', tint:'糖油雙修 · 夜市修行者', score:sc,
-      title:'我的中毒人格', text:'我是「螞蟻人×酥脆星人」——你是哪種?來測:解毒吧' };
+      title:'我的中毒人格', text:'我是「螞蟻人×酥脆星人」——你是哪種?來測:'+skLink('detox'), url:skLink('detox') };
   }
   return { emoji:face, acc:acc, sub:'我的毒分身', tint:st.tint, score:sc,
-    title:'我的毒分身', text:'我的毒分身'+st.tint.split('——')[0]+'(毒值 '+sc+')——來領你的:解毒吧' };
+    title:'我的毒分身', text:'我的毒分身'+st.tint.split('——')[0]+'(毒值 '+sc+')——來領你的:'+skLink('detox'), url:skLink('detox') };
 }
 function skRender(){
   var m=skEl();
@@ -3495,9 +3499,9 @@ function skShare(){
   skBlob(function(blob){
     var file = new File([blob], 'jieduba-card.png', {type:'image/png'});
     if(navigator.canShare && navigator.canShare({files:[file]})){
-      navigator.share({files:[file], text:d.text}).catch(function(){});
+      navigator.share({files:[file], text:d.text, url:d.url}).catch(function(){});
     } else if(navigator.share){
-      navigator.share({title:d.title, text:d.text}).catch(function(){});
+      navigator.share({title:d.title, text:d.text, url:d.url}).catch(function(){});
       toast('此瀏覽器不支援直接分享圖片——已下載圖卡,貼文時附上');
       skDownload();
     } else {
