@@ -2997,16 +2997,22 @@ function bdEl(){
   + '<div style="font-size:12.5px;font-weight:800;color:#5D6B85" id="bdScanTxt">吸入發票中…</div></div></div>'
   + '<div id="bdV2" style="display:none">'
   + '<div class="gx-card"><div class="bd-score"><b>'+bdScore+'</b><span style="font-size:14px;color:#7A88A3"> /100 無聊值</span></div>'
-  + '<div style="text-align:center;font-size:12.5px;font-weight:800;color:#8A5A00">生活半徑約 1.2 km ——「你是安穩,還是卡住了?」</div>'
-  + '<div class="bd-ev">🧾 發票證據(示範):超商佔比 62%・<b>連續 21 天</b>同一家全家・外送晚餐 ×9・週末平均移動 800m・新店嘗試 0 家</div></div>'
+  + '<div style="text-align:center;font-size:14px;font-weight:900;color:#1E2B45">生活半徑 1.2 km<br><span style="font-size:12px;color:#8A5A00">你的全世界,走路 15 分鐘就到了</span></div>'
+  + '<div style="margin-top:10px;font-size:12.5px;line-height:2;color:#3A4560">'
+  + '🏪 人生的 <b>62%</b> 在超商結帳<br>'
+  + '🐻 同一家全家連續報到 <b>21 天</b>——店員比你朋友熟你<br>'
+  + '🛵 這個月最常見到你的人:<b>外送員</b>(晚餐 ×9)<br>'
+  + '📏 週末平均移動 <b>800 公尺</b>——樓下就是你的遠方<br>'
+  + '🆕 新店嘗試 <b>0 家</b>,勇氣同分</div>'
+  + '<div class="gx-note" style="margin-top:6px;text-align:right">🧾 以上全是你的發票說的(示範數據)</div></div>'
   + '<button class="gx-btn" onclick="bdShow(3);bdTrack(&quot;bd_rx_open&quot;)">領取我的解悶處方 →</button>'
   + '<div style="height:8px"></div><button class="gx-btn line" onclick="bdShare()">😶 曬無聊值,揪人一起出走</button></div>'
   + '<div id="bdV3" style="display:none">'
   + bdPtsBox()
   + '<div class="gx-card"><b style="font-size:13px;color:#1E2B45">📍 附近的解悶處方(示範)</b>'
-  + '<div class="bd-rx"><span class="lg">🌆</span><span class="in"><b>象山夜景步道</b><small>走出 800m 舒適圈 · 4.2km · 捷運 20 分</small></span><button class="vf" onclick="bdVerify(0,30)">模擬到店核銷</button></div>'
-  + '<div class="bd-rx"><span class="lg">♨️</span><span class="in"><b>北投溫泉手作體驗</b><small>新店嘗試 +1 · 8.5km · 捷運 35 分</small></span><button class="vf" onclick="bdVerify(1,35)">模擬到店核銷</button></div>'
-  + '<div class="bd-rx"><span class="lg">🛶</span><span class="in"><b>大稻埕河岸市集</b><small>週末半徑 ×6 · 5.1km · 公車 25 分</small></span><button class="vf" onclick="bdVerify(2,35)">模擬到店核銷</button></div>'
+  + '<div class="bd-rx"><span class="lg">🌆</span><span class="in"><b>象山夜景步道</b><small>走出 800m 舒適圈 · 4.2km · 捷運 20 分</small></span><button class="vf" onclick="bdVerify(this,0,30)">就衝這家</button></div>'
+  + '<div class="bd-rx"><span class="lg">♨️</span><span class="in"><b>北投溫泉手作體驗</b><small>新店嘗試 +1 · 8.5km · 捷運 35 分</small></span><button class="vf" onclick="bdVerify(this,1,35)">就衝這家</button></div>'
+  + '<div class="bd-rx"><span class="lg">🛶</span><span class="in"><b>大稻埕河岸市集</b><small>週末半徑 ×6 · 5.1km · 公車 25 分</small></span><button class="vf" onclick="bdVerify(this,2,35)">就衝這家</button></div>'
   + '<div class="gx-note" style="margin-top:6px">推薦只做正面(解悶處方)。地點與距離為示範。</div></div>'
   + '<button class="gx-btn line" onclick="bdShowAll()">🗺 看全部好去處(自己挑)</button>'
   + '<div style="height:8px"></div><button class="gx-btn line" onclick="bdShare()">分享處方,揪人同行</button></div>'
@@ -3014,21 +3020,21 @@ function bdEl(){
   + '<p>不用測驗——你的發票已經替你選好 3 個任務</p></div>'
   + bdPtsBox()
   + '<div class="gx-card"><b style="font-size:13px;color:#1E2B45">🎯 本週出走挑戰(示範)</b>'
-  + '<div class="bd-rx"><span class="lg">🆕</span><span class="in"><b>去一家 30 天沒去過的店</b><small>你已連續 21 天同一家全家——換一家就算贏</small></span><button class="vf" onclick="bdVerify(10,30)">到店核銷</button></div>'
-  + '<div class="bd-rx"><span class="lg">📏</span><span class="in"><b>走出 1.2km 生活半徑</b><small>任何超出半徑的店家發票都算</small></span><button class="vf" onclick="bdVerify(11,35)">到店核銷</button></div>'
-  + '<div class="bd-rx"><span class="lg">👥</span><span class="in"><b>揪 1 個人同行</b><small>分享挑戰,對方完成首單,兩邊都加分</small></span><button class="vf" onclick="bdShare();bdVerify(12,35)">揪人+核銷</button></div>'
+  + '<div class="bd-rx"><span class="lg">🆕</span><span class="in"><b>去一家 30 天沒去過的店</b><small>你已連續 21 天同一家全家——換一家就算贏</small></span><button class="vf" onclick="bdVerify(this,10,30)">就衝這家</button></div>'
+  + '<div class="bd-rx"><span class="lg">📏</span><span class="in"><b>走出 1.2km 生活半徑</b><small>任何超出半徑的店家發票都算</small></span><button class="vf" onclick="bdVerify(this,11,35)">就衝這家</button></div>'
+  + '<div class="bd-rx"><span class="lg">👥</span><span class="in"><b>揪 1 個人同行</b><small>分享挑戰,對方完成首單,兩邊都加分</small></span><button class="vf" onclick="bdShare();bdVerify(this,12,35)">揪人衝</button></div>'
   + '<div class="gx-note" style="margin-top:6px">任務由你的發票結構生成(示範);完成=到店開發票核銷。</div></div>'
   + '<button class="gx-btn line" onclick="bdShowAll()">🗺 看全部好去處(自己挑)</button>'
   + '<div style="height:8px"></div><button class="gx-btn line" onclick="bdShow(0);bdTrack(&quot;bd_switch_quiz&quot;)">😶 還是想先測我的無聊值 →</button></div>'
   + '<div id="bdV5" style="display:none">'
   + bdPtsBox()
   + '<div class="gx-card"><b style="font-size:13px;color:#1E2B45">🗺 全部好去處(自己挑,示範)</b>'
-  + '<div class="bd-rx"><span class="lg">🌆</span><span class="in"><b>象山夜景步道</b><small>信義區</small></span><button class="vf" onclick="bdVerify(20,15)">到店核銷</button></div>'
-  + '<div class="bd-rx"><span class="lg">♨️</span><span class="in"><b>北投溫泉手作</b><small>北投區</small></span><button class="vf" onclick="bdVerify(21,15)">到店核銷</button></div>'
-  + '<div class="bd-rx"><span class="lg">🛶</span><span class="in"><b>大稻埕河岸市集</b><small>大同區</small></span><button class="vf" onclick="bdVerify(22,15)">到店核銷</button></div>'
-  + '<div class="bd-rx"><span class="lg">🥾</span><span class="in"><b>貓空茶山步道</b><small>文山區</small></span><button class="vf" onclick="bdVerify(23,15)">到店核銷</button></div>'
-  + '<div class="bd-rx"><span class="lg">🎨</span><span class="in"><b>松菸文創市集</b><small>信義區</small></span><button class="vf" onclick="bdVerify(24,15)">到店核銷</button></div>'
-  + '<div class="bd-rx"><span class="lg">🚴</span><span class="in"><b>社子島河濱單車</b><small>士林區</small></span><button class="vf" onclick="bdVerify(25,15)">到店核銷</button></div>'
+  + '<div class="bd-rx"><span class="lg">🌆</span><span class="in"><b>象山夜景步道</b><small>信義區</small></span><button class="vf" onclick="bdVerify(this,20,15)">就衝這家</button></div>'
+  + '<div class="bd-rx"><span class="lg">♨️</span><span class="in"><b>北投溫泉手作</b><small>北投區</small></span><button class="vf" onclick="bdVerify(this,21,15)">就衝這家</button></div>'
+  + '<div class="bd-rx"><span class="lg">🛶</span><span class="in"><b>大稻埕河岸市集</b><small>大同區</small></span><button class="vf" onclick="bdVerify(this,22,15)">就衝這家</button></div>'
+  + '<div class="bd-rx"><span class="lg">🥾</span><span class="in"><b>貓空茶山步道</b><small>文山區</small></span><button class="vf" onclick="bdVerify(this,23,15)">就衝這家</button></div>'
+  + '<div class="bd-rx"><span class="lg">🎨</span><span class="in"><b>松菸文創市集</b><small>信義區</small></span><button class="vf" onclick="bdVerify(this,24,15)">就衝這家</button></div>'
+  + '<div class="bd-rx"><span class="lg">🚴</span><span class="in"><b>社子島河濱單車</b><small>士林區</small></span><button class="vf" onclick="bdVerify(this,25,15)">就衝這家</button></div>'
   + '<div class="gx-note" style="margin-top:6px">全量列表、自己挑。地點為示範。</div></div>'
   + '<button class="gx-btn line" onclick="bdBack()">← 回上一頁</button></div>'
   + '</div>';
@@ -3045,9 +3051,10 @@ function bdBack(){ var h=bdHome(); var vh=document.getElementById('bdV'+h);
 function bdScan(){ bdTrack('bd_scan_start'); bdShow(1); var t=['吸入發票中…','計算同店重複率…','量測週末移動半徑…','比對新店嘗試次數…'], i=0;
   var el=document.getElementById('bdScanTxt');
   var h=setInterval(function(){ i++; if(i<t.length){ el.textContent=t[i]; } else { clearInterval(h); bdShow(2); bdTrack('bd_result'); } }, 650); }
-function bdVerify(i,p){ if(bdDone[i]){ toast('這一項已核銷過(示範)'); return; }
+function bdVerify(btn,i,p){ if(bdDone[i]){ toast('已經在你的出走清單裡了(示範)'); return; }
   bdDone[i]=true; bdPts=Math.min(100,bdPts+p); bdPtsRender(); bdTrack('bd_verify',{item:i,pts:bdPts});
-  toast('✅ 到店開發票,這一趟就算數(示範)');
+  if(btn && btn.textContent){ btn.textContent='✅ 已排入'; btn.classList.add('done'); }
+  toast('✅ 排進出走清單——到店開發票,這一趟就算數(示範)');
 }
 function bdShare(){ bdTrack('bd_share'); skOpen('bored'); } /* 0724:分享=一張圖+QR */
 </script>
@@ -3376,6 +3383,7 @@ var qrcode=function(){function i(t,r){function a(t,r){g=function(t){for(var r=ne
 .sk-btns button{flex:1;padding:12px;border-radius:12px;font-size:14px;font-weight:800;min-height:44px}
 .sk-share{background:#E4001A;color:#fff}
 .sk-dl{background:#fff;border:1.5px solid #D8DEE6;color:#33404F}
+.vf.done{background:#9BB3A6!important;color:#fff}
 #umMask{position:absolute;inset:0;background:rgba(15,20,30,.45);display:none;align-items:flex-end;z-index:96}
 #umMask.on{display:flex}
 .um-sheet{width:100%;background:#fff;border-radius:18px 18px 0 0;padding:10px 12px calc(14px + env(safe-area-inset-bottom,0px))}
@@ -3415,9 +3423,9 @@ function skData(){
   if(k==='bored'){
     var b = (typeof bdScore==='number')? bdScore : 74;
     return { theme:'bored', emoji:'😶', sub:'無聊快篩', tint:'生活半徑 1.2 km', score:b, unitTxt:'/100 無聊值',
-      head:'😶 無 聊 快 篩 ・ 生 活 檢 測', punch:'你是安穩,還是卡住了?',
+      head:'😶 無 聊 快 篩 ・ 生 活 檢 測', punch:'全世界,走路 15 分鐘就到了',
       stamp: b>=85?'靜止人口':(b>=70?'原地打轉':(b>=50?'例行公事':'還有救')),
-      title:'我的無聊值', text:'你是安穩,還是卡住了?', url:skLink('bored') };
+      title:'我的無聊值', text:'我的無聊值 '+b+'——全世界走路 15 分鐘就到了。你的呢?', url:skLink('bored') };
   }
   if(k==='wcheck'){
     var a = (typeof wcAge==='number')? wcAge : 43;
