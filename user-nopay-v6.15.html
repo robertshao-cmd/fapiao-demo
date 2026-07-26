@@ -802,7 +802,6 @@ button:focus-visible,a:focus-visible{outline:3px solid #7FD1CC;outline-offset:2p
 .gx-head{padding:46px 16px 12px;display:flex;align-items:center;gap:8px;background:#fff;border-bottom:3px solid #1F1B2E}
 .gx-head .back{font-size:21px;padding:2px 10px 2px 0;color:var(--ink);background:none;border:none;font-weight:900}
 .gx-head h2{font-size:16.5px;font-weight:900;color:var(--ink);letter-spacing:1px}
-@media (max-width:390px){.gx-head .gx-off{font-size:8px;padding:2px 6px}.gx-head h2{font-size:15px;letter-spacing:0}}
 .gx-head .gx-off{margin-left:auto;font-size:9px;font-weight:900;color:#1F1B2E;background:#FFD34D;padding:3px 9px;border-radius:8px;white-space:nowrap;border:2px solid #1F1B2E;box-shadow:2px 2px 0 #1F1B2E;transform:rotate(2deg)}
 #detox .gx-head{background:linear-gradient(120deg,#FF6B75,#E4001A 72%)}
 #detox .gx-head h2,#detox .gx-head .back{color:#fff;text-shadow:1.5px 1.5px 0 #1F1B2E}
@@ -862,13 +861,6 @@ button:focus-visible,a:focus-visible{outline:3px solid #7FD1CC;outline-offset:2p
 .dx-trend .dn{color:#177A4C}.dx-trend .up{color:#D7000F}
 .dx-howto{display:flex;align-items:center;justify-content:space-between;width:100%;margin-top:10px;padding:10px 12px;background:#FFF6F5;border:1.5px solid #F0E0E1;border-radius:10px;font-size:12px;font-weight:800;color:#6E5558;min-height:44px}
 .dx-howto b{color:#E4001A}
-.dx-task{display:flex;gap:9px;align-items:flex-start;padding:11px 4px;font-size:12.5px;color:#3D3346;font-weight:700;min-height:44px;border-bottom:1px dashed #F0E0E1}
-.dx-task .bx{font-size:16px;color:#A50011}
-.dx-task small{display:block;font-size:10.5px;color:#8B96A3;font-weight:600;margin-top:2px}
-.dx-task b{color:#A50011}
-#dxCoupon{margin-top:10px}
-#dxCoupon:disabled{opacity:.5}
-#dxCoupon.got{background:#EAF4EE;border-color:#B9D9C6;color:#177A4C}
 .dx-howto[aria-expanded="true"] #dxHowCaret{transform:rotate(90deg)}
 #dxHowCaret{display:inline-block;transition:transform .2s}
 .dx-pers{display:flex;gap:10px;align-items:center;margin-top:8px;background:radial-gradient(rgba(255,190,120,.4) 1.6px,transparent 2px) 0 0/14px 14px,linear-gradient(135deg,#FFF3DC,#FFE2D6);border:2.5px solid #1F1B2E;border-radius:14px;padding:11px;box-shadow:4px 4px 0 rgba(31,27,46,.9)}
@@ -1353,16 +1345,11 @@ window.onerror=function(m,s,l,c){try{if(document.body&&document.body.classList.c
             <div id="dxLast" style="display:none"></div>
             <div style="height:12px"></div>
             <button class="gx-btn" id="dxCta" onclick="dxEnter()">我敢驗</button>
-            <div id="dxRetest" style="display:none"><div style="height:8px"></div>
-              <div class="dx-sec"><button class="dx-seclink" onclick="dxRetest()">重新驗一次（發票沒更新的話，數字不會變）</button></div>
-            </div>
             <div style="height:10px"></div>
             <div class="dx-sec">
               <button class="dx-seclink" onclick="dxGate('v4')">🛡️ 真食安比對</button>
               <span class="dx-secdot">·</span>
               <button class="dx-seclink" onclick="dxGate('v5')">💊 解毒站</button>
-              <span class="dx-secdot">·</span>
-              <button class="dx-seclink" onclick="openAvatar()">🧑‍🎨 毒分身</button>
             </div>
             <div class="gx-note" style="margin-top:10px" id="dxWindowNote">只評你自己的消費結構，不對商家貼標（示範數據）</div>
           </div>
@@ -1387,16 +1374,13 @@ window.onerror=function(m,s,l,c){try{if(document.body&&document.body.classList.c
           <div id="dxV1" style="display:none">
             <div class="gx-card" style="text-align:center">
               <div style="font-size:12.5px;font-weight:800;color:#8A5A5E">先猜猜：你近 30 天的「綜合中毒指數」？</div>
-              <div class="gx-note" style="margin-top:4px;margin-bottom:2px">指數 0–100，看你近 30 天發票裡糖／油／鈉／加工／咖啡因的份量——越高＝吃進越多</div>
               <div class="dx-face" id="dxFace">😏</div>
-              <div class="dx-guessv"><span id="dxGv">—</span><span style="font-size:14px;color:#B8912F"> /100</span></div>
+              <div class="dx-guessv"><span id="dxGv">40</span><span style="font-size:14px;color:#B8912F"> /100</span></div>
               <input class="dx-slider" id="dxSl" type="range" min="0" max="100" value="40" oninput="dxGuessUpd(this.value)" aria-label="猜測中毒指數">
-              <div class="gx-note" style="margin-top:6px">0＝你吃得像修行 · 100＝行走的防腐劑</div>
+              <div class="gx-note" style="margin-top:6px">0＝仙人掌都比你毒 · 100＝行走的防腐劑</div>
             </div>
             <div style="height:10px"></div>
-            <button class="gx-btn" id="dxGuessBn" onclick="dxStartTest()" disabled>先拉一個數字</button>
-            <div style="height:8px"></div>
-            <div class="dx-sec"><button class="dx-seclink" onclick="dxSkipGuess()">懶得猜，直接看結果</button></div>
+            <button class="gx-btn" onclick="dxStartTest()">我猜好了，開驗！</button>
           </div>
           <div id="dxV2" style="display:none">
             <div class="gx-card" style="text-align:center">
@@ -1407,7 +1391,6 @@ window.onerror=function(m,s,l,c){try{if(document.body&&document.body.classList.c
                 <div style="display:flex;justify-content:center;gap:44px;font-size:9px;color:#9A8A8A;margin-top:4px"><span>C</span><span>T</span></div>
               </div>
               <div style="font-size:12.5px;font-weight:800;color:#A50011;margin-top:6px" id="dxTestTxt">吸入發票中…</div>
-              <button class="dx-seclink" style="margin-top:6px" onclick="dxSkipScan()">跳過動畫 ›</button>
               <div class="gx-note" id="dxScanNote">正在分析發票的品項與商家（示範）</div>
             </div>
           </div>
@@ -1458,7 +1441,7 @@ window.onerror=function(m,s,l,c){try{if(document.body&&document.body.classList.c
             </div>
             <div id="dxSafeR" style="display:none">
               <div class="dx-ok" id="dxOkLine">✓　未命中現行公告名單</div>
-              <div class="dx-hit" id="dxHitBox">
+              <div class="dx-hit">
                 <b>⚠ 1 筆提醒（示範情境）</b>
                 <div style="font-size:11.5px;color:#6B5330;line-height:1.75;margin-top:5px">6/30 你在「好味鹽酥雞 中山店」的消費——該店使用之油品批號，列於 <b>7/9 公布之第三層下架名單</b>（來源：台中市食安處 · 示範）。該批號目前已全面下架。</div>
                 <div class="gx-row" style="margin-top:9px">
@@ -1470,7 +1453,6 @@ window.onerror=function(m,s,l,c){try{if(document.body&&document.body.classList.c
               <div class="gx-card">
                 <b style="font-size:13px;color:var(--ink)">👨‍👩‍👧 幫家人驗（載具已歸戶）</b>
                 <div style="height:8px"></div>
-                <div class="gx-note" style="margin-top:2px;margin-bottom:8px">需家人在載具 App 完成「家庭歸戶」授權；只比對公告名單，不顯示品項明細。</div>
                 <div id="dxFam"><button class="gx-btn line" onclick="dxFamily()">一鍵複驗：媽媽的發票（近 90 天）</button></div>
               </div>
               <div style="height:8px"></div>
@@ -1486,9 +1468,7 @@ window.onerror=function(m,s,l,c){try{if(document.body&&document.body.classList.c
             </div>
             <div class="gx-card">
               <b style="font-size:13px;color:var(--ink)">本週解毒任務</b>
-              <div class="dx-task" id="dxTask1" onclick="dxTaskTick()"><span class="bx" id="dxT1Bx">□</span><span>連續 3 天無含糖手搖　<b id="dxT1N">0</b>/3<small>點一下記錄今天（示範）</small></span></div>
-              <div class="dx-task" id="dxTask2"><span class="bx" id="dxT2Bx">□</span><span>本週 2 次解毒站　<b id="dxTk">0</b>/2<small>到解毒站核銷即自動累計</small></span></div>
-              <button class="gx-btn line" id="dxCoupon" onclick="dxClaim()" disabled>完成兩項領 NT$50 解毒券</button>
+              <div style="font-size:12px;color:#5B4A4C;line-height:1.95;margin-top:6px">□ 連續 3 天無含糖手搖（0/3）<br>□ 本週 2 次解毒站（<span id="dxTk">0</span>/2）——完成領 <b style="color:#A50011">NT$50 解毒券</b>（核銷後入帳）</div>
             </div>
             <div class="gx-card">
               <b style="font-size:13px;color:var(--ink)">📍 附近解毒站（板橋府中）</b>
@@ -1789,7 +1769,6 @@ var coupons = [
 function $(id){ return document.getElementById(id); }
 function fmtN(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
 function toast(msg){
-  try{ msg = dmText(msg); }catch(e){}
   var t = $("toast"); t.textContent = msg; t.classList.add("show");
   clearTimeout(t._h); t._h = setTimeout(function(){ t.classList.remove("show"); }, 2100);
 }
@@ -2842,22 +2821,9 @@ function receiveCoupon(c){
 /* ================= v5.8 官方自營：解毒吧 ＋ 呷健康隊（提案新增） ================= */
 var dxScore=76, dxDone=0, dxGuess=40, dxFromTeam=false; /* 初值即刻由 dxComposite() 覆寫 */
 var DXV=["dxV0","dxV1","dxV2","dxV3","dxV4","dxV5","dxV6","dxV7"];
-/* DEMO_MODE:單一開關。?demo=0 或改成 false → 全站自動移除「(示範)/（示範）/示範數據」標記 */
-var DEMO_MODE=(function(){ try{ return new URLSearchParams(location.search).get('demo')!=='0'; }catch(e){ return true; } })();
-function dmText(t){
-  if(DEMO_MODE || !t) return t;
-  return String(t).replace(/[（(]\s*示範[^）)]*[）)]|示範數據/g,'').replace(/\s{2,}/g,' ').replace(/[，,、]\s*$/,'').trim();
-}
-function applyDemoMode(root){
-  if(DEMO_MODE) return;
-  var w=document.createTreeWalker(root||document.body, NodeFilter.SHOW_TEXT, null);
-  var re=/[（(]\s*示範[^）)]*[）)]|示範數據|（示範）|\(示範\)/g, n;
-  while((n=w.nextNode())){ if(re.test(n.nodeValue)) n.nodeValue=n.nodeValue.replace(re,'').replace(/\s{2,}/g,' '); }
-}
 /* ═══════ DATA v6.14:全 App 單一資料源(Step 1 數字一致性) ═══════
    正式版:整個 INV/POISON 改讀中台 platform-api /features/summary 與 /invoices,
    其餘畫面不需再改——所有頁面都只讀這裡。 */
-var SAFE_HIT=(function(){ try{ return new URLSearchParams(location.search).get('hit')!=='0'; }catch(e){ return true; } })(); /* ?hit=0 演示全數未命中 */
 var INV = {
   d30:    { n:47,  shops:23 },              /* 近 30 天:解毒吧/無聊快篩的分析窗口 */
   period: { label:'05-06月', n:88 },        /* 對獎期別(雙月)——首頁條碼卡用 */
@@ -2901,50 +2867,24 @@ var dxInv=(function(){ try{ var q=new URLSearchParams(location.search).get('inv'
 var dxStore={};
 function dxLoad(){ try{ dxStore=JSON.parse(localStorage.getItem('dx_state')||'{}')||{}; }catch(e){ dxStore={}; }
   if(typeof dxStore.score==='number'){ dxScore=dxStore.score; dxDone=dxStore.done||0; dxGuess=dxStore.guess||40; } }
-function dxSave(){ try{ localStorage.setItem('dx_state', JSON.stringify({score:dxScore,done:dxDone,guess:dxGuess,at:Date.now(),sub:dxStore.sub,prev:dxStore.prev,t1:dxStore.t1,t1day:dxStore.t1day,coupon:dxStore.coupon})); dxStore.score=dxScore; dxStore.at=Date.now(); }catch(e){} }
+function dxSave(){ try{ localStorage.setItem('dx_state', JSON.stringify({score:dxScore,done:dxDone,guess:dxGuess,at:Date.now(),sub:dxStore.sub,prev:dxStore.prev})); dxStore.score=dxScore; }catch(e){} }
 function dxAgo(t){ if(!t) return ''; var d=Math.floor((Date.now()-t)/86400000);
   return d<=0?'今天':(d===1?'昨天':(d<30?d+' 天前':'很久以前')); }
 /* 入口回訪態:測過就顯示上次結果+改 CTA */
 function dxEntryRender(){
   var wn=document.getElementById('dxWindowNote');
-  if(wn) wn.textContent=dmText('分析窗口：近 30 天 '+INV.d30.n+' 張發票 · '+INV.d30.shops+' 家商家。只評你自己的消費結構，不對商家貼標（示範數據）');
+  if(wn) wn.textContent='分析窗口：近 30 天 '+INV.d30.n+' 張發票 · '+INV.d30.shops+' 家商家。只評你自己的消費結構，不對商家貼標（示範數據）';
   var box=document.getElementById('dxLast'), cta=document.getElementById('dxCta'); if(!box||!cta) return;
-  var hero=document.querySelector('#dxV0 .dx-hero'), re=document.getElementById('dxRetest');
   if(typeof dxStore.score==='number'){
     box.style.display='';
-    var trend='';
-    if(typeof dxStore.prev==='number' && dxStore.prev!==dxStore.score){
-      var d=dxStore.score-dxStore.prev;
-      trend='<i class="'+(d<0?'dn':'up')+'">'+(d<0?'▼':'▲')+Math.abs(d)+'</i>';
-    }
-    box.innerHTML='<div class="dx-lastbox"><div><small>上次實測 · '+dxAgo(dxStore.at)+'</small><b>'+dxStore.score+'<span>/100</span>'+trend+'</b></div>'
+    box.innerHTML='<div class="dx-lastbox"><div><small>上次實測 · '+dxAgo(dxStore.at)+'</small><b>'+dxStore.score+'<span>/100</span></b></div>'
       +'<button class="dx-lastgo" onclick="dxShow(\'v3\');dxRenderResult()">看上次結果 ›</button></div>';
-    /* A2:同一批發票重驗只會得到同一個數字——主鈕改成看結果,重驗降級並說明 */
-    cta.textContent='看我的檢測結果';
-    cta.setAttribute('onclick','dxShow(\'v3\');dxRenderResult()');
-    if(re) re.style.display='';
-    if(hero) hero.classList.add('mini');
-  } else {
-    box.style.display='none'; cta.textContent='我敢驗'; cta.setAttribute('onclick','dxEnter()');
-    if(re) re.style.display='none';
-    if(hero) hero.classList.remove('mini');
-  }
-}
-/* A2:重驗的誠實說明 */
-function dxRetest(){
-  if(dxInv<DX_MIN_INV){ dxEnter(); return; }
-  toast('你的發票這 30 天沒有新增，數字不會變——想看變化，去解毒站核銷一筆');
-  dxResetGuess(); dxShow('v1');
+    cta.textContent='再驗一次';
+  } else { box.style.display='none'; cta.textContent='我敢驗'; }
 }
 /* 主 CTA:發票不足→空狀態(production 必要,不讓用戶撞死路) */
-function dxResetGuess(){
-  dxGuessed=false; dxGuess=null;
-  var g=$("dxGv"), b=$("dxGuessBn"), sl=$("dxSl"), f=$("dxFace");
-  if(g) g.textContent='—'; if(sl) sl.value=40; if(f) f.textContent='😏';
-  if(b){ b.disabled=true; b.textContent='先拉一個數字'; }
-}
-function dxEnter(){ if(dxInv<DX_MIN_INV){ dxShow('v7'); var n=document.getElementById('dxInvN'); if(n) n.textContent=dxInv; return; } dxResetGuess(); dxShow('v1'); }
-function dxDemoFill(){ dxInv=INV.d30.n; toast('（示範）已灌入 '+INV.d30.n+' 張發票'); dxResetGuess(); dxShow('v1'); }
+function dxEnter(){ if(dxInv<DX_MIN_INV){ dxShow('v7'); var n=document.getElementById('dxInvN'); if(n) n.textContent=dxInv; return; } dxShow('v1'); }
+function dxDemoFill(){ dxInv=INV.d30.n; toast('（示範）已灌入 '+INV.d30.n+' 張發票'); dxShow('v1'); }
 /* 次要入口:沒測過先擋(不進空頁) */
 function dxGate(v){
   if(typeof dxStore.score!=='number' && v==='v5'){ toast('先驗一次,才知道要解什麼毒'); dxEnter(); return; }
@@ -2971,26 +2911,14 @@ function openDetox(v){
   else { dxShow("v0"); }
 }
 function dxBack(){ if ($("dxV0").style.display!=="none"){ go("home"); } else { dxShow("v0"); } }
-var dxGuessed=false;
-function dxGuessUpd(v){
-  dxGuess=+v; dxGuessed=true;
-  $("dxGv").textContent=v; $("dxFace").textContent = v<25?"😇":(v<50?"😏":(v<75?"😬":"🫠"));
-  var b=$("dxGuessBn"); if(b){ b.disabled=false; b.textContent='我猜好了，開驗！'; }
-}
-/* B4 不想猜的人也有路:跳過=不計落差 */
-function dxSkipGuess(){ dxGuessed=false; dxGuess=null; dxStartTest(); }
-var _dxScanT=[];
-function dxSkipScan(){ _dxScanT.forEach(clearTimeout); _dxScanT=[];
-  if(typeof dxStore.score==='number' && dxStore.score!==DX_BASE) dxStore.prev=dxStore.score;
-  dxScore=DX_BASE; dxDone=0; dxSave(); dxEntryRender(); dxShow("v3"); dxRenderResult(); }
+function dxGuessUpd(v){ dxGuess=+v; $("dxGv").textContent=v; $("dxFace").textContent = v<25?"😇":(v<50?"😏":(v<75?"😬":"🫠")); }
 function dxStartTest(){
   dxShow("v2"); $("dxT").classList.remove("show"); $("dxTestTxt").textContent="吸入發票中…";
-  var sn=$("dxScanNote"); if(sn) sn.textContent=dmText("正在分析近 30 天 "+INV.d30.n+" 張發票、"+INV.d30.shops+" 家商家（示範）");
-  _dxScanT=[];
-  _dxScanT.push(setTimeout(function(){ $("dxTestTxt").textContent="顯影中——兩條線見真章…"; $("dxT").classList.add("show"); },900));
-  _dxScanT.push(setTimeout(function(){
+  var sn=$("dxScanNote"); if(sn) sn.textContent="正在分析近 30 天 "+INV.d30.n+" 張發票、"+INV.d30.shops+" 家商家（示範）";
+  setTimeout(function(){ $("dxTestTxt").textContent="顯影中——兩條線見真章…"; $("dxT").classList.add("show"); },900);
+  setTimeout(function(){
     if(typeof dxStore.score==='number' && dxStore.score!==DX_BASE) dxStore.prev=dxStore.score;
-    dxScore=DX_BASE; dxDone=0; dxSave(); dxEntryRender(); dxShow("v3"); dxRenderResult(); },2600));
+    dxScore=DX_BASE; dxDone=0; dxSave(); dxEntryRender(); dxShow("v3"); dxRenderResult(); },2600);
 }
 function dxToggleHow(){
   var f=document.getElementById('dxFormula'), b=document.getElementById('dxHowBn');
@@ -3007,21 +2935,14 @@ function dxRenderTrend(){
   t.innerHTML='上次 '+prev+' → 這次 <b>'+dxScore+'</b>　<span class="'+(dn?'dn':'up')+'">'+(dn?'▼ 降了 '+Math.abs(d):'▲ 又漲了 '+d)+'</span>';
 }
 function dxRenderResult(){
-  $("dxGr").textContent=(dxGuess===null?'—':dxGuess); $("dxRv").textContent=dxScore; $("dxSc1").textContent=dxScore;
+  $("dxGr").textContent=dxGuess; $("dxRv").textContent=dxScore; $("dxSc1").textContent=dxScore;
   var s2=$("dxSc2"); if(s2) s2.textContent=dxScore;
   var hn=document.getElementById('dxHowN'); if(hn) hn.textContent=dxScore;
   var pf=document.getElementById('dxPersFace');
   if(pf && typeof dxaState==='function'){ pf.textContent=(dxScore>=50)?dxaState().face:(typeof dxaBase!=='undefined'?dxaBase:'🧑'); }
   dxRenderTrend();
-  var gapEl=$("dxGag"), gp=$("dxV3").querySelector(".dx-gap");
-  if(dxGuess===null){
-    if(gp) gp.style.display='none';
-    gapEl.textContent = "沒猜也沒關係——數字在這裡，賴不掉";
-  } else {
-    if(gp) gp.style.display='';
-    var d=dxScore-dxGuess;
-    gapEl.textContent = d>15 ? ("落差 +"+d+"——你對自己的嘴，太寬容了") : (d>0 ? ("落差 +"+d+"——差一點就被你猜到") : (d===0 ? "你猜中了——這種自知之明很危險" : "比你猜的低——但 T 線還是很深，別鬆懈"));
-  }
+  var d=dxScore-dxGuess;
+  $("dxGag").textContent = d>15 ? ("落差 +"+d+"——你對自己的嘴，太寬容了") : (d>0 ? ("落差 +"+d+"——差一點就被你猜到") : "比你猜的低——但 T 線還是很深，別鬆懈");
   dxRenderRadar();
   var bars=$("dxV3").querySelectorAll(".fl");
   for(var i=0;i<bars.length;i++)(function(b){ setTimeout(function(){ b.style.width=b.getAttribute("data-w")+"%"; },160); })(bars[i]);
@@ -3040,43 +2961,12 @@ function dxRenderRadar(){
   if(f) f.innerHTML='綜合毒值 <b>'+dxComposite()+'</b> ＝ 最毒的一項（'+dxTopPoisonName()+' '+mx+'）×70% ＋ 其餘平均（'+avg+'）×30%'
     + '<br><span style="color:#9A8A8A">為什麼不取平均：一項超標，不會因為其他項乾淨就變安全（同空品 AQI 的取法）</span>';
 }
-/* F1 任務可互動且記得住;F2 券有領取路徑(不再是死承諾) */
-function dxTaskTick(){
-  var n=(dxStore.t1||0);
-  if(n>=3){ toast('這週的 3 天已經記滿了（示範）'); return; }
-  if(dxStore.t1day===new Date().getDate()){ toast('今天記過了——明天再來（示範）'); return; }
-  dxStore.t1=n+1; dxStore.t1day=new Date().getDate(); dxSave(); dxTaskRender();
-  toast(dxStore.t1>=3?'✅ 連續 3 天達成（示範）':'✅ 今天記錄成功（示範）：'+dxStore.t1+'/3');
-}
-function dxTaskRender(){
-  var t1=dxStore.t1||0, t2=Math.min(2,dxDone);
-  var e1=document.getElementById('dxT1N'), b1=document.getElementById('dxT1Bx'),
-      e2=document.getElementById('dxTk'), b2=document.getElementById('dxT2Bx'),
-      cp=document.getElementById('dxCoupon');
-  if(e1) e1.textContent=t1; if(b1) b1.textContent=t1>=3?'☑':'□';
-  if(e2) e2.textContent=t2; if(b2) b2.textContent=t2>=2?'☑':'□';
-  if(cp){
-    if(dxStore.coupon){ cp.textContent='🎫 已領取 · 在券夾裡'; cp.disabled=true; cp.classList.add('got'); }
-    else if(t1>=3 && t2>=2){ cp.textContent='🎫 領取 NT$50 解毒券'; cp.disabled=false; cp.classList.remove('got'); }
-    else { cp.textContent='完成兩項領 NT$50 解毒券（'+((t1>=3?1:0)+(t2>=2?1:0))+'/2）'; cp.disabled=true; cp.classList.remove('got'); }
-  }
-}
-function dxClaim(){
-  if(dxStore.coupon) return;
-  dxStore.coupon=true; dxSave(); dxTaskRender();
-  toast('🎫 已入券夾（示範）：下次到解毒站結帳自動折抵 NT$50');
-}
 function dxRunSafe(){
   $("dxSafeR").style.display="none"; $("dxPg").style.width="0";
   $("dxPgt").textContent="掃描中：近 90 天 "+INV.d90.shops+" 家消費商家…";
   var ok=$("dxOkLine"); if(ok) ok.innerHTML="✓　"+(INV.d90.shops-1)+" 家未命中現行公告名單";
   setTimeout(function(){ $("dxPg").style.width="100%"; },80);
-  setTimeout(function(){
-    $("dxPgt").textContent=dmText("完成："+INV.d90.shops+" 家商家 · "+INV.d90.items+" 個品項已比對（示範）");
-    var hit=document.getElementById('dxHitBox'), ok=document.getElementById('dxOkLine');
-    if(SAFE_HIT){ if(hit) hit.style.display=''; if(ok) ok.innerHTML="✓　"+(INV.d90.shops-1)+" 家未命中現行公告名單"; }
-    else { if(hit) hit.style.display='none'; if(ok) ok.innerHTML="✓　"+INV.d90.shops+" 家全數未命中現行公告名單——這 90 天你很安全"; }
-    $("dxSafeR").style.display=""; },1700);
+  setTimeout(function(){ $("dxPgt").textContent="完成："+INV.d90.shops+" 家商家 · "+INV.d90.items+" 個品項已比對（示範）"; $("dxSafeR").style.display=""; },1700);
 }
 function dxFamily(){
   $("dxFam").innerHTML='<div class="dx-ok">✓　媽媽近 90 天 38 家商家，全數未命中公告名單</div><div style="height:8px"></div><button class="gx-btn line" onclick="skOpen(\'guard\')">📤 傳「家人守護卡」給媽媽</button>';
@@ -3088,7 +2978,7 @@ function dxVerify(btn,i){
   if(dxVDone[i]){ toast("這家已經在你的解毒清單裡了(示範)"); return; }
   dxVDone[i]=true; dxDone++; var old=dxScore; dxScore=Math.max(40,dxScore-7); dxSave();
   if(btn && btn.textContent){ btn.textContent="✅ 已排入"; btn.classList.add("done"); }
-  $("dxSc2").textContent=dxScore; dxTaskRender();
+  $("dxSc2").textContent=dxScore; $("dxTk").textContent=Math.min(2,dxDone);
   $("dxScNote").innerHTML="🎉 發票已核銷：綜合中毒 "+old+" → <b style='color:#177A4C'>"+dxScore+"</b>，T 線變淺了（糖毒 −5 · 油毒 −2）";
   toast("核銷成功(示範):「"+names[i]+"」 · 毒值 "+old+" → "+dxScore);
   var sh=document.getElementById('dxPoiAdd'); if(sh){ sh.textContent='✅ 已排入'; sh.classList.add('done'); }
@@ -3250,13 +3140,9 @@ function bdEnter(){
   bdShow(6);
 }
 function bdDemoFill(){ try{ dxInv=INV.d30.n; }catch(e){} toast('(示範)已灌入 '+INV.d30.n+' 張發票'); bdShow(6); }
-var BD_DEF={wk:12,dn:9};
-function bdPick(btn,q,v){
-  var was=btn.classList.contains('on'), g=btn.parentNode;
+function bdPick(btn,q,v){ var g=btn.parentNode;
   g.querySelectorAll('.bd-chip').forEach(function(c){ c.classList.remove('on'); });
-  if(was){ bdAns[q]=BD_DEF[q]; }                /* 再點一次=取消選取,回中間值 */
-  else { btn.classList.add('on'); bdAns[q]=v; }
-  bdTrack('bd_pick',{q:q,v:bdAns[q]}); }
+  btn.classList.add('on'); bdAns[q]=v; bdTrack('bd_pick',{q:q,v:v}); }
 function bdTrack(ev,extra){ try{ console.log('[track]', ev, Object.assign({exp:bdExp},extra||{})); }catch(e){} }
 function bdPtsRender(){ var ps=document.querySelectorAll('.bdP'), bs=document.querySelectorAll('.bdBar'), i;
   for(i=0;i<ps.length;i++) ps[i].textContent=bdPts;
@@ -3472,11 +3358,9 @@ function wcEnter(){
   wcShow(1); wcTrack('wc_interview_start');
 }
 function wcDemoFill(){ try{ dxInv=47; }catch(e){} toast('(示範)已灌入近 90 天發票'); wcShow(1); }
-function wcPick2(el,k,v){
-  var was=el.classList.contains('on');
+function wcPick2(el,k,v){ wcAns[k]=v;
   var sib=el.parentNode.children; for(var i=0;i<sib.length;i++) sib[i].classList.remove('on');
-  if(was){ wcAns[k]=0; } else { wcAns[k]=v; el.classList.add('on'); }
-  wcTrack('wc_pick',{q:k,v:wcAns[k]}); }
+  el.classList.add('on'); wcTrack('wc_pick',{q:k,v:v}); }
 function wcTrack(ev,extra){ try{ console.log('[track]', ev, extra||{}); }catch(e){} }
 function wcEl(){
   var s=document.getElementById('wcheck');
@@ -3549,11 +3433,7 @@ function openWc(){ wcEl();
     if(a) a.textContent=wcAge; if(y) y.textContent=Math.max(3,wcAge-26); }
   if ($("drawer").classList.contains("open")) closeDrawer(); go('wcheck'); wcShow(0); wcEntryRender(); wcTrack('wc_view'); }
 function wcBack(){ var v0=document.getElementById('wcV0'); if(v0 && v0.style.display!=='none'){ go('home'); } else { wcShow(0); } }
-function wcPick(el,age){
-  var was=el.classList.contains('on');
-  var sib=el.parentNode.children; for(var i=0;i<sib.length;i++) sib[i].classList.remove('on');
-  if(was){ wcAns.income=null; } else { wcAns.income=age; el.classList.add('on'); }
-}
+function wcPick(el,age){ wcAns.income=age; var sib=el.parentNode.children; for(var i=0;i<sib.length;i++) sib[i].classList.remove('on'); el.classList.add('on'); }
 function wcScan(){ wcAge = Math.max(28, (wcAns.income||43) + (wcAns.goal||0) + (wcAns.cut||0)); /* 三題一起驅動(示範模型) */
   wcTrack('wc_scan',{age:wcAge}); wcShow(2);
   var t=['吸入近 90 天發票…','計算收支缺口…','定位漏財點…','推演破產倒數…'], i=0;
@@ -3646,13 +3526,7 @@ function dxaRender(){
   var sc = (typeof dxScore==='number')? dxScore : 78;
   document.getElementById('dxaBar').style.width = sc + '%';
 }
-function dxaPick(el,b){
-  var was=el.classList.contains('on');
-  var sib=el.parentNode.children; for(var i=0;i<sib.length;i++) sib[i].classList.remove('on');
-  if(was){ dxaBase='🧑'; }                      /* 再點一次=取消選取 */
-  else { dxaBase=b; el.classList.add('on'); }
-  dxaRender();
-}
+function dxaPick(el,b){ dxaBase=b; var sib=el.parentNode.children; for(var i=0;i<sib.length;i++) sib[i].classList.remove('on'); el.classList.add('on'); dxaRender(); }
 function dxaShare(){
   var sc=(typeof dxScore==='number')? dxScore : 78;
   var msg='我的毒分身已經'+dxaState().tint.split('——')[0]+'(毒值 '+sc+')——來領你自己的分身:解毒吧';
@@ -3688,7 +3562,7 @@ function dxaMount(){
     + '<button onclick="dxaPick(this,\'👩\')">👩</button>'
     + '<button onclick="dxaPick(this,\'🧔\')">🧔</button>'
     + '<button onclick="dxaPick(this,\'🧒\')">🧒</button></div>'
-    + '</div>'
+    + '<div class="gx-note" style="margin-top:8px">正式版=更完整的捏臉(髮型/配件);分身可放首頁小樹旁,天天看它臉色。</div></div>'
     + '<button class="gx-btn" onclick="dxaShare()">🧑‍🎨 曬分身,看誰的比較毒</button>'
     + '<div style="height:8px"></div>'
     + '<button class="gx-btn line" onclick="dxShow(\'v5\')">💊 帶他去解毒(解毒站地圖)</button>'
@@ -3829,12 +3703,6 @@ var qrcode=function(){function i(t,r){function a(t,r){g=function(t){for(var r=ne
 .dx-lastbox small{display:block;font-size:10.5px;color:#8B96A3;font-weight:700}
 .dx-lastbox b{font-size:26px;color:#D7000F;line-height:1.2}
 .dx-lastbox b span{font-size:12px;color:#8B96A3}
-.dx-lastbox b i{font-style:normal;font-size:12px;margin-left:6px;font-weight:900}
-.dx-lastbox b i.dn{color:#177A4C}.dx-lastbox b i.up{color:#D7000F}
-.dx-hero.mini{padding:14px 10px}
-.dx-hero.mini .big{font-size:44px}
-.dx-hero.mini h3{font-size:16px}
-.dx-hero.mini p{display:none}
 .dx-lastgo{font-size:12.5px;font-weight:800;color:#A50011;background:#FFE9EB;border-radius:99px;padding:10px 13px;min-height:44px}
 .wc-save button.done{background:#C9D2CE!important;color:#fff!important}
 #wcInvBn.done{background:#C9D2CE!important;color:#fff!important}
@@ -3911,8 +3779,12 @@ function skData(){
   var face = (sc>=50)? st.face : (typeof dxaBase!=='undefined'? dxaBase : '🧑');
   var acc = (typeof dxaTopPoison==='function')? dxaTopPoison() : '🧋';
   var stamp = sc>=85?'中毒重症':(sc>=70?'毒素超標':(sc>=50?'毒素累積':'尚屬健康'));
-  /* Step 5:中毒人格已併入毒分身——persona 保留相容,內容與分身一致 */
-  return { theme:'detox', emoji:face, acc:acc, sub:'螞蟻人 × 酥脆星人', tint:st.tint, score:sc, unitTxt:'/100 綜合毒值',
+  if(k==='persona'){
+    return { theme:'detox', emoji:'🐜', sub:'螞蟻人 × 酥脆星人', tint:'糖油雙修 · 夜市修行者', score:sc, unitTxt:'/100 綜合毒值',
+      head:'🧪 解 毒 吧 ・ 檢 驗 報 告', punch:'你的發票,驗得出你的毒', stamp:stamp,
+      title:'我的中毒人格', text:'我測出「螞蟻人×酥脆星人」,你呢?', url:skLink('detox') };
+  }
+  return { theme:'detox', emoji:face, acc:acc, sub:'我的毒分身', tint:st.tint, score:sc, unitTxt:'/100 綜合毒值',
     head:'🧪 解 毒 吧 ・ 檢 驗 報 告', punch:'你的發票,驗得出你的毒', stamp:stamp,
     title:'我的毒分身', text:'我的毒分身已經'+st.tint.split('——')[0]+'。敢驗你自己的嗎?', url:skLink('detox') };
 }
@@ -4059,8 +3931,6 @@ window.addEventListener('load', function(){
   dxEntryRender();
   try{ if(typeof bdEntryRender==='function'){ bdEl(); bdEntryRender(); } }catch(e){}
   try{ if(typeof wcEntryRender==='function'){ wcEl(); wcEntryRender(); } }catch(e){}
-  try{ dxTaskRender(); }catch(e){}
-  try{ applyDemoMode(document.body); }catch(e){}
 }); }catch(e){}</script>
 <!-- ===== NAV-STACK v6.12:三單元返回=上一頁;過場/一次性頁不入堆疊且不誤刪 ===== -->
 <script>
