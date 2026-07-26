@@ -310,6 +310,18 @@ body{display:flex;flex-direction:column;align-items:center;gap:10px;padding:32px
 .demo-note{color:#8ADAD4;font-size:12px;text-align:center;max-width:400px;line-height:1.7;}
 @media (max-width:420px){ body{padding:0} .phone{width:100vw;height:100dvh;border-radius:0;box-shadow:none} }
 </style>
+<style>
+.mp-hd{display:flex;align-items:baseline;gap:8px;padding:10px 16px 0}
+.mp-hd b{font-size:13.5px;font-weight:900;color:#1F1F1F}
+.mp-hd span{font-size:10.5px;color:#8C8C8C;font-weight:700}
+.mp-new{position:absolute;top:-6px;right:2px;font-size:9px;font-weight:800;color:#fff;background:#F04B3E;border-radius:99px;padding:2px 6px;box-shadow:0 2px 5px rgba(240,75,62,.35)}
+.mp-cta.seen .mp-new{display:none}
+@keyframes mpPop{0%{transform:scale(.55) translateY(10px);opacity:0}62%{transform:scale(1.1) translateY(0);opacity:1}100%{transform:scale(1)}}
+@keyframes mpWiggle{0%,100%{transform:translateY(0) rotate(0)}14%{transform:translateY(-7px) rotate(-7deg)}30%{transform:translateY(0) rotate(6deg)}46%{transform:translateY(-5px) rotate(-4deg)}62%{transform:translateY(0) rotate(3deg)}80%{transform:translateY(-2px) rotate(0)}}
+@keyframes mpPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+.mp-cta:not(.seen) .mp-new{animation:mpPulse 1.6s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.mp-cta:not(.seen) .mp-new{animation:none}}
+</style>
 </head>
 <body>
 <div class="demo-note">真實 App 首頁素材(iOS 真色票/真圖標)× 提案捷徑列——點小程序圖標進入體驗</div>
@@ -348,12 +360,13 @@ body{display:flex;flex-direction:column;align-items:center;gap:10px;padding:32px
     </div>
     
     <!-- ===== 提案新增:官方小程序捷徑列(demo,點擊進小程序體驗)===== -->
-    <div class="tray" style="margin-top:10px;">
+    <div class="mp-hd"><b>🌱 官方小程序</b><span>免下載，點開就玩</span></div>
+    <div class="tray" style="margin-top:4px;">
       <div class="tray-inner" style="justify-content:flex-start;gap:0;">
-        <div class="fi" onclick="openUnit('detox')" style="cursor:pointer"><div class="fib" style="display:flex;align-items:center;justify-content:center;font-size:30px;background:#FDECEC;border-radius:14px;width:60px;height:60px;">🧪</div><div class="ft">解毒吧</div></div>
-        <div class="fi" onclick="openUnit('bored')" style="cursor:pointer;margin-left:calc((375px - 32px) / 4.5 - 60px);"><div class="fib" style="display:flex;align-items:center;justify-content:center;font-size:30px;background:#EAF1FF;border-radius:14px;width:60px;height:60px;">😶</div><div class="ft">無聊快篩</div></div>
-        <div class="fi" onclick="openUnit('wcheck')" style="cursor:pointer;margin-left:calc((375px - 32px) / 4.5 - 60px);"><div class="fib" style="display:flex;align-items:center;justify-content:center;font-size:30px;background:#FDEDED;border-radius:14px;width:60px;height:60px;">💸</div><div class="ft">幾歲破產</div></div>
-        <div class="fi" onclick="window.open('https://dotdao-eat.cmoney.tw','_blank')" style="cursor:pointer;margin-left:calc((375px - 32px) / 4.5 - 60px);"><div class="fib" style="display:flex;align-items:center;justify-content:center;font-size:30px;background:#FBF0EC;border-radius:14px;width:60px;height:60px;">🍝</div><div class="ft">暖暖窩點單</div></div>
+        <div class="fi mp-cta" data-unit="detox" onclick="openUnit('detox')" style="cursor:pointer;position:relative"><div class="fib" style="display:flex;align-items:center;justify-content:center;font-size:30px;background:#FDECEC;border-radius:14px;width:60px;height:60px;">🧪</div><div class="ft">解毒吧</div><span class="mp-new">NEW</span></div>
+        <div class="fi mp-cta" data-unit="bored" onclick="openUnit('bored')" style="cursor:pointer;position:relative;margin-left:calc((375px - 32px) / 4.5 - 60px);"><div class="fib" style="display:flex;align-items:center;justify-content:center;font-size:30px;background:#EAF1FF;border-radius:14px;width:60px;height:60px;">😶</div><div class="ft">無聊快篩</div><span class="mp-new">NEW</span></div>
+        <div class="fi mp-cta" data-unit="wcheck" onclick="openUnit('wcheck')" style="cursor:pointer;position:relative;margin-left:calc((375px - 32px) / 4.5 - 60px);"><div class="fib" style="display:flex;align-items:center;justify-content:center;font-size:30px;background:#FDEDED;border-radius:14px;width:60px;height:60px;">💸</div><div class="ft">幾歲破產</div><span class="mp-new">NEW</span></div>
+        <div class="fi mp-cta" data-unit="nnw" onclick="window.open('https://dotdao-eat.cmoney.tw','_blank')" style="cursor:pointer;position:relative;margin-left:calc((375px - 32px) / 4.5 - 60px);"><div class="fib" style="display:flex;align-items:center;justify-content:center;font-size:30px;background:#FBF0EC;border-radius:14px;width:60px;height:60px;">🍝</div><div class="ft">暖暖窩點單</div><span class="mp-new">NEW</span></div>
       </div>
       <div style="font-size:10px;color:#8C8C8C;padding:0 14px 10px;">官方自營小程序(提案示範)——點擊進入體驗;點單直達點到生產站</div>
     </div>
@@ -456,6 +469,30 @@ body{display:flex;flex-direction:column;align-items:center;gap:10px;padding:32px
 })();
 
 function openUnit(k){ location.href = 'user-nopay-v6.9.html?v=6.9&open=' + k; }
+</script>
+<script>
+/* 首頁小程序列=主 CTA:進場彈跳 + 未讀擺動;點開過就安靜(注意力到被確認為止) */
+(function(){
+  var KEY='mp_seen';
+  function seen(){ try{ return JSON.parse(localStorage.getItem(KEY)||'{}')||{}; }catch(e){ return {}; } }
+  function paint(){ var m=seen(); document.querySelectorAll('.mp-cta').forEach(function(t){ if(m[t.dataset.unit]) t.classList.add('seen'); }); }
+  function mark(u){ try{ var m=seen(); if(!m[u]){ m[u]=1; localStorage.setItem(KEY, JSON.stringify(m)); } }catch(e){} paint(); }
+  var reduce=false; try{ reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){}
+  function wig(el){ el.style.animation='none'; void el.offsetWidth; el.style.animation='mpWiggle .9s ease-in-out'; }
+  window.addEventListener('load', function(){
+    paint();
+    document.querySelectorAll('.mp-cta').forEach(function(t){ t.addEventListener('click', function(){ mark(t.dataset.unit); }); });
+    if(reduce) return;
+    document.querySelectorAll('.mp-cta').forEach(function(t,i){
+      var b=t.querySelector('.fib'); if(b) setTimeout(function(){ b.style.animation='mpPop .5s ease-out'; }, 260+i*70);
+    });
+    setInterval(function(){
+      if(document.hidden) return;
+      var un=document.querySelectorAll('.mp-cta:not(.seen)');
+      [].forEach.call(un, function(t,i){ var b=t.querySelector('.fib'); if(b) setTimeout(function(){ wig(b); }, i*150); });
+    }, 6000);
+  });
+})();
 </script>
 </body>
 </html>
