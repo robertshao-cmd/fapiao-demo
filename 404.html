@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>這個版本已下架｜發票載具 DEMO</title>
+<!-- 舊版連結(舊 QR 卡、Chat 裡貼過的網址)一律導到最新版,不讓任何人看到過期的 demo。
+     GitHub Pages 會把所有找不到的路徑交給這一頁處理。 -->
+<meta http-equiv="refresh" content="3;url=./app.html?v=6.19">
+<style>
+  :root{--font:"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:var(--font);min-height:100vh;color:#fff;background:#20304B;
+    background-image:radial-gradient(1100px 520px at 60% -10%,#2C4368 0%,#20304B 55%);
+    display:flex;align-items:center;justify-content:center;padding:28px 18px;text-align:center}
+  .wrap{width:min(460px,100%)}
+  .eyebrow{font-size:11px;letter-spacing:.4em;color:#8FD0CB;font-weight:800}
+  h1{font-size:clamp(20px,5vw,26px);margin-top:14px;font-weight:800;line-height:1.5}
+  p{font-size:13px;color:#9FB0C8;margin-top:14px;line-height:1.9}
+  a.go{display:inline-block;margin-top:22px;padding:14px 22px;border-radius:14px;
+    background:#B8912F;color:#fff;text-decoration:none;font-size:15px;font-weight:800}
+  .small{font-size:11px;color:#7E8DA6;margin-top:20px;line-height:1.9}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">發票載具 · DEMO</div>
+  <h1>你手上這個連結是舊版</h1>
+  <p>舊版本已經下架，3 秒後自動帶你去<b style="color:#FFD98A">目前版本 v6.19</b>。<br>
+     舊的 QR 卡與貼過的網址都會導到這裡，不會再看到過期的畫面。</p>
+  <a class="go" href="./app.html?v=6.19">直接看最新版 ›</a>
+  <div class="small">舊版本的原始檔仍保留在 git 歷史裡（供 FIXLOG 對照），只是不再對外提供網址。<br>
+     入口頁：<a href="./index.html?v=6.19" style="color:#8FD0CB">index</a></div>
+</div>
+</body>
+</html>
