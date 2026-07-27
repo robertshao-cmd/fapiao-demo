@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>發票載具 · 官方小程序 DEMO</title>
+<style>
+  :root{--ink:#1F2430;--red:#E4001A;--mut:#8C8C8C;--line:#EDEFF2;--shelf:#DFF3D8;--new:#F04B3E}
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{font-family:-apple-system,"PingFang TC","Noto Sans TC",sans-serif;background:#F5F7FA;color:var(--ink);min-height:100dvh}
+  button{font-family:inherit;border:none;background:none;cursor:pointer;color:inherit}
+  .phone{max-width:430px;margin:0 auto;background:#fff;min-height:100dvh;position:relative;overflow:hidden}
+
+  .bar{background:var(--red);color:#fff;padding:calc(8px + env(safe-area-inset-top,0)) 12px 8px;display:flex;align-items:center;gap:8px}
+  .bar b{font-size:15px;flex:1}
+  .src{display:flex;background:rgba(255,255,255,.18);border-radius:99px;padding:2px}
+  .src button{font-size:10.5px;font-weight:800;color:#fff;padding:6px 10px;border-radius:99px;opacity:.6;min-height:32px}
+  .src button.on{background:#fff;color:var(--red);opacity:1}
+
+  .sky{background:linear-gradient(180deg,#CFEAF7,#E8F6EC);padding:20px 16px 34px;position:relative}
+  .bubble{background:#fff;border-radius:14px;padding:9px 12px;font-size:12.5px;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.08);display:inline-block}
+  .hill{margin-top:14px;text-align:center;font-size:34px}
+
+  .shelf-hd{margin:-22px 14px -6px;display:flex;align-items:baseline;gap:8px;position:relative;z-index:3}
+  .shelf-hd b{font-size:13px;font-weight:900;color:#1F4D33}
+  .shelf-hd span{font-size:10.5px;color:#5C7A69;font-weight:700}
+  .shelf{position:relative;z-index:3;margin:6px 10px 0;background:linear-gradient(180deg,#E7F7E2,var(--shelf));border-radius:18px;padding:14px 8px 12px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+  .shelf::-webkit-scrollbar{display:none}
+  .tile{position:relative;flex:0 0 80px;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;font-weight:800;color:#263B31;min-height:44px}
+  .tile .tic{width:58px;height:58px;border-radius:15px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:27px;box-shadow:0 3px 10px rgba(80,130,90,.26)}
+  .tile .new{position:absolute;top:-6px;right:6px;font-size:9px;font-weight:800;color:#fff;background:var(--new);border-radius:99px;padding:2px 7px;box-shadow:0 2px 5px rgba(240,75,62,.35)}
+  .tile.seen .new{display:none}
+  .tile .dot{position:absolute;bottom:20px;right:10px;width:9px;height:9px;border-radius:99px;border:2px solid #fff}
+  .tile .dot.up{background:#22C55E}.tile .dot.down{background:#CBD5E1}
+  @keyframes pop{0%{transform:scale(.55) translateY(10px);opacity:0}62%{transform:scale(1.1);opacity:1}100%{transform:scale(1)}}
+  @keyframes wig{0%,100%{transform:translateY(0) rotate(0)}14%{transform:translateY(-7px) rotate(-7deg)}30%{transform:translateY(0) rotate(6deg)}46%{transform:translateY(-5px) rotate(-4deg)}62%{transform:translateY(0) rotate(3deg)}80%{transform:translateY(-2px) rotate(0)}}
+  @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+  .tile:not(.seen) .new{animation:pulse 1.6s ease-in-out infinite}
+  @media (prefers-reduced-motion:reduce){.tile:not(.seen) .new{animation:none}}
+
+  .card{margin:14px 12px 0;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px}
+  .card b{font-size:13px}
+  .row{display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:8px 0;border-bottom:1px dashed var(--line)}
+  .row:last-child{border:none}
+  .row code{font-size:10.5px;color:var(--mut);font-family:Menlo,monospace}
+  .pill{font-size:10px;font-weight:800;padding:3px 8px;border-radius:99px}
+  .pill.up{background:#DCFCE7;color:#15803D}.pill.down{background:#F1F5F9;color:#64748B}
+  .hint{font-size:10.5px;color:var(--mut);line-height:1.8;margin:10px 12px 20px}
+
+  /* 單元 webview(iframe):正式環境就是這樣開的 */
+  #view{position:fixed;inset:0;background:#fff;display:none;flex-direction:column;z-index:50}
+  #view.on{display:flex}
+  .vbar{background:#1F2430;color:#fff;display:flex;align-items:center;gap:8px;padding:calc(8px + env(safe-area-inset-top,0)) 8px 8px}
+  .vbar button{color:#fff;font-size:19px;font-weight:900;min-width:44px;min-height:44px}
+  .vbar b{font-size:13.5px;flex:1;text-align:center}
+  .vbar small{font-size:9.5px;opacity:.7;font-family:Menlo,monospace;max-width:38%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #frame{flex:1;width:100%;border:none;background:#fff}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="bar">
+    <b>🌱 發票載具</b>
+    <div class="src">
+      <button id="srcLocal" class="on" onclick="setSrc('local')">這個 demo</button>
+      <button id="srcDev" onclick="setSrc('dev')">ailab-dev</button>
+    </div>
+  </div>
+
+  <div class="sky">
+    <div class="bubble">致癌油流入市面，你中鏢了嗎？ ▸</div>
+    <div class="hill">🌱</div>
+  </div>
+
+  <div class="shelf-hd"><b>🌱 官方小程序</b><span>免下載，點開就玩</span></div>
+  <div class="shelf" id="shelf"></div>
+
+  <div class="card">
+    <b>單元狀態</b>
+    <div id="status"></div>
+  </div>
+
+  <!-- 靜態發佈版移除「其他單元改了什麼」(需要 node /api/changes) -->
+
+  <div class="hint">
+    這個殼用 <b>iframe</b> 開單元——正式環境的載具 App 就是用 webview 開
+    <code>ailab-dev.cmoney.tw/&lt;slug&gt;</code>，所以這裡看到的就是上線後的樣子。<br>
+    四個 session 各自改自己的資料夾，改完在這裡重新點一次就看得到，不需要任何整合。<br>
+    切到「ailab-dev」可以比對本機版與已部署版的差異。
+  </div>
+</div>
+
+<div id="view">
+  <div class="vbar">
+    <button onclick="closeView()" aria-label="關閉">‹</button>
+    <b id="vTitle">單元</b>
+    <small id="vUrl"></small>
+    <button onclick="reload()" aria-label="重新載入">⟳</button>
+  </div>
+  <iframe id="frame" title="小程序" allow="clipboard-write; web-share"></iframe>
+</div>
+
+<script>
+var UNITS = [
+  { slug:'detox',  name:'解毒吧',     emoji:'🧪', bg:'#FDECEC', port:5181, isNew:true },
+  { slug:'bored',  name:'無聊快篩',   emoji:'😶', bg:'#EAF1FF', port:5182, isNew:true },
+  { slug:'wealth', name:'幾歲破產',   emoji:'💸', bg:'#FDEDED', port:5183, isNew:true,
+    devSlug:'wealth-check' },   /* 已部署的那顆叫 wealth-check */
+  /* 暖暖窩是「點到」的店,不是我們的單元 → 開它的店家頁 https://dotdao-eat.cmoney.tw/<shopId>/order
+     shopId 的單一資料源是 _kit/unit-kit.js 的 UK.shops.REGISTRY.nnw;這個殼刻意不載入 kit
+     (kit 一載入就 injectCSS,會蓋掉殼自己的樣式;shell/server.js 也只服務 shell/ 這層目錄)。
+     所以這裡是第二處要填的地方 —— verify.py 會比對這兩個值,不一致就警告。
+     取得方式:掃店內桌卡 QR,或商家後台 → 顧客點餐連結。先用
+       python nest-integration/verify-shop.py <UUID>
+     確認那串 UUID 真的是暖暖窩(順便驗 enableInvoice)再填。 */
+  { slug:'nnw',    name:'暖暖窩點單', emoji:'🍝', bg:'#FBF0EC', isNew:true,
+    ext:'https://dotdao-eat.cmoney.tw', shopId:'' }   /* ← 待填 Shop UUID */
+];
+var SRC = 'local';
+var SEEN_KEY = 'shell_seen';
+
+function seen(){ try{ return JSON.parse(localStorage.getItem(SEEN_KEY)||'{}')||{}; }catch(e){ return {}; } }
+function markSeen(s){ try{ var m=seen(); if(!m[s]){ m[s]=1; localStorage.setItem(SEEN_KEY, JSON.stringify(m)); } }catch(e){} paint(); }
+
+function urlOf(u){
+  /* 外部站(點到):shopId 填了才是「直達店家頁」;沒填就只有裸網域,不是可驗的入口 */
+  if (u.ext) return u.shopId ? (u.ext + '/' + u.shopId + '/order') : u.ext;
+  if (SRC === 'local') return './' + u.slug + '/';   /* 靜態發佈版:同層資料夾 */
+  return 'https://ailab-dev.cmoney.tw/' + (u.devSlug || u.slug);
+}
+
+function render(){
+  var m = seen();
+  document.getElementById('shelf').innerHTML = UNITS.map(function(u){
+    return '<button class="tile' + (m[u.slug]?' seen':'') + '" data-slug="'+u.slug+'" onclick="openUnit(\''+u.slug+'\')">'
+      + '<span class="tic" style="background:'+u.bg+'">'+u.emoji+'</span>'+u.name
+      + (u.isNew?'<span class="new">NEW</span>':'')
+      + '<span class="dot down" id="dot-'+u.slug+'"></span></button>';
+  }).join('');
+  document.getElementById('status').innerHTML = UNITS.map(function(u){
+    return '<div class="row"><span>'+u.emoji+' '+u.name+'</span>'
+      + '<span style="display:flex;align-items:center;gap:8px">'
+      + '<code>'+urlOf(u).replace(/^https?:\/\//,'')+'</code>'
+      + '<span class="pill down" id="pill-'+u.slug+'">檢查中</span></span></div>';
+  }).join('');
+  probeAll();
+  animate();
+}
+function paint(){
+  var m = seen();
+  document.querySelectorAll('.tile').forEach(function(t){
+    if (m[t.dataset.slug]) t.classList.add('seen'); else t.classList.remove('seen');
+  });
+}
+
+/* 起了沒:用 no-cors fetch 探測。
+   (不要用 iframe onload——連線失敗時瀏覽器會載入錯誤頁,onload 照樣觸發,會誤報「運作中」) */
+function probe(u){
+  if (u.ext) return Promise.resolve(true);          /* 外部站不探測 */
+  var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+  var t = setTimeout(function(){ if (ctrl) ctrl.abort(); }, 2000);
+  return fetch(urlOf(u), { mode:'no-cors', cache:'no-store', signal: ctrl ? ctrl.signal : undefined })
+    .then(function(){ clearTimeout(t); return true; })
+    .catch(function(){ clearTimeout(t); return false; });
+}
+function probeAll(){
+  UNITS.forEach(function(u){
+    probe(u).then(function(up){
+      var dot = document.getElementById('dot-'+u.slug), pill = document.getElementById('pill-'+u.slug);
+      if (dot)  dot.className  = 'dot ' + (up?'up':'down');
+      if (pill){
+        pill.className = 'pill ' + (up && !(u.ext && !u.shopId) ? 'up' : 'down');
+        pill.textContent = u.ext ? (u.shopId ? '外部站' : '待填') : (up ? '運作中' : '未啟動');
+      }
+    });
+  });
+}
+
+/* 吸睛動效:進場彈跳 + 未讀擺動;點過就安靜(注意力到被確認為止) */
+var reduce=false; try{ reduce = matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){}
+var wigTimer = null;
+function animate(){
+  if (reduce) return;
+  var tiles = document.querySelectorAll('.tile');
+  tiles.forEach(function(t,i){
+    var ic = t.querySelector('.tic');
+    setTimeout(function(){ ic.style.animation = 'pop .5s ease-out'; }, 220 + i*70);
+  });
+  if (wigTimer) clearInterval(wigTimer);
+  wigTimer = setInterval(function(){
+    if (document.hidden || document.getElementById('view').classList.contains('on')) return;
+    document.querySelectorAll('.tile:not(.seen)').forEach(function(t,i){
+      var ic = t.querySelector('.tic');
+      setTimeout(function(){ ic.style.animation='none'; void ic.offsetWidth; ic.style.animation='wig .9s ease-in-out'; }, i*150);
+    });
+  }, 6000);
+}
+
+function openUnit(slug){
+  var u = UNITS.filter(function(x){ return x.slug===slug; })[0]; if(!u) return;
+  markSeen(slug);
+  /* 誠實的空狀態:跟 kit 的 UK.shops.open 同一個原則 —— shopId 沒填就不假裝可點餐,
+     也不用裸網域(店家首頁)冒充直達 */
+  if (u.ext && !u.shopId){
+    alert('店家連結待填：掃店內桌卡 QR 或到商家後台複製顧客點餐連結，\n'
+        + '先跑 nest-integration/verify-shop.py <UUID> 驗過，\n'
+        + '再填 _kit/unit-kit.js 的 REGISTRY.nnw.shopId 與本檔 UNITS 的 nnw.shopId。');
+    return;
+  }
+  var url = urlOf(u);
+  document.getElementById('vTitle').textContent = u.emoji + ' ' + u.name;
+  document.getElementById('vUrl').textContent = url.replace(/^https?:\/\//,'');
+  document.getElementById('frame').src = url;
+  document.getElementById('view').classList.add('on');
+  history.pushState({v:1},'');
+}
+function closeView(){
+  var v = document.getElementById('view');
+  if (!v.classList.contains('on')) return false;
+  v.classList.remove('on');
+  document.getElementById('frame').src = 'about:blank';
+  return true;
+}
+function reload(){
+  var f = document.getElementById('frame'), s = f.src;
+  f.src = 'about:blank'; setTimeout(function(){ f.src = s; }, 60);
+}
+function setSrc(s){
+  SRC = s;
+  document.getElementById('srcLocal').classList.toggle('on', s==='local');
+  document.getElementById('srcDev').classList.toggle('on', s==='dev');
+  render();
+}
+window.addEventListener('popstate', function(){ closeView(); });
+window.addEventListener('keydown', function(e){ if(e.key==='Escape') closeView(); });
+
+/* 單元在入口頁按返回 → kit 會 postMessage 過來 → 關掉 webview 回到首頁小程序列。
+   這樣「首頁 → 小程序 → 單元 → 返回首頁」是一個閉環,不會卡在單元裡。 */
+window.addEventListener('message', function(e){
+  var d = e.data;
+  if (d && d.uk === 'home') closeView();
+});
+
+/* 其他單元改了什麼(唯讀 git;四個 session 平行時最需要的那塊資訊) */
+function loadChanges(){
+  var box = document.getElementById('changes');
+  box.textContent = '載入中…';
+  fetch('/api/changes', { cache:'no-store' })
+    .then(function(r){ return r.json(); })
+    .then(function(j){
+      box.innerHTML = j.repos.map(function(r){
+        if (r.missing) return '<div class="row"><span>'+r.name+'</span><span class="pill down">沒有 repo</span></div>';
+        var dirty = r.dirty
+          ? '<span class="pill up" title="'+(r.dirtyFiles||[]).join(', ')+'">未提交 '+r.dirty+' 個檔</span>'
+          : '<span class="pill down">乾淨</span>';
+        return '<div class="row" style="align-items:flex-start">'
+          + '<span style="flex:1"><b style="font-size:12px">'+r.name+'</b>'
+          + '<div style="font-size:10.5px;color:var(--mut);margin-top:2px">'
+          + (r.subject ? (r.subject.length>34 ? r.subject.slice(0,34)+'…' : r.subject) : '(還沒有 commit)')
+          + '</div>'
+          + '<div style="font-size:10px;color:#94A3B8;margin-top:1px">'
+          + (r.hash ? r.hash+' · '+r.when+' · 共 '+r.commits+' 個 commit' : '')
+          + '</div></span>' + dirty + '</div>';
+      }).join('');
+    })
+    .catch(function(){
+      box.innerHTML = '<span style="color:#B45309">讀不到 /api/changes —— 請用 <code>node _kit/shell/server.js</code> 啟動殼(不要用其他靜態伺服器)</span>';
+    });
+}
+
+render();
+/* loadChanges() 靜態版沒有 */
+</script>
+</body>
+</html>

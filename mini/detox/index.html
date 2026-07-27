@@ -1,0 +1,744 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#E4001A">
+<title>解毒吧｜發票載具</title>
+<script src="qrcode.min.js"></script>
+<script src="unit-kit.js"></script>
+<script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
+<style>
+  :root{--ink:#1F1B2E;--red:#E4001A;--deep:#A50011;--gold:#B8912F;--teal:#177A4C;
+        --mut:#8B96A3;--line:#F0E0E1;--bg:#FFF6F5}
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{font-size:16px}
+  body{font-family:-apple-system,"PingFang TC","Noto Sans TC",sans-serif;background:var(--bg);color:var(--ink);min-height:100dvh}
+  button{font-family:inherit;border:none;background:none;cursor:pointer;color:inherit}
+
+  /* 頭部:返回 + 標題 + 官方自營 + ⋯(375px 也塞得下) */
+  .head{position:sticky;top:0;z-index:9;background:linear-gradient(120deg,#FF6B75,#E4001A 72%);
+        color:#fff;padding:calc(10px + env(safe-area-inset-top,0)) 6px 10px;display:flex;align-items:center;gap:2px;
+        border-bottom:3px solid var(--ink)}
+  .head h1{font-size:16.5px;font-weight:900;letter-spacing:1px;flex:1;text-align:center;
+           text-shadow:1.5px 1.5px 0 var(--ink)}
+  /* 標題本身就是「回這支 app 第一頁」的入口——任何一頁都回得去,不用連按返回。
+     要壓過上面那條 .head button(21px/44px 寬),所以選擇器寫長一點。 */
+  .head h1 button.brand{font:inherit;color:inherit;letter-spacing:inherit;text-shadow:inherit;
+                        width:100%;min-width:0;min-height:44px;padding:0;cursor:pointer}
+  .head h1 button.brand:active{opacity:.7}
+  .head button{color:#fff;font-size:21px;font-weight:900;min-width:44px;min-height:44px;
+               display:inline-flex;align-items:center;justify-content:center;text-shadow:1.5px 1.5px 0 var(--ink)}
+  .head .off{font-size:9px;font-weight:900;color:var(--ink);background:#FFD34D;padding:3px 8px;border-radius:8px;
+             white-space:nowrap;border:2px solid var(--ink);box-shadow:2px 2px 0 var(--ink);transform:rotate(2deg)}
+  @media (max-width:390px){.head h1{font-size:15px;letter-spacing:0}.head .off{font-size:8px;padding:2px 6px}}
+
+  .wrap{max-width:430px;margin:0 auto;padding:14px 16px calc(28px + env(safe-area-inset-bottom,0))}
+  .card{background:#fff;border-radius:16px;padding:14px;margin-top:12px;box-shadow:0 2px 10px rgba(31,27,46,.07)}
+  .note{font-size:10.5px;color:#6E5558;line-height:1.75;margin-top:9px}
+  .btn{display:block;width:100%;padding:14px;border-radius:13px;font-size:16px;font-weight:800;
+       text-align:center;margin-top:10px;min-height:50px}
+  .btn.p{background:var(--red);color:#fff;box-shadow:0 4px 14px rgba(228,0,26,.28)}
+  .btn.p:disabled{opacity:.45;box-shadow:none}
+  .btn.l{background:#fff;border:1.5px solid #E3CFCF;color:#5A4548;font-size:14px;font-weight:800}
+  .sec{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px;flex-wrap:wrap}
+  .sec button{font-size:12.5px;font-weight:800;color:#8A5A5E;text-decoration:underline;
+              text-underline-offset:3px;padding:12px 6px;min-height:44px}
+  .sec .dot{color:#C9B6B8}
+
+  /* 次要動作列:等寬並排的卡片鈕。少一顆時剩下的自動撐滿,不會歪。
+     視覺語彙沿用 hero/stage 的粗框+硬陰影,但比主 CTA 輕(白底、無填色)。 */
+  .acts{display:flex;gap:8px;margin-top:12px}
+  .act{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+       background:#fff;border:2.5px solid var(--ink);border-radius:13px;box-shadow:3px 3px 0 var(--ink);
+       padding:10px 4px;min-height:58px;font-size:11px;font-weight:900;color:#4A3B3D;letter-spacing:.3px;
+       transition:transform .1s,box-shadow .1s}
+  .act .ic{font-size:19px;line-height:1}
+  .act:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--ink)}
+  @media (max-width:360px){.act{font-size:10px;padding:9px 2px}.act .ic{font-size:17px}}
+
+  /* 入口 hero(回訪自動縮小) */
+  .hero{text-align:center;padding:20px 8px 4px;background:linear-gradient(160deg,#FFF0EE,#FFF8F7);
+        border:3px solid var(--ink);border-radius:18px;box-shadow:4px 4px 0 var(--ink);margin-top:4px}
+  .hero .big{font-size:62px;line-height:1}
+  .hero h2{font-size:21px;font-weight:900;margin-top:8px;line-height:1.4}
+  .hero p{font-size:12.5px;color:#8A5A5E;margin-top:6px;font-weight:700}
+  .hero.mini{padding:12px 8px 4px}
+  .hero.mini .big{font-size:38px}.hero.mini h2{font-size:16px}.hero.mini p{display:none}
+
+  /* 猜測頁 */
+  .face{font-size:64px;line-height:1;margin:6px 0}
+  .guessv{font-size:44px;font-weight:900;color:var(--gold);line-height:1;text-shadow:2px 2px 0 var(--ink)}
+  .guessv span:last-child{font-size:14px;text-shadow:none}
+  input[type=range]{-webkit-appearance:none;width:100%;height:44px;background:transparent;margin-top:8px}
+  input[type=range]::-webkit-slider-runnable-track{height:10px;border-radius:99px;
+    background:linear-gradient(90deg,#49C98C,#DAAB00,#E4001A);border:2px solid var(--ink)}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:30px;height:30px;border-radius:99px;
+    background:#fff;border:3px solid var(--ink);box-shadow:2px 2px 0 var(--ink);margin-top:-13px}
+
+  /* 快篩試紙 */
+  .strip{margin:10px auto 0;width:180px}
+  .stick{background:#F7F3EE;border:3px solid var(--ink);border-radius:12px;padding:10px 12px;
+         box-shadow:3px 3px 0 var(--ink)}
+  .well{width:22px;height:22px;border-radius:99px;background:#F3D9D0;border:2.5px solid var(--ink);margin:0 auto 8px}
+  .win{background:#FFFDF8;border:2.5px solid var(--ink);border-radius:5px;height:34px;
+       display:flex;align-items:center;justify-content:center;gap:40px}
+  .line{width:5px;height:22px;border-radius:2px;background:transparent}
+  .line.c{background:var(--ink)}
+  .line.t{opacity:0;transition:opacity .8s}
+  .line.t.show{opacity:1;background:#D7000F}
+  .line.t.half{opacity:.45}
+  .ct{display:flex;justify-content:center;gap:44px;font-size:9px;color:#9A8A8A;margin-top:4px}
+  .fly{display:flex;justify-content:center;gap:10px;font-size:19px;margin-bottom:6px}
+  .fly span{animation:fly 1.5s ease-in-out infinite}
+  .fly span:nth-child(2){animation-delay:.25s}.fly span:nth-child(3){animation-delay:.5s}
+  @keyframes fly{0%,100%{transform:translateY(0);opacity:.55}50%{transform:translateY(-8px);opacity:1}}
+
+  .bar{display:flex;align-items:center;gap:8px;font-size:11.5px;font-weight:800;color:#3D3346;margin-top:9px}
+  .bar .nm{width:66px;white-space:nowrap}
+  .bar .tr{flex:1;height:14px;border-radius:99px;background:#FBEDEA;overflow:hidden;border:2px solid var(--ink)}
+  /* 寬度直接寫在 HTML 的 style 裡,CSS 不再預設 width:0。
+     0728:原本是「CSS 給 width:0 → JS 在 160ms 後補上真寬度」,那個 setTimeout
+     只要沒跑到(切頁、背景分頁被節流、DOM 重畫),bar 就永遠停在空的,
+     而數字是寫死的所以照樣正確——症狀就是「有數字、沒有條」。
+     現在正確的寬度是預設值,動畫只是裝飾:用 scaleX 播,壞掉也只是沒動畫。 */
+  /* ⚠️ 這條 bar 刻意「沒有進場動畫」,是修 bug 修出來的結論,不要好心加回去。
+     踩過的兩個版本都會讓 bar 變成空的、只剩右邊數字正確(使用者回報三次的症狀):
+       1. width:0 + JS setTimeout 補真寬度 → timeout 沒跑到就永遠是空的
+       2. width 寫死 + @keyframes scaleX(0→1) → 動畫「執行中但不推進」時
+          (背景分頁節流、省電模式、低階機、頁面沒在合成)卡在 scaleX(0),同樣是空的
+     資訊本身不能靠動畫或延遲工作才正確。要動畫就只動不承載資訊的東西(例如光暈)。 */
+  .bar .fl{display:block;height:100%;border-radius:99px}
+  .bar .fl.hot{background:linear-gradient(90deg,#FF8A94,#E4001A)}
+  .bar .fl.mid{background:linear-gradient(90deg,#FFD98A,#DAAB00)}
+  .bar .fl.ok{background:linear-gradient(90deg,#8FE0B4,#149559)}
+  .bar .v{width:24px;text-align:right;font-weight:900}
+  .bar .v.hot{color:var(--red)}.bar .v.mid{color:#A57A00}.bar .v.ok{color:var(--teal)}
+  .howto{display:flex;align-items:center;justify-content:space-between;width:100%;margin-top:10px;
+         padding:10px 12px;background:var(--bg);border:1.5px solid var(--line);border-radius:10px;
+         font-size:12px;font-weight:800;color:#6E5558;min-height:44px}
+  .howto b{color:var(--red)}
+  #caret{display:inline-block;transition:transform .2s}
+  .formula{margin-top:8px;padding:8px 10px;background:var(--bg);border:1.5px dashed var(--line);
+           border-radius:10px;font-size:10.5px;line-height:1.8;color:#6E5558}
+  /* 地點卡的三步說明要能換行(kit 的 .uk-poi-info 是 textContent,用 pre-line 讓 \n 生效) */
+  #uk-poi .uk-poi-info{white-space:pre-line}
+
+  /* 毒分身預覽(0728 四次修正):v3/v5 整頁第一眼,取代原本的試紙結果卡。
+     主文案是靠杯標語(avState().say),不是說明文字——要讓人看了會想點進去嗆回去。
+     沿用 .avatar 的表情動畫(.dying/.wheeze/.fine),只是縮小尺寸、去掉軌道配件。 */
+  .avPrev{display:flex;align-items:center;gap:12px;margin-top:12px;padding:10px 12px;
+          background:#FFF6F5;border:2px solid var(--ink);border-radius:14px;width:100%;text-align:left}
+  .avPrev:active{transform:translateY(1px)}
+  .avatar.sm{font-size:42px}
+  .avPrevTxt{flex:1;min-width:0}
+  .avPrevTxt b{display:block;font-size:13.5px;font-weight:900;color:var(--ink)}
+  .avPrevTxt small{font-size:10.5px;color:#8A5A5E;font-weight:700}
+  /* 獨立當整頁第一眼用的版本:比嵌在卡片裡的尺寸更大、陰影更重,撐得起「唯一視覺」的份量 */
+  .avPrev.top{margin-top:4px;padding:16px 14px;border-radius:18px;box-shadow:4px 4px 0 var(--ink);gap:14px}
+  .avPrev.top .avatar.sm{font-size:60px}
+  .avPrev.top .avPrevTxt b{font-size:16px;line-height:1.35}
+  .avPrev.top .avPrevTxt small{font-size:11.5px;display:block;margin-top:3px}
+
+  /* 真食安 */
+  .prog{height:9px;background:#F3E3E3;border-radius:99px;overflow:hidden;margin-top:9px;border:2px solid var(--ink)}
+  .prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,#49C98C,#149559);transition:width 1.5s ease}
+  .ok{background:#EAF7F0;border:2px solid #B9D9C6;border-radius:11px;padding:10px;font-size:12.5px;
+      font-weight:800;color:var(--teal);margin-top:10px}
+  .hit{background:#FFF8E6;border:2px solid #E8C766;border-radius:11px;padding:11px;margin-top:9px}
+  .hit b{font-size:12.5px;color:#8A6210}
+  .two{display:flex;gap:8px;margin-top:9px}
+  .two .btn{margin:0}
+
+  /* 解毒站 */
+  .score{font-size:46px;font-weight:900;color:var(--red);line-height:1;text-shadow:2px 2px 0 var(--ink)}
+  .st{display:flex;align-items:center;gap:9px;padding:11px 4px;border-bottom:1px dashed var(--line);cursor:pointer}
+  .st:last-of-type{border:none}
+  .st:active{background:#FFF6F5}
+  .st .lg{font-size:26px}
+  .st .in{flex:1}
+  .st .in b{font-size:12.5px;font-weight:900;display:block}
+  .st .in small{font-size:10.5px;color:#8A5A5E;display:block;margin-top:2px}
+  .cross{font-size:9px;font-weight:900;color:#fff;background:var(--teal);border-radius:5px;padding:1px 5px}
+  .shoptag{display:inline-block;margin-top:4px;font-size:9.5px;font-weight:900;color:var(--teal);
+           background:#EAF7F0;border:1px solid #B9D9C6;border-radius:6px;padding:2px 6px}
+  .banner{display:block;width:100%;text-align:left;background:linear-gradient(120deg,#FFE9A8,#FFD34D);
+          border:3px solid var(--ink);border-radius:14px;padding:11px 13px;margin-top:12px;
+          box-shadow:3px 3px 0 var(--ink);min-height:50px}
+  .banner b{display:block;font-size:13px;font-weight:900}
+  .banner small{font-size:10.5px;color:#6A5520}
+
+  /* 毒分身 */
+  .stage{text-align:center;padding:16px 14px;background:#fff;border:3px solid var(--ink);
+         border-radius:16px;box-shadow:4px 4px 0 var(--ink);margin-top:4px}
+  .avatar{font-size:78px;line-height:1;position:relative;display:inline-block;transform-origin:50% 90%}
+  .orbit{position:absolute;font-size:26px;top:-4px;right:-20px;transform:rotate(18deg)}
+  .say{font-size:15px;font-weight:900;margin-top:12px;line-height:1.5}
+  .tint{font-size:12px;font-weight:800;margin-top:4px;opacity:.85}
+  .meter{height:10px;background:#F3E3E3;border-radius:99px;overflow:hidden;margin-top:10px;border:2px solid var(--ink)}
+  .meter i{display:block;height:100%;background:linear-gradient(90deg,#1F9D63,#DAAB00,#E4001A)}
+  @keyframes dying{0%,100%{transform:translateY(0) rotate(-3deg) scale(1)}25%{transform:translateY(3px) rotate(2deg) scale(.985)}
+    50%{transform:translateY(0) rotate(-2deg) scale(1)}62%{transform:translateY(1px) rotate(6deg) scale(.99)}
+    68%{transform:translateY(1px) rotate(-5deg) scale(.99)}75%{transform:translateY(2px) rotate(1deg) scale(.985)}}
+  @keyframes wheeze{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(2px) scale(.99)}}
+  @keyframes fine{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-4px) rotate(2deg)}}
+  .avatar.dying{animation:dying 2.4s ease-in-out infinite}
+  .avatar.wheeze{animation:wheeze 2.8s ease-in-out infinite}
+  .avatar.fine{animation:fine 2.6s ease-in-out infinite}
+
+  .scan{text-align:center;padding:6px 0 2px;font-size:12.5px;font-weight:800;color:var(--deep)}
+  .btn:active,.st:active,.banner:active{transform:scale(.985)}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <button onclick="nav.back()" aria-label="返回">&lsaquo;</button>
+  <h1><button class="brand" onclick="toEntry()" aria-label="回解毒吧第一頁">🧪 解毒吧</button></h1>
+  <span class="off">官方自營</span>
+  <button onclick="UK.menu.open()" aria-label="更多選項">&ctdot;</button>
+</div>
+
+<div class="wrap">
+
+  <!-- ═══ v0 入口:一頁只有一個主 CTA ═══ -->
+  <div id="v0">
+    <div class="hero" id="hero">
+      <div class="big">🧪</div>
+      <h2>你以為你吃得還行</h2>
+      <p>你的發票不這麼認為</p>
+    </div>
+    <div id="lastBox"></div>
+    <button class="btn p" id="cta" onclick="enter()">我敢驗</button>
+    <!-- 次要動作:三顆並排。回訪才會出現「重新驗」,少一顆時另外兩顆自動撐滿 -->
+    <div class="acts">
+      <button class="act" id="actRetest" style="display:none" onclick="retest()">
+        <span class="ic">🔄</span>重新驗</button>
+      <button class="act" onclick="gate('v4')"><span class="ic">🛡️</span>真食安比對</button>
+      <button class="act" onclick="gate('v5')"><span class="ic">💊</span>解毒站</button>
+    </div>
+    <div class="note" id="windowNote" style="text-align:center"></div>
+  </div>
+
+  <!-- ═══ v1 猜測:滑桿沒動不能往下(落差不能靠預設值製造) ═══ -->
+  <div id="v1" style="display:none">
+    <div class="card" style="text-align:center">
+      <div style="font-size:12.5px;font-weight:800;color:#8A5A5E">先猜猜：你近 30 天的「綜合中毒指數」？</div>
+      <div class="note" style="margin-top:4px">指數 0–100，看你近 30 天發票裡糖／油／鈉／加工／咖啡因的份量——越高＝吃進越多</div>
+      <div class="face" id="gFace">😏</div>
+      <div class="guessv"><span id="gVal">—</span><span> /100</span></div>
+      <input type="range" id="gSl" min="0" max="100" value="40" oninput="guessUpd(this.value)" aria-label="猜測中毒指數">
+      <div class="note" style="text-align:center">0＝你吃得像修行 · 100＝行走的防腐劑</div>
+    </div>
+    <button class="btn p" id="goBn" onclick="startTest()" disabled>先拉一個數字</button>
+    <div class="sec"><button onclick="skipGuess()">懶得猜，直接看結果</button></div>
+  </div>
+
+  <!-- ═══ v2 顯影過場(transient:不入返回堆疊、可跳過) ═══ -->
+  <div id="v2" style="display:none">
+    <div class="card" style="text-align:center">
+      <div class="fly"><span>🧾</span><span>🧾</span><span>🧾</span></div>
+      <div class="strip"><div class="stick">
+        <div class="well"></div>
+        <div class="win"><span class="line c"></span><span class="line t" id="tLine"></span></div>
+        <div class="ct"><span>C</span><span>T</span></div>
+      </div></div>
+      <div class="scan" id="scanTxt">吸入發票中…</div>
+      <div class="note" id="scanNote" style="text-align:center"></div>
+    </div>
+    <div class="sec"><button onclick="skipScan()">跳過動畫 &rsaquo;</button></div>
+  </div>
+
+  <!-- ═══ v3 結果:趨勢 + 落差 + 雷達 + 算式 + 分身卡 + 唯一主 CTA ═══ -->
+  <div id="v3" style="display:none">
+    <div class="uk-trend" id="trend" style="display:none"></div>
+
+    <!-- 毒分身:整頁第一眼(0728 四次修正:刪掉試紙結果卡,只留這個+靠杯標語)。
+         點下去開 v6 全頁(含分享),表情/文案/標語都是同一份 avState()。 -->
+    <button class="avPrev top" id="avPrev" onclick="openAvatar()">
+      <span class="avatar sm" id="avPrevFace">🤢</span>
+      <span class="avPrevTxt">
+        <b id="avPrevSay">—</b>
+        <small id="avPrevMeta">—</small>
+      </span>
+    </button>
+
+    <div class="card">
+      <b style="font-size:13px">五毒雷達（近 30 天）</b>
+      <div id="radar"></div>
+      <button class="howto" id="howBn" onclick="toggleHow()" aria-expanded="false">
+        <span>綜合毒值 <b id="howN">—</b> 是怎麼算的？</span><span id="caret">›</span>
+      </button>
+      <div class="formula" id="formula" style="display:none"></div>
+      <div class="note" id="srcNote"></div>
+    </div>
+
+    <button class="btn p" onclick="nav.show('v5')">💊 去解毒——把毒值降下來</button>
+    <div class="acts">
+      <button class="act" onclick="openSafe()"><span class="ic">🛡️</span>真食安比對</button>
+      <button class="act" onclick="nav.show('v0')"><span class="ic">🏠</span>回解毒吧</button>
+    </div>
+  </div>
+
+  <!-- ═══ v4 真食安比對:命中 / 全數未命中 兩種狀態 ═══ -->
+  <div id="v4" style="display:none">
+    <div class="card">
+      <b style="font-size:13px">🛡️ 你吃過的店，上過黑名單嗎？</b>
+      <div style="font-size:12px;font-weight:700;color:#3D3346;line-height:1.75;margin-top:5px">
+        拿你的發票去對官方名單——不是我們說誰有問題，是政府說的。</div>
+      <div class="prog"><i id="progBar"></i></div>
+      <div class="note" id="progTxt">掃描中…</div>
+      <div class="note" style="font-size:10px;color:#9A8A8A">比對範圍：近 90 天發票的商家與品項 × 食藥署與各縣市衛生局公告。僅轉載官方原文，標註來源與日期。</div>
+    </div>
+    <div id="safeResult" style="display:none">
+      <div class="ok" id="okLine">✓　未命中現行公告名單</div>
+      <div class="hit" id="hitBox">
+        <b>⚠ 1 筆提醒（示範情境）</b>
+        <div style="font-size:11.5px;color:#6B5330;line-height:1.75;margin-top:5px">
+          6/30 你在「好味鹽酥雞 中山店」的消費——該店使用之油品批號，列於
+          <b>7/9 公布之第三層下架名單</b>（來源：台中市食安處 · 示範）。該批號目前已全面下架。</div>
+        <div class="two">
+          <button class="btn l" onclick="official('news')">查看官方公告</button>
+          <button class="btn l" onclick="official('help')">退換貨／就醫指引</button>
+        </div>
+      </div>
+      <div class="note">紅線：商家層級警示<b>僅限官方公告原文轉載</b>；毒值只評你自己的消費結構，平台不對商家做任何「毒」標籤。</div>
+      <!-- 主 CTA 提到家人卡之前:家人複驗是分支動作,不該把主路徑推到第二屏 -->
+      <button class="btn p" onclick="nav.show('v5')">💊 去看解毒處方</button>
+      <div class="card">
+        <b style="font-size:13px">👨‍👩‍👧 你驗完了，那你媽呢？</b>
+        <div style="font-size:12px;font-weight:700;color:#3D3346;line-height:1.75;margin-top:5px">
+          她不會自己來驗——你幫她按一下就好。</div>
+        <div class="note" style="font-size:10px;color:#9A8A8A">需家人在載具 App 完成「家庭歸戶」授權；只比對公告名單，不顯示品項明細。</div>
+        <div id="famBox"><button class="btn l" onclick="family()">一鍵複驗：媽媽的發票（近 90 天）</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ v5 解毒站:地點卡 + 已開通商家直達 ═══ -->
+  <div id="v5" style="display:none">
+    <!-- 毒分身也放解毒站最上面(0728 三次修正):跟 v3 同一顆預覽,同一份 avState()。 -->
+    <button class="avPrev top" id="avPrev2" onclick="openAvatar()">
+      <span class="avatar sm" id="avPrevFace2">🤢</span>
+      <span class="avPrevTxt">
+        <b id="avPrevSay2">—</b>
+        <small id="avPrevMeta2">—</small>
+      </span>
+    </button>
+    <div class="card" style="text-align:center">
+      <div style="font-size:11px;font-weight:900;color:var(--gold)">目前綜合中毒</div>
+      <div class="score" id="sc2">—</div>
+      <div class="note" id="scNote">這個數字只有一種方法會降：去下面隨便一家，吃一餐，開發票</div>
+    </div>
+    <div class="card">
+      <b style="font-size:13px">📍 走路 10 分鐘內，有解藥（板橋府中）</b>
+      <div id="stations"></div>
+      <div class="note" id="stNote">點卡片看它憑什麼叫解藥。<br>
+        <span style="color:#9A8A8A">解毒站＝通過審核的健康商家，只做正面認證；名單與距離為示範。</span></div>
+    </div>
+    <!-- 消費鏈路的最後一哩(0728):人已經在店裡了,條碼要在這頁叫得出來。
+         沒有這顆,毒值就永遠降不下去——降毒的唯一條件是「開發票」。 -->
+    <button class="btn p" onclick="UK.carrier.open({from:'v5'})">📸 結帳了？叫出我的載具條碼</button>
+    <div class="note" style="text-align:center">給店員掃完，這餐的發票就會自己回到你的載具——下次複驗就看得到它。</div>
+    <button class="banner" id="subBn" onclick="subscribe(this)">
+      <b>🗓 開獎日 ＝ 全民複驗日</b><small>對完獎，順手複驗一次——看看 T 線有沒有變淺</small></button>
+  </div>
+
+  <!-- ═══ v6 毒分身:一頁一個焦點(大臉 + 一個主動作) ═══ -->
+  <div id="v6" style="display:none">
+    <div class="stage">
+      <span class="avatar" id="avWrap"><span id="avFace">🧑</span><span class="orbit" id="avOrbit">🧋</span></span>
+      <div class="say" id="avSay">—</div>
+      <div class="tint" id="avTint">—</div>
+      <div class="meter"><i id="avBar" style="width:0"></i></div>
+    </div>
+    <button class="btn p" onclick="UK.share.open(avatarCard)">🧑‍🎨 曬分身，看誰的比較毒</button>
+    <div class="sec"><button onclick="nav.show('v5')">💊 帶他去解毒</button></div>
+  </div>
+
+  <!-- ═══ v7 空狀態(transient:一次性頁,有引導也有出路) ═══ -->
+  <div id="v7" style="display:none">
+    <div class="hero" style="background:linear-gradient(160deg,#F4F6FA,#FBFCFE)">
+      <div class="big">🧾</div>
+      <h2>你的發票太乾淨了</h2>
+      <p>近 30 天只有 <b id="invN">0</b> 張——不夠算出你的毒</p>
+    </div>
+    <div class="card">
+      <b style="font-size:13px">怎麼讓發票自己跑進來</b>
+      <div style="font-size:12.5px;color:#5B4A4C;line-height:2;margin-top:6px">
+        1️⃣ 結帳時報你的手機條碼（載具）<br>2️⃣ 發票自動歸戶，不用拍不用存<br>3️⃣ 累積 5 張就能開驗</div>
+    </div>
+    <!-- 0728:原本這顆只跳一則 toast 叫人自己回載具首頁找,等於把人推出去。
+         改成直接把條碼蓋在這頁上——發票太少的人,最需要的就是「現在就開始存」。 -->
+    <button class="btn p" onclick="UK.carrier.open({from:'v7'})">📸 看我的載具條碼</button>
+    <div class="sec"><button onclick="demoFill()">（示範）灌入近 30 天發票再試一次</button></div>
+  </div>
+
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   解毒吧（detox）· 單元邏輯
+   共用層一律走 UK.*(unit-kit.js)。不改 unit-kit.js,不複製它的功能。
+   ══════════════════════════════════════════════════════════════ */
+var UK_SLUG = 'detox';      /* 給 UK.exitToHome 的 postMessage 帶身分,殼才知道是誰要回首頁 */
+var KEY = 'detox_state';
+var ST = UK.state.load(KEY);
+var guess = null, guessed = false;
+var score = null;
+var verified = {};          /* 解毒站核銷紀錄(防重複) */
+
+/* 五毒分級色(>70 紅 / 50-70 黃 / <50 綠);數字仍在,不違反 color-not-only */
+function tier(v){ return v > 70 ? 'hot' : (v >= 50 ? 'mid' : 'ok'); }
+
+/* 分身狀態:臉 + 動畫 + 靠杯台詞(四級,每級輪替) */
+var SAY = {
+  dead: ['「我先躺一下……你繼續喝沒關係」','「救護車不用叫了，叫外送就好」','「你贏了，我認輸」'],
+  sick: ['「再一杯我就登出」','「我臉綠成這樣你還笑？」','「你確定這叫吃飯？」'],
+  meh:  ['「還有氣，但不多了」','「勉強及格，別得意」','「今天先放過你」'],
+  fine: ['「難得，你今天像個人」','「保持住，我還想活久一點」']
+};
+function pick(arr, n){ return arr[n % arr.length]; }
+function avState(){
+  var s = (typeof score === 'number') ? score : UK.data.composite();
+  if (s >= 85) return { face:'😵', tint:'中毒重症', anim:'dying',  say:pick(SAY.dead, s), color:'#A50011', stamp:'中毒重症' };
+  if (s >= 70) return { face:'🤢', tint:'毒素偏高', anim:'dying',  say:pick(SAY.sick, s), color:'#C8551B', stamp:'毒素超標' };
+  if (s >= 50) return { face:'😐', tint:'普普通通', anim:'wheeze', say:pick(SAY.meh, s),  color:'#B8912F', stamp:'毒素累積' };
+  return          { face:'😄', tint:'挺健康的', anim:'fine',   say:pick(SAY.fine, s), color:'#177A4C', stamp:'尚屬健康' };
+}
+function topEmoji(){ var t = UK.data.topPoison(); return String(t.nm).split(' ')[0] || '🧋'; }
+
+/* v3 與 v5 最上面的毒分身小預覽:跟 v6 全頁共用同一份 avState(),
+   表情/文案不會三邊講不同的話——只是尺寸縮小、拿掉軌道配件。
+   兩顆(v3 的 avPrev / v5 的 avPrev2)一起更新,不管從哪個入口進來都是新的。 */
+function renderResultAvatar() {
+  var st = avState();
+  ['avPrevFace', 'avPrevFace2'].forEach(function (id) {
+    var f = document.getElementById(id); if (!f) return;
+    f.textContent = st.face;
+    f.classList.remove('dying', 'wheeze', 'fine'); f.classList.add(st.anim);
+  });
+  /* 靠杯標語當主文案:直接借 avState().say(v6 全頁也是這句,講同一句話) */
+  ['avPrevSay', 'avPrevSay2'].forEach(function (id) {
+    var b = document.getElementById(id); if (!b) return;
+    b.textContent = st.say;
+  });
+  ['avPrevMeta', 'avPrevMeta2'].forEach(function (id) {
+    var m = document.getElementById(id); if (!m) return;
+    m.textContent = st.tint + ' · ' + score + '/100 · 點開看你的分身 →';
+  });
+}
+
+/* ── NAV:v2 過場、v7 空狀態不入返回堆疊(kit 已處理好的坑) ── */
+var VIEWS = ['v0','v1','v2','v3','v4','v5','v6','v7'];
+var nav = UK.nav.create({
+  views: VIEWS,
+  transient: ['v2','v7'],
+  render: function (v) {
+    VIEWS.forEach(function (id) { document.getElementById(id).style.display = (id === v) ? '' : 'none'; });
+    window.scrollTo(0, 0);
+  },
+  /* onHome 只在單機直開時當備援;嵌在殼/App 裡時 kit 會自動 postMessage 回首頁 */
+  sheets: function () { return [function () { return UK.closeTopSheet(); }]; }
+});
+
+/* ── 標題列 = 回這支 app 的第一頁 ──
+   任何一頁(含開著浮層時)點標題都回得去,不用連按返回。
+   用 nav.reset:回到第一頁後再按返回 = 離開這支 app 回發票載具首頁,
+   不會再退回剛才那幾頁——這才是「第一頁」該有的語意。 */
+function toEntry() {
+  for (var i = 0; i < 4 && UK.closeTopSheet(); i++) {}   /* 浮層先收掉 */
+  if (nav.current() === 'v0') { window.scrollTo(0, 0); return; }
+  nav.reset('v0');
+  entryRender();
+  UK.track('dx_brand_home');
+}
+
+/* ── 入口:回訪態 + 空狀態門檻 ── */
+function entryRender() {
+  document.getElementById('windowNote').textContent =
+    UK.dmText('近 30 天 ' + UK.data.INV.d30.n + ' 張發票 · 只算你自己（示範數據）');
+  var box = document.getElementById('lastBox'), cta = document.getElementById('cta'),
+      re = document.getElementById('actRetest'), hero = document.getElementById('hero');
+  if (typeof ST.n === 'number') {
+    box.innerHTML = UK.state.lastBox({ label:'上次實測', n:ST.n, unit:'/100', at:ST.at, prev:ST.prev, onclick:'showResult()' });
+    cta.textContent = '看我的檢測結果'; cta.setAttribute('onclick', 'showResult()');
+    re.style.display = ''; hero.classList.add('mini');
+  } else {
+    box.innerHTML = ''; cta.textContent = '我敢驗'; cta.setAttribute('onclick', 'enter()');
+    re.style.display = 'none'; hero.classList.remove('mini');
+  }
+}
+function enter() {
+  if (UK.data.invCount() < UK.data.MIN_INV) {
+    document.getElementById('invN').textContent = UK.data.invCount();
+    nav.show('v7'); return;
+  }
+  resetGuess(); nav.show('v1'); UK.track('dx_start');
+}
+/* 同一批發票重驗只會得到同一個數字——說清楚,不騙人 */
+function retest() {
+  if (UK.data.invCount() < UK.data.MIN_INV) { enter(); return; }
+  UK.toast('你的發票這 30 天沒有新增，數字不會變——想看變化，去解毒站核銷一筆');
+  resetGuess(); nav.show('v1');
+}
+function demoFill() { UK.data.INV.d30.n = 47; UK.toast('（示範）已灌入 47 張發票'); resetGuess(); nav.show('v1'); }
+/* 次要入口:沒測過先擋(不進空頁) */
+function gate(v) {
+  if (UK.data.invCount() < UK.data.MIN_INV) { enter(); return; }
+  if (v === 'v5' && typeof ST.n !== 'number') { UK.toast('先驗一次，才知道要解什麼毒'); enter(); return; }
+  if (v === 'v4') { openSafe(); return; }
+  nav.show(v);
+}
+
+/* ── 猜測:必須拉過滑桿才解鎖 ── */
+function resetGuess() {
+  guessed = false; guess = null;
+  document.getElementById('gVal').textContent = '—';
+  document.getElementById('gSl').value = 40;
+  document.getElementById('gFace').textContent = '😏';
+  var b = document.getElementById('goBn'); b.disabled = true; b.textContent = '先拉一個數字';
+}
+function guessUpd(v) {
+  guess = +v; guessed = true;
+  document.getElementById('gVal').textContent = v;
+  document.getElementById('gFace').textContent = v < 25 ? '😇' : (v < 50 ? '😏' : (v < 75 ? '😬' : '🫠'));
+  var b = document.getElementById('goBn'); b.disabled = false; b.textContent = '我猜好了，開驗！';
+}
+function skipGuess() { guessed = false; guess = null; startTest(); }
+
+/* ── 顯影過場(可跳過;timer 會清掉,不會晚一步又跳) ── */
+var timers = [];
+function startTest() {
+  nav.show('v2');
+  document.getElementById('tLine').classList.remove('show');
+  document.getElementById('scanTxt').textContent = '吸入發票中…';
+  document.getElementById('scanNote').textContent =
+    UK.dmText('正在分析近 30 天 ' + UK.data.INV.d30.n + ' 張發票、' + UK.data.INV.d30.shops + ' 家商家（示範）');
+  timers = [];
+  timers.push(setTimeout(function () {
+    document.getElementById('scanTxt').textContent = '顯影中——兩條線見真章…';
+    document.getElementById('tLine').classList.add('show');
+  }, 900));
+  timers.push(setTimeout(finish, 2600));
+}
+function skipScan() { timers.forEach(clearTimeout); timers = []; finish(); }
+function finish() {
+  timers.forEach(clearTimeout); timers = [];
+  var next = UK.data.composite();
+  var prev = (typeof ST.n === 'number' && ST.n !== next) ? ST.n : ST.prev;
+  score = next;
+  ST = UK.state.save(KEY, { n:score, prev:prev, guess:guess, sub:ST.sub, fam:ST.fam });
+  verified = {};
+  renderStations();
+  entryRender(); showResult();
+  UK.track('dx_result', { score:score, guessed:guessed });
+}
+
+/* ── 結果頁 ── */
+function showResult() {
+  if (score === null && typeof ST.n === 'number') { score = ST.n; guess = ST.guess; }
+  document.getElementById('howN').textContent = score;
+  document.getElementById('sc2').textContent = score;
+
+  var t = document.getElementById('trend'), html = UK.state.trendHTML(score, ST.prev);
+  t.innerHTML = html; t.style.display = html ? '' : 'none';
+
+  renderRadar();
+  document.getElementById('srcNote').textContent =
+    UK.dmText('兇手三名：全糖手搖 ×12 · 鹽酥雞 ×5 · 超商甜點 ×7　（都是你自己刷的，發票有寫）');
+  renderResultAvatar();
+  nav.show('v3');
+}
+/* 雷達由 UK.data.POISON 渲染 + 算式印出來(分數要能被用戶自己推回去) */
+function renderRadar() {
+  /* 寬度就寫在 HTML 裡:第一次 paint 就是正確的,不依賴任何後續 JS。
+     data-w 保留給分享卡的配件判斷用(它會讀最大值)。 */
+  document.getElementById('radar').innerHTML = UK.data.POISON.map(function (p) {
+    var k = tier(p.v), w = Math.max(0, Math.min(100, p.v));
+    return '<div class="bar"><span class="nm">' + p.nm + '</span>'
+      + '<span class="tr"><i class="fl ' + k + '" data-w="' + p.v + '" style="width:' + w + '%"></i></span>'
+      + '<span class="v ' + k + '">' + p.v + '</span></div>';
+  }).join('');
+  var f = UK.data.formula();
+  document.getElementById('formula').innerHTML = f.text + '<br><span style="color:#9A8A8A">' + f.why + '</span>';
+}
+function toggleHow() {
+  var f = document.getElementById('formula'), b = document.getElementById('howBn');
+  var on = f.style.display === 'none';
+  f.style.display = on ? '' : 'none';
+  b.setAttribute('aria-expanded', on ? 'true' : 'false');
+  document.getElementById('caret').style.transform = on ? 'rotate(90deg)' : '';
+}
+
+/* ── 真食安比對:命中 / 全數未命中 兩態(?hit=0 演示未命中) ── */
+var SAFE_HIT = (function () {
+  try { return new URLSearchParams(location.search).get('hit') !== '0'; } catch (e) { return true; }
+})();
+function openSafe() { nav.show('v4'); runSafe(); }
+function runSafe() {
+  var res = document.getElementById('safeResult');
+  res.style.display = 'none';
+  document.getElementById('progBar').style.width = '0';
+  document.getElementById('progTxt').textContent = '掃描中：近 90 天 ' + UK.data.INV.d90.shops + ' 家消費商家…';
+  setTimeout(function () { document.getElementById('progBar').style.width = '100%'; }, 80);
+  setTimeout(function () {
+    document.getElementById('progTxt').textContent =
+      UK.dmText('完成：' + UK.data.INV.d90.shops + ' 家商家 · ' + UK.data.INV.d90.items + ' 個品項已比對（示範）');
+    var hit = document.getElementById('hitBox'), ok = document.getElementById('okLine');
+    if (SAFE_HIT) {
+      hit.style.display = '';
+      ok.textContent = '✓　' + (UK.data.INV.d90.shops - 1) + ' 家未命中現行公告名單';
+    } else {
+      hit.style.display = 'none';
+      ok.textContent = '✓　' + UK.data.INV.d90.shops + ' 家全數未命中現行公告名單——這 90 天你很安全';
+    }
+    res.style.display = '';
+    UK.track('dx_safe_done', { hit: SAFE_HIT });
+  }, 1700);
+}
+/* 官方連結:只轉載官方原文(口徑鐵律) */
+function official(k) {
+  var u = (k === 'news') ? 'https://www.fda.gov.tw/TC/newsList.aspx'
+                         : 'https://www.fda.gov.tw/TC/site.aspx?sid=9822';
+  UK.track('dx_official', { k:k });
+  window.open(u, '_blank');
+}
+function family() {
+  ST.fam = true; UK.state.save(KEY, ST);
+  document.getElementById('famBox').innerHTML =
+    '<div class="ok">✓　媽媽近 90 天 38 家商家，全數未命中公告名單</div>'
+    + '<button class="btn l" onclick="UK.share.open(guardCard)">📤 傳「家人守護卡」給媽媽</button>';
+  UK.toast('已完成家人複驗（載具歸戶授權 · 示範）');
+  UK.track('dx_family');
+}
+
+/* ── 解毒站:地點卡 + 已開通商家直達其點餐頁 ── */
+var STATIONS = [
+  { key:'nnw', shop:'nnw', emoji:'🥗', name:'暖暖窩義式廚房', cross:'✚ 認證解毒站',
+    meta:'原型食物 · 溫沙拉 · 400m · 步行 6 分',
+    why:'糖毒 82——這裡的溫沙拉是原型食物，不是沙拉醬泡菜', info:'📍 400m · 步行 6 分 · 認證解毒站' },
+  { key:'yuanwei', shop:'yuanwei', emoji:'🍱', name:'原味時代健康餐盒 府中店', cross:'✚',
+    meta:'低 GI · 舒肥 · 350m · 步行 5 分',
+    why:'低 GI 舒肥——你的血糖需要一天休假', info:'📍 350m · 步行 5 分 · 認證解毒站', q:'原味時代 板橋府中' },
+  { key:'guoyang', shop:'guoyang', emoji:'🥤', name:'果漾 Fresh 冷壓蔬果飲', cross:'✚',
+    meta:'無加糖 · 650m · 步行 9 分',
+    why:'手搖 ×12 之後，這裡的無加糖會讓你嘗到自己的味覺', info:'📍 650m · 步行 9 分 · 認證解毒站', q:'冷壓蔬果汁 板橋' }
+];
+/* 到店三步:bored 用一模一樣這句(0727 Melon「需設計清楚的溝通方式」)。
+   要改就兩支一起改,不要各寫各的。 */
+var GO_STEPS = '掃桌上的碼 → 直接點餐 → 結帳時報載具';
+function canOrder(s) { return UK.shops.url(s.shop) !== null; }
+
+/* 一份列渲染,只給 v5 全列用(0727 二次修正:mini 版已從 v3 移除,商家只在解毒站出現) */
+function stRow(s) {
+  return '<div class="st" data-poi="' + s.key + '" data-shop="' + s.shop + '">'
+    + '<span class="lg">' + s.emoji + '</span>'
+    + '<span class="in"><b>' + s.name + ' <span class="cross">' + s.cross + '</span></b>'
+    + '<small>' + s.meta + '</small>'
+    + (canOrder(s) ? '<span class="shoptag">📱 可線上點餐</span>' : '') + '</span>'
+    + '<button class="uk-vf' + (verified[s.key] ? ' done' : '') + '" onclick="verify(this,\'' + s.key + '\')">'
+    + (verified[s.key] ? '✅ 已排入' : '就衝這家') + '</button></div>';
+}
+function renderStations() {
+  document.getElementById('stations').innerHTML =
+    STATIONS.map(function (s) { return stRow(s); }).join('');
+  var n = document.getElementById('stNote');
+  if (n && STATIONS.some(canOrder)) {
+    n.innerHTML = '點卡片看它憑什麼叫解藥。標「📱 可線上點餐」的可以直接點：' + GO_STEPS + '<br>'
+      + '<span style="color:#9A8A8A">解毒站＝通過審核的健康商家，只做正面認證；名單與距離為示範。</span>';
+  }
+  renderResultAvatar();   /* v5 最上面那顆預覽,分數一變(核銷/重驗)就要跟著換 */
+}
+/* 地點卡字典:推薦理由綁回發票證據;可線上點餐的多帶一行到店三步 */
+var POI = {};
+STATIONS.forEach(function (s) {
+  POI[s.key] = { name:s.name, emoji:s.emoji, why:s.why, q:s.q,
+                 /* 三步放第一行:kit 會把「可線上點餐」標籤接在 info 尾巴,
+                    讓它接在位置那行才不會黏在三步後面 */
+                 info: (canOrder(s) ? GO_STEPS + '\n' : '') + s.info,
+                 partner:(s.shop === 'nnw'), addLabel:'就衝這家',
+                 onAdd: function (vf) { verify(vf, s.key); } };
+});
+/* 核銷:完成態 + 防重複 + 分數持久化 */
+function verify(btn, key) {
+  if (verified[key]) { UK.toast('這家已經在你的解毒清單裡了（示範）'); return; }
+  if (score === null) score = (typeof ST.n === 'number') ? ST.n : UK.data.composite();
+  verified[key] = true;
+  var old = score; score = Math.max(40, score - 7);
+  ST = UK.state.save(KEY, { n:score, prev:ST.prev, guess:guess, sub:ST.sub, fam:ST.fam });
+  if (btn) { btn.textContent = '✅ 已排入'; btn.classList.add('done'); }
+  document.getElementById('sc2').textContent = score;
+  document.getElementById('scNote').innerHTML =
+    '🎉 發票已核銷：綜合中毒 ' + old + ' → <b style="color:var(--teal)">' + score + '</b>，T 線變淺了（糖毒 −5 · 油毒 −2）';
+  UK.toast('核銷成功（示範）：「' + POI[key].name + '」 · 毒值 ' + old + ' → ' + score);
+  UK.track('dx_verify', { shop:key, score:score });
+  renderStations();     /* 解毒站列表的「已排入」狀態要跟著核銷結果更新 */
+  entryRender();
+}
+/* 開獎日訂閱:真狀態切換(不是死按鈕) */
+function subscribe(btn) {
+  var on = !ST.sub; ST.sub = on; UK.state.save(KEY, ST);
+  btn.innerHTML = on ? '<b>✅ 已訂閱 · 開獎日提醒</b><small>對完獎會提醒你順手複驗一次</small>'
+                     : '<b>🗓 開獎日 ＝ 全民複驗日</b><small>對完獎，順手複驗一次——看看 T 線有沒有變淺</small>';
+  UK.toast(on ? '已訂閱（示範）：開獎日會推一則提醒' : '已取消訂閱');
+  UK.track('dx_subscribe', { on:on });
+}
+
+/* ── 毒分身:一頁一個焦點;沒測過先擋(沒有數據不給結論) ── */
+function openAvatar() {
+  if (typeof ST.n !== 'number') { UK.toast('先驗一次，分身才生得出來'); enter(); return; }
+  if (score === null) score = ST.n;
+  renderAvatar(); nav.show('v6'); UK.track('dx_avatar');
+}
+function renderAvatar() {
+  var st = avState();
+  document.getElementById('avFace').textContent = st.face;
+  var w = document.getElementById('avWrap');
+  w.classList.remove('dying','wheeze','fine'); w.classList.add(st.anim);
+  document.getElementById('avSay').textContent = st.say;
+  var t = document.getElementById('avTint');
+  t.textContent = st.tint + '（毒值 ' + score + '）'; t.style.color = st.color;
+  document.getElementById('avBar').style.width = Math.max(6, Math.min(100, score)) + '%';
+  document.getElementById('avOrbit').textContent = topEmoji();
+}
+
+/* ── 分享卡:一張圖 + 圖內 QR(kit 負責畫) ── */
+function avatarCard() {
+  var st = avState();
+  return {
+    theme:'detox', emoji:st.face, acc:topEmoji(),
+    sub:'螞蟻人 × 酥脆星人', tint:st.tint, score:score, unitTxt:'/100 綜合毒值',
+    head:'🧪 解 毒 吧 ・ 檢 驗 報 告', punch:'你的發票，驗得出你的毒', stamp:st.stamp,
+    title:'我的毒分身', text:'我的毒分身已經' + st.tint + '（毒值 ' + score + '）\n敢驗你自己的嗎？',
+    qrHint:'掃碼，驗你自己的', url:location.origin + location.pathname
+  };
+}
+function guardCard() {
+  return {
+    theme:'detox', emoji:'👨‍👩‍👧', sub:'家人守護卡', tint:'我幫她驗過了',
+    score:0, unitTxt:' 筆命中公告名單',
+    head:'🛡 家 人 守 護 ・ 複 驗 報 告', punch:'她的發票，我幫她驗過了', stamp:'全數安全',
+    title:'家人守護卡', text:'媽，妳近 90 天的發票我幫妳驗過了，全數安全。',
+    qrHint:'也幫你家人驗一次', url:location.origin + location.pathname
+  };
+}
+
+/* ── init ── */
+UK.poi.bind(POI, '.st[data-poi]');
+if (typeof ST.n === 'number') score = ST.n;
+renderStations();
+if (ST.sub) {
+  document.getElementById('subBn').innerHTML =
+    '<b>✅ 已訂閱 · 開獎日提醒</b><small>對完獎會提醒你順手複驗一次</small>';
+}
+entryRender();
+nav.reset('v0');
+UK.applyDemoMode(document.body);
+UK.homeHint();          /* 單機直開時顯示「從發票載具首頁進入」的正規路徑 */
+UK.track('dx_view');
+/* 開發時 console 打 UK.selfCheck() 做機械自檢 */
+</script>
+</body>
+</html>

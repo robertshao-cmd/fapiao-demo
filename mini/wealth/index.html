@@ -1,0 +1,527 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#E4001A">
+<title>幾歲破產|發票載具</title>
+<!-- vendored / 共用層:不改。unit-kit 這裡只用到 UK.selfCheck()(唯讀機械自檢),
+     nav/state/share 依 0726 決策維持本單元手寫版本。 -->
+<script src="qrcode.min.js"></script>
+<script src="unit-kit.js"></script>
+<script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
+<style>
+  :root{--ink:#1F2430;--red:#E4001A;--red-deep:#A50011;--gold:#FFD34D;--teal:#0E7C7B;--mut:#7A8494;--bg:#FFF6F5;--line:#F0E0E1}
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{font-size:16px}
+  body{font-family:-apple-system,"PingFang TC","Noto Sans TC",sans-serif;background:var(--bg);color:var(--ink);min-height:100dvh}
+  button{font-family:inherit;border:none;background:none;cursor:pointer;color:inherit}
+  /* 三欄 grid、左右欄等寬(1fr),標題才會真的落在列的正中央。
+     bored 用的 .ttl{flex:1} 是在「剩餘空間」置中——右邊有徽章+⋯ 比左邊寬,會偏 28px。 */
+  .top{position:sticky;top:0;z-index:9;background:var(--red);color:#fff;padding:calc(10px + env(safe-area-inset-top,0)) 8px 10px;
+       display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:4px}
+  .top .ttl{grid-column:2;justify-self:center;font-size:16px;font-weight:800;color:#fff;white-space:nowrap;min-height:44px;padding:0 6px}
+  .top .tbtn:first-child{grid-column:1;justify-self:start}
+  .top-r{grid-column:3;justify-self:end;display:flex;align-items:center;gap:4px;min-width:0}
+  /* 徽章縮短成「官方自營」(對齊 bored):原本「官方自營 · 提案示範」太寬,會把標題往左推 */
+  .top .off{font-size:9px;background:rgba(255,211,77,.2);color:var(--gold);border:1px solid rgba(255,211,77,.5);padding:2px 7px;border-radius:99px;white-space:nowrap}
+  .wrap{max-width:430px;margin:0 auto;padding:16px 16px calc(28px + env(safe-area-inset-bottom,0))}
+  .hero{text-align:center;padding:22px 6px 8px}
+  .hero .big{font-size:56px;line-height:1}
+  .hero h1{font-size:23px;line-height:1.5;margin-top:10px}
+  .hero h1 em{font-style:normal;color:var(--red)}
+  .hero p{font-size:12.5px;color:var(--mut);margin-top:8px;line-height:1.8}
+  .btn{display:block;width:100%;padding:14px;border-radius:13px;font-size:16px;font-weight:800;text-align:center;margin-top:10px}
+  .btn.p{background:var(--red);color:#fff;box-shadow:0 4px 14px rgba(228,0,26,.3)}
+  .btn.p:disabled{opacity:.42;box-shadow:none;cursor:default}
+  .btn.t{background:var(--teal);color:#fff}
+  .btn.g{background:linear-gradient(135deg,#B8912F,#8A6210);color:#fff}
+  .btn.l{background:#fff;border:1.5px solid #E3CFCf;color:#5A4548;font-size:13.5px;font-weight:700}
+  .note{font-size:11px;color:var(--mut);line-height:1.7;margin-top:10px;text-align:center}
+  .card{background:#fff;border-radius:16px;padding:14px;margin-top:12px;box-shadow:0 2px 10px rgba(31,36,48,.06)}
+  .q{font-size:13.5px;font-weight:800;color:#5A0E14;margin:10px 0 8px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{font-size:13.5px;background:#fff;border:1.5px solid #E8D5D6;border-radius:99px;padding:10px 14px;color:#5A4548;font-weight:700;min-height:44px}
+  .chip.on{border-color:var(--red);color:var(--red);background:#FDEDED}
+  .age{display:flex;align-items:baseline;justify-content:center;gap:8px;margin:6px 0}
+  .age b{font-size:48px;color:var(--red)}
+  .age span{font-size:13px;color:var(--mut)}
+  .leak{display:flex;justify-content:space-between;font-size:13.5px;padding:9px 0;border-bottom:1px dashed var(--line)}
+  .leak b{color:var(--red)}
+  .leak .nm{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .tag{font-size:10px;font-weight:800;color:var(--red-deep);background:#FDEDED;border:1px solid #F3C9CB;border-radius:99px;padding:2px 7px;white-space:nowrap}
+  .two{display:flex;gap:10px;margin-top:12px}
+  .two .btn{margin-top:0;font-size:14px;padding:12px 10px}
+  .two .btn small{display:block;font-weight:600;font-size:10.5px;opacity:.88;margin-top:3px}
+  .btn small{display:block;font-weight:600;font-size:10.5px;opacity:.85;margin-top:3px}
+  .save{display:flex;justify-content:space-between;align-items:center;gap:8px;background:#fff;border:1px solid #E8D5D6;border-radius:12px;padding:10px 12px;margin-top:8px;font-size:13px}
+  .save button{background:var(--teal);color:#fff;border-radius:9px;padding:9px 12px;font-size:12.5px;font-weight:800;min-height:44px;white-space:nowrap}
+  .save button.done{background:#C9D2CE}
+  .scan{text-align:center;padding:40px 0;font-size:13.5px;font-weight:800;color:#8A5A5E}
+  .toast{position:fixed;left:50%;bottom:calc(30px + env(safe-area-inset-bottom,0));transform:translateX(-50%) translateY(20px);background:#1F2430;color:#fff;font-size:13px;padding:10px 18px;border-radius:99px;opacity:0;transition:.25s;pointer-events:none;max-width:88vw;z-index:99}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .top .tbtn{font-size:21px;font-weight:900;color:#fff;min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center}
+  .lastbox{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1.5px solid var(--line);border-radius:13px;padding:11px 13px;margin-top:12px}
+  .lastbox small{display:block;font-size:10.5px;color:var(--mut);font-weight:700}
+  .lastbox b{font-size:26px;color:var(--red);line-height:1.2}
+  .lastbox b span{font-size:12px;color:var(--mut)}
+  .lastgo{font-size:12.5px;font-weight:800;color:var(--red-deep);background:#FDEDED;border-radius:99px;padding:10px 13px;min-height:44px}
+  /* 起算年齡:攤開來、可自由填寫(0727 Melon:不用區間,部分使用者對區間敏感) */
+  .basis{font-size:11px;color:var(--mut);margin-top:8px;text-align:center;line-height:1.9}
+  .basis b{color:#5A4548}
+  .a0{display:flex;gap:6px;align-items:center;justify-content:center;margin-top:6px}
+  .a0-in{width:82px;min-height:44px;padding:9px 10px;font-family:inherit;font-size:17px;font-weight:800;
+         text-align:center;color:var(--ink);background:#fff;border:1.5px solid #E8D5D6;border-radius:11px}
+  .a0-in:focus{outline:none;border-color:var(--red)}
+  .a0-in.bad{border-color:var(--red);background:#FDEDED}
+  .a0-unit{font-size:13px;font-weight:800;color:var(--mut)}
+  .a0-err{font-size:11px;font-weight:700;color:var(--red);text-align:center;margin-top:6px;line-height:1.6}
+  /* .acts / .act:與 detox 同一套卡片鈕元件(逐字沿用,不另立樣式) */
+  .acts{display:flex;gap:8px;margin-top:12px}
+  .act{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+       background:#fff;border:2.5px solid var(--ink);border-radius:13px;box-shadow:3px 3px 0 var(--ink);
+       padding:10px 4px;min-height:58px;font-size:11px;font-weight:900;color:#4A3B3D;letter-spacing:.3px;
+       transition:transform .1s,box-shadow .1s}
+  .act .ic{font-size:19px;line-height:1}
+  .act:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--ink)}
+  @media (max-width:360px){.act{font-size:10px;padding:9px 2px}.act .ic{font-size:17px}}
+  .sec{display:flex;align-items:center;justify-content:center;margin-top:10px}
+  .sec button{font-size:12.5px;font-weight:800;color:#8A5A5E;text-decoration:underline;text-underline-offset:3px;padding:12px 8px;min-height:44px}
+  .allin{background:#EAF5F1;border:1.5px solid #B9DACD;border-radius:12px;padding:11px 13px;margin-top:10px;font-size:12.5px;font-weight:800;color:#0B5D5C;text-align:center;line-height:1.7}
+  .hint{font-size:10.5px;color:var(--mut);font-weight:600;line-height:1.6;margin-top:2px}
+  /* 分享浮層的樣式由 kit 的 .uk-* 提供(0727 改走 UK.share),這裡只留 ⋯ 選單自己的 */
+  #mnMask{position:fixed;inset:0;background:rgba(15,20,30,.5);display:none;align-items:flex-end;z-index:99}
+  #mnMask.on{display:flex}
+  .mn-sheet{width:100%;max-width:430px;margin:0 auto;background:#fff;border-radius:20px 20px 0 0;padding:14px 14px calc(16px + env(safe-area-inset-bottom,0));max-height:88%;overflow-y:auto}
+  .mn-item{display:block;width:100%;padding:14px;font-size:15px;font-weight:800;color:var(--ink);border-radius:12px;min-height:48px;text-align:center}
+  .mn-cancel{color:var(--mut);font-weight:700}
+  .mn-link{display:block;width:100%;min-height:44px;padding:11px 12px;font-family:inherit;font-size:13px;font-weight:700;color:#33404F;text-align:center;background:#F5F6F8;border:1.5px solid #D8DEE6;border-radius:12px;-webkit-user-select:all;user-select:all}
+  /* .act 第三行(purpose)字要比 App 名小一階 */
+  .act span:not(.ic){font-size:9.5px;line-height:1.3}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<!-- 頂部列:‹ 和 標題/icon 都是「回第一頁」,沒有例外。
+     離開單元(回發票載具首頁)移到 ⋯ 選單,不佔用這條列——
+     否則在第一頁按 ‹ 會把整個單元收掉,那不叫返回。 -->
+<div class="top"><button class="tbtn" onclick="goTop()" aria-label="回第一頁">‹</button><button class="ttl" onclick="goTop()" aria-label="回第一頁">💸 幾歲破產</button><span class="top-r"><span class="off">官方自營</span><button class="tbtn" onclick="menuOpen()" aria-label="更多選項">⋯</button></span></div>
+<div class="wrap">
+
+  <div id="v0">
+    <div class="hero"><div class="big">⏳</div>
+      <h1>照這個月的花法,<br>你的錢撐到 <em>幾歲</em>?</h1>
+      <p>你的發票已經算好了,只是你不敢看</p></div>
+    <div id="lastBox" style="display:none"></div>
+    <button class="btn p" id="cta" onclick="enter()">我敢看</button>
+    <div class="note">情境試算、非財務預測(示範數據)</div>
+  </div>
+
+  <!-- 三題都真的驅動結果:Q1 進歲數基準、Q2 調整、Q3 同時調整歲數並重排漏財點與處方順序 -->
+  <div id="v1" style="display:none">
+    <div class="card">
+      <div class="q">Q1 · 你的月收入大概落在?</div>
+      <div class="chips" data-q="income">
+        <button class="chip" data-action="pick" data-age="41">3–5 萬</button>
+        <button class="chip" data-action="pick" data-age="45">5–8 萬</button>
+        <button class="chip" data-action="pick" data-age="52">8 萬以上</button>
+        <button class="chip" data-action="pick" data-age="43">不方便說</button></div>
+      <div class="q">Q2 · 有存錢目標嗎?</div>
+      <div class="chips" data-q="goal">
+        <button class="chip" data-action="pick" data-d="4">有,存頭期款</button><button class="chip" data-action="pick" data-d="0">隨緣存</button><button class="chip" data-action="pick" data-d="-5">月光,別問</button></div>
+      <div class="q">Q3 · 最想砍哪類花費?</div>
+      <div class="chips" data-q="cut">
+        <button class="chip" data-action="pick" data-d="2" data-k="drink">手搖/咖啡</button><button class="chip" data-action="pick" data-d="2" data-k="deliv">外送</button><button class="chip" data-action="pick" data-d="1" data-k="sub">訂閱</button><button class="chip" data-action="pick" data-d="-3">都不想砍</button></div>
+      <div class="hint" style="margin-top:10px">再點一次可以取消。Q1 沒選不會幫你猜——「不方便說」也是一個答案。</div>
+    </div>
+    <button class="btn p" id="goScan" onclick="scan()" disabled>先選收入級距</button>
+  </div>
+
+  <div id="v2" style="display:none">
+    <div class="card scan" id="scanTxt">吸入近 90 天發票…</div>
+    <div class="sec"><button onclick="skipScan()">跳過動畫 ›</button></div>
+  </div>
+
+  <div id="v3" style="display:none">
+    <div class="card" style="text-align:center">
+      <div style="font-size:11px;font-weight:800;color:#B8912F">情境試算 · 非財務預測(示範)</div>
+      <div class="age"><b id="ageN">43</b><span>歲那年,存款歸零</span></div>
+      <div style="font-size:12px;color:var(--mut)" id="yrsLine"></div>
+      <div class="basis">以 <b id="a0N">26</b> 歲起算,不是的話改這裡:</div>
+      <div class="a0">
+        <input id="a0In" class="a0-in" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="26"
+               autocomplete="off" aria-label="你現在幾歲(12 到 99)" oninput="a0Input()">
+        <span class="a0-unit">歲</span></div>
+      <div class="a0-err" id="a0Err" style="display:none"></div>
+    </div>
+    <div class="card"><b style="font-size:13.5px;color:#5A0E14">💧 三大漏財點(來自發票)</b>
+      <div id="leaks"></div></div>
+    <!-- 0727:結果頁只留一條主路(省錢處方)。原本並列的「讓錢長大」已移除。 -->
+    <button class="btn t" onclick="show('v4');rxRender();track('wc_path_save')">把漏洞堵起來<small>看能往後拖幾年</small></button>
+    <!-- 次要出口:放在兩條主路之下,不跟結果數字與主 CTA 搶第一屏 -->
+    <div class="acts">
+      <button class="act" onclick="goApp('chips')"><span class="ic">📊</span>籌碼K線</button>
+      <button class="act" onclick="share()"><span class="ic">💸</span>曬倒數</button>
+    </div>
+  </div>
+
+  <!-- 0727:拿掉「啟用」三顆假開關(按了不會真的發生任何事)。
+       這頁改成「看得懂的處方 + 直達 CMoney 理財 App」,不再有站內假試算。 -->
+  <div id="v4" style="display:none">
+    <div class="card"><b style="font-size:13.5px;color:var(--teal)">省錢處方</b>
+      <div id="rx"></div>
+      <div class="allin" id="allin"></div></div>
+    <div class="card"><b style="font-size:13.5px;color:#5A0E14">省下來的錢,自己不會長大</b>
+      <div class="acts" id="apps"></div></div>
+    <!-- 法遵:兩段併一句,鐵律要求的字眼一個都沒少 -->
+    <div class="note">情境試算、非財務預測;非投資建議,實際報酬隨市場變動。</div>
+    <button class="btn l" onclick="goBack()">← 返回</button>
+  </div>
+
+  <!-- v5「讓錢長大」已移除(0727):站內 10 年試算與「留位」都改成直達 CMoney App。
+       兩個入口都拿掉了,留著就是不可達頁面。 -->
+
+  <div id="v6" style="display:none">
+    <div class="hero"><div class="big">🧾</div>
+      <h1>沒有發票,<br>算不出你什麼時候破產</h1>
+      <p>近 90 天只有 <b id="invN">0</b> 張&mdash;&mdash;好消息是你可能還沒開始花</p></div>
+    <div class="card"><b style="font-size:13.5px;color:#5A0E14">怎麼讓發票自己跑進來</b>
+      <div style="font-size:12.5px;color:#3A4560;line-height:2;margin-top:6px">1️⃣ 結帳報手機條碼(載具)<br>2️⃣ 自動歸戶,不用拍不用存<br>3️⃣ 5 張就能開算</div></div>
+    <button class="btn p" onclick="goHome()">看我的載具條碼</button>
+    <div class="sec"><button onclick="demoFill()">(示範)灌入近 90 天發票再試一次</button></div>
+  </div>
+
+  <!-- 分享面板由 UK.share 自己建(0727 起共用 kit 版式),這裡不再自備 -->
+
+  <!-- ⋯ 極簡選單:分享入口只做「複製連結」,不做多社群選單 -->
+  <div id="mnMask"><div class="mn-sheet">
+    <button class="mn-item" onclick="copyLink()">🔗 複製連結</button>
+    <!-- 離開單元的入口:從頂部列搬到這裡,頂部列只負責回第一頁 -->
+    <button class="mn-item" onclick="menuClose();goHome()">🏠 回發票載具首頁</button>
+    <!-- 自動複製被容器擋下時的出路:連結直接攤出來給你選,不用 prompt(容器會吃掉) -->
+    <div id="mnFallback" style="display:none">
+      <div class="note" style="margin-top:2px">瀏覽器擋掉自動複製了&mdash;&mdash;長按下面這行複製</div>
+      <input id="mnLink" class="mn-link" readonly onclick="this.select()">
+    </div>
+    <button class="mn-item mn-cancel" onclick="menuClose()">取消</button>
+  </div></div>
+
+</div>
+<div class="toast" id="tst"></div>
+<script>
+/* 幾歲破產 standalone(小樹中台單元)— v3 移植 pass 0726
+   production 判準:沒有死路 / 沒有死按鈕 / 有空狀態 / 狀態記得住 / 返回可預期 / 數字對得起來
+   中台整合點:session/invoices/features/track 見註解。
+   法遵:全程「情境試算、非財務預測」;投資段落「示範情境、非投資建議」;不提供個人化投資建議。 */
+
+/* 漏財點是單一資料源:結果頁的漏財點、省錢處方、讓錢長大的金額全部從這裡長出來,
+   所以三者的數字一定對得起來(舊版是三處各寫死一組)。
+   正式版:leak 由中台 /features/summary 的支出分項回填,save 由處方規則算。 */
+var LEAKS=[
+  {k:'drink', ic:'🧋', nm:'手搖+咖啡',    leak:2840, save:1420, rx:'第 3 杯的時候攔你', why:'沒叫你戒,只算少喝一半'},
+  {k:'deliv', ic:'🛵', nm:'外送費+服務費', leak:1920, save:960,  rx:'改自取,省的是運費', why:'飯錢照付,運費不用'},
+  {k:'sub',   ic:'📺', nm:'沒在看的訂閱',  leak:647,  save:647,  rx:'30 天沒開的列給你', why:'退了就整筆不再扣'}
+];
+var UK_SLUG = 'wealth';                  /* 給 UK.exitToHome 的 postMessage 帶身分,殼才知道是誰要回首頁 */
+/* 起算年齡。0727 Melon 定調:改「自由填寫」,不用區間——部分使用者對區間敏感。
+   ⚠️ 排序待對齊:7/24 的說法是改區間、7/27 的說法是自由填寫,已排回問 Melon。
+      要換回區間版,只改這一處:把 A0_BANDS 打開、v3 的 <input> 換回 chip 迴圈。
+   var A0_BANDS=[{label:'20+',v:25},{label:'30+',v:35},{label:'40+',v:45},{label:'50+',v:55}];
+   (同一個區間敏感度風險也在 Q1「月收入」的 3-5萬/5-8萬/8萬以上,這版先不動,等回覆一起處理) */
+var A0_DEFAULT=26, A0_MIN=12, A0_MAX=99;  /* 沒填就用 A0_DEFAULT,並且畫面明寫,不幫使用者猜 */
+var age=43, ANS={income:null, goal:0, cut:0, cutK:null};
+var MIN_INV=5;
+/* ?inv=abc → 0;?inv=-5 → 0(負數不該印在畫面上) */
+var INV=(function(){ try{ var q=new URLSearchParams(location.search).get('inv'); return q===null?47:Math.max(0,+q||0); }catch(e){ return 47; } })();
+var ST=(function(){ try{ return JSON.parse(localStorage.getItem('wc_state')||'{}')||{}; }catch(e){ return {}; } })();
+delete ST.on; delete ST.inv;   /* 0727 移除「啟用」與「投資留位」機制;清掉舊使用者殘留的欄位 */
+function save(){ try{ ST.at=Date.now(); localStorage.setItem('wc_state', JSON.stringify(ST)); }catch(e){} }
+function ago(t){ if(!t) return ''; var d=Math.floor((Date.now()-t)/86400000);
+  return d<=0?'今天':(d===1?'昨天':(d<30?d+' 天前':'很久以前')); }
+function track(ev,extra){ try{ console.log('[track]', ev, extra||{}); /* TODO: POST platform-api /track */ }catch(e){} }
+function toast(m){ var t=document.getElementById('tst'); t.textContent=m; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(function(){t.classList.remove('show');},2400); }
+function nt(n){ return '$'+n.toLocaleString(); }
+function reduceMotion(){ try{ return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){ return false; } }
+function age0(){ return ST.age0||A0_DEFAULT; }
+/* 情境數字:三項都堵起來每月可省多少。不再累計使用者的「啟用」操作(那機制已移除) */
+function planTotal(){ var s=0; LEAKS.forEach(function(L){ s+=L.save; }); return s; }
+/* Q3 選的那一項排到最前面:Q3 不只調歲數,也真的改變畫面。
+   排序與標籤一律走 cutKey() 這一個來源——兩邊各自判斷過,
+   會出現「排第一卻沒標籤」的鬼狀態。 */
+function cutKey(){ return (ST.ans && ST.ans.cutK) || null; }
+function ordered(){ var k=cutKey(); if(!k) return LEAKS.slice();
+  return LEAKS.slice().sort(function(a,b){ return (b.k===k)-(a.k===k); }); }
+
+/* ── 返回堆疊:過場(v2)與一次性頁(v6)不入堆疊,且站在其上按返回不誤刪 ── */
+var VIEWS=['v0','v1','v2','v3','v4','v6'], STACK=[], CUR=null;   /* v5 讓錢長大已移除 */
+function _show(id){ VIEWS.forEach(function(v){ var e=document.getElementById(v); if(e) e.style.display=(v===id)?'':'none'; }); window.scrollTo(0,0); }
+function show(id){
+  CUR=id;
+  if(id!=='v2' && id!=='v6'){ if(STACK[STACK.length-1]!==id){ STACK.push(id); try{ history.pushState({v:1},''); }catch(e){} } }
+  _show(id);
+}
+/* 過場計時器只要還活著,1.8 秒後就會 skipScan() 把人拽到結果頁——
+   任何「離開 v2」的動作都必須先殺掉它,否則使用者按了返回還是會被抓回去。 */
+function killScan(){ if(_t){ clearInterval(_t); _t=null; } }
+/* 浮層一律關掉;回傳有沒有真的關掉東西。
+   分享卡是 kit 建的浮層,要用 UK.share.close()(它自己回傳有沒有關到) */
+function closeSheets(){
+  var mn=document.getElementById('mnMask'), hit=false;
+  if(mn.classList.contains('on')){ menuClose(); hit=true; }
+  if(UK.share.close()) hit=true;
+  return hit;
+}
+function goBack(){
+  killScan();
+  if(closeSheets()) return;                 /* 系統返回:浮層開著就只關浮層(逐層退的語意) */
+  var top=STACK[STACK.length-1];
+  if(CUR!==top){ if(top){ CUR=top; _show(top); } else { CUR='v0'; _show('v0'); } return; }
+  STACK.pop(); var prev=STACK[STACK.length-1];
+  /* 見底 = 離開單元回載具首頁(對齊 UK.nav 的行為);留在 v0 的話在殼裡就出不去了 */
+  if(!prev){ STACK=['v0']; CUR='v0'; _show('v0'); goHome(); }
+  else { CUR=prev; _show(prev); }
+}
+window.addEventListener('popstate', goBack);
+/* 頂部 ‹ = 一鍵回第一頁(不是逐層退)。硬體/瀏覽器返回仍走 goBack() 逐層退,
+   兩者刻意不同:‹ 是「帶我出去」,系統返回是「上一步」。
+   浮層開著時一律先關浮層;已經在第一頁就交還載具容器,不留死按鈕。 */
+/* 一按就回第一頁,零例外。
+   不做「已經在 v0 就離開單元」那種聰明事——使用者按的是返回,不是關掉 app。
+   在 v0 按也有真行為:關浮層 + 捲回頂部(_show 會 scrollTo)。
+   要離開單元請走 ⋯ 選單的「回發票載具首頁」,或系統返回退到底。 */
+function goTop(){
+  killScan();                    /* 不殺掉的話,在過場按 ‹ 會先回 v0、1.8 秒後又被拽回結果頁 */
+  closeSheets();                 /* 關浮層後「不」return:‹ 是一按到位,不是分兩段 */
+  STACK=['v0']; CUR='v0'; _show('v0'); track('wc_top');
+}
+/* 單元邊界:堆疊見底 → 真的送他回載具首頁。
+   不傳 fallback:嵌在殼/App 裡 kit 會 postMessage 關 webview,單機直開會導回載具首頁。
+   這裡本來寫成 toast,在殼裡就是死路——kit 0726 的註解正好點名這個坑。
+   (本單元走手寫 nav,拿不到 UK.nav 的自動保證,所以要手動接上。) */
+function goHome(){
+  track('wc_home');
+  /* 不吃裸的 UK.exitToHome():kit 的 UK.HOME 寫死 localhost:5180,
+     手機直開這個單元時會跳到「手機自己的」localhost → 拒絕連線。
+     嵌在殼/App 裡時 exitToHome 會先走 postMessage,這個 fallback 只有單機直開才用得到。
+     ⚠️ kit 那處寫死屬共用層,不歸本單元改——已回報 _kit owner(見 _kit/LANES.md)。
+        對方修好後,這裡可以改回單純的 UK.exitToHome()。 */
+  UK.exitToHome(function(){ location.href = location.protocol + '//' + location.hostname + ':5180/'; });
+}
+
+/* ── 入口:回訪態 + 空狀態門檻 ── */
+function entryRender(){
+  var box=document.getElementById('lastBox'), cta=document.getElementById('cta');
+  if(typeof ST.age==='number'){
+    box.style.display='';
+    box.innerHTML='<div class="lastbox"><div><small>上次倒數 · '+ago(ST.at)+'</small><b>'+ST.age+'<span> 歲歸零</span></b></div>'
+      +'<button class="lastgo" onclick="showResult()">看上次結果 ›</button></div>';
+    cta.textContent='再算一次';
+    age=ST.age;
+  } else { box.style.display='none'; cta.textContent='我敢看'; }
+}
+function enter(){
+  if(INV<MIN_INV){ document.getElementById('invN').textContent=INV; CUR='v6'; _show('v6'); return; }
+  resetAns(); show('v1'); track('wc_interview_start');
+}
+function demoFill(){ INV=47; toast('(示範)已灌入近 90 天發票'); resetAns(); show('v1'); }
+
+/* ── 三題:再點一次可取消並回中性值;Q1 沒選不放行(落差不靠預設值製造) ── */
+function resetAns(){
+  ANS={income:null, goal:0, cut:0, cutK:null};
+  document.querySelectorAll('#v1 .chip').forEach(function(c){ c.classList.remove('on'); });
+  gate();
+}
+function gate(){
+  var b=document.getElementById('goScan'), ok=(typeof ANS.income==='number');
+  b.disabled=!ok; b.textContent=ok?'好了,驗我的發票':'先選收入級距';
+}
+document.querySelectorAll('#v1 .chips').forEach(function(g){
+  g.addEventListener('click', function(e){
+    var b=e.target.closest('.chip'); if(!b) return;
+    var q=g.getAttribute('data-q'), off=b.classList.contains('on');
+    g.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('on'); });
+    if(off){                                     /* 再點一次 = 取消,回中性值 */
+      if(q==='income') ANS.income=null; else { ANS[q]=0; if(q==='cut') ANS.cutK=null; }
+    } else {
+      b.classList.add('on');
+      if(q==='income') ANS.income=parseInt(b.dataset.age,10);
+      else { ANS[q]=parseInt(b.dataset.d,10)||0; if(q==='cut') ANS.cutK=b.dataset.k||null; }
+    }
+    gate(); track('wc_pick',{q:q, cleared:off});
+  });
+});
+
+/* ── 掃描過場:可跳過,timer 會清掉不會晚一步又跳 ── */
+var _t=null;
+function scan(){
+  if(typeof ANS.income!=='number') return;       /* 保險:門檻已擋,這裡不給預設值 */
+  age=Math.max(28, ANS.income + (ANS.goal||0) + (ANS.cut||0));
+  track('wc_scan',{age:age});
+  /* 過場只是表演。設定減少動態的人不該被這 2.5 秒綁著:直接給結果。
+     (CSS 的 prefers-reduced-motion 只擋得掉 transition/animation,擋不掉 JS 計時器) */
+  if(reduceMotion()){ skipScan(); return; }
+  show('v2');
+  var t=['吸入近 90 天發票…','計算收支缺口…','定位漏財點…','推演破產倒數…'], i=0, el=document.getElementById('scanTxt');
+  el.textContent=t[0];
+  _t=setInterval(function(){ i++; if(i<t.length){ el.textContent=t[i]; } else { skipScan(); } }, 620);
+}
+function skipScan(){
+  if(_t){ clearInterval(_t); _t=null; }
+  ST.age=age; ST.ans={income:ANS.income, goal:ANS.goal, cut:ANS.cut, cutK:ANS.cutK};
+  if(typeof ST.age0!=='number') ST.age0=A0_DEFAULT;
+  save(); entryRender(); showResult(); track('wc_result',{age:age});
+}
+
+/* ── 結果頁 ── */
+/* 只重畫「跟起算年齡有關」的部分。輸入框每敲一鍵都會走這裡,
+   所以不能呼叫 show()——那會 scrollTo(0,0),打字時畫面會一直跳。 */
+function renderAge(){
+  document.getElementById('a0N').textContent=age0();
+  var yrs=age-age0(), line=document.getElementById('yrsLine');
+  if(yrs>0){
+    line.innerHTML='距離現在約 <b style="color:var(--red)">'+yrs+'</b> 年,還來得及';
+  } else {
+    /* 邊界:起算年齡已經追過破產歲數,不能再印一個假的「距今 N 年」 */
+    line.innerHTML='<b style="color:var(--red)">缺口已經發生</b>,撐不到你現在的年紀';
+  }
+}
+/* 自由填寫:即時重算,不用按確認。
+   超出 12–99 或非數字 → 不接受、也不靜默改值(不 clamp),保留上一個有效值並說明。
+   清空 → 回到預設起算年齡,畫面照樣寫明「以 26 歲起算」。 */
+function a0Input(){
+  var el=document.getElementById('a0In'), err=document.getElementById('a0Err'), raw=el.value.trim();
+  if(raw===''){ ST.age0=A0_DEFAULT; save(); err.style.display='none'; el.classList.remove('bad'); renderAge(); return; }
+  var n=/^\d+$/.test(raw)?parseInt(raw,10):NaN;
+  if(isNaN(n)||n<A0_MIN||n>A0_MAX){
+    err.textContent='請填 '+A0_MIN+'–'+A0_MAX+' 之間的年齡;先照 '+age0()+' 歲算給你看';
+    err.style.display=''; el.classList.add('bad');
+    return;                                   /* 不接受就是不接受:不改 ST、不動已算好的結果 */
+  }
+  err.style.display='none'; el.classList.remove('bad');
+  ST.age0=n; save(); renderAge(); track('wc_age0',{a0:n});
+}
+function showResult(){
+  if(typeof ST.age==='number') age=ST.age;
+  document.getElementById('ageN').textContent=age;
+  renderAge();
+  /* 回訪時把使用者自己填過的年齡帶回來;沒填過就留空,讓 placeholder 顯示預設值 */
+  var el=document.getElementById('a0In');
+  el.value=(typeof ST.age0==='number'&&ST.age0!==A0_DEFAULT)?String(ST.age0):'';
+  el.classList.remove('bad'); document.getElementById('a0Err').style.display='none';
+  var k=cutKey();
+  document.getElementById('leaks').innerHTML=ordered().map(function(L){
+    return '<div class="leak"><span class="nm">'+L.ic+' '+L.nm+(L.k===k?' <span class="tag">你說想砍這個</span>':'')+'</span>'
+      +'<span>月漏 <b>'+nt(L.leak)+'</b></span></div>';
+  }).join('');
+  show('v3');
+}
+/* ── 省錢處方:唯讀 ──
+   0727:拿掉「啟用／已啟用」三顆開關。那是假的——按了不會真的設定任何東西,
+   而本單元的判準就寫著「做不到的功能就移除,不要留 toast 假裝」。
+   金額改成情境數字(全部堵起來可省多少),不再累計使用者的假操作。 */
+function rxRender(){
+  /* 每項壓到兩行(做法 + 為什麼只省這麼多)。原本四行 × 三張 = 12 行,
+     整頁 262 字、是其他頁的兩倍——CLAUDE.md 寫「每頁字越少越好」。 */
+  document.getElementById('rx').innerHTML=ordered().map(function(L){
+    return '<div class="save"><div>'+L.ic+' '+L.rx
+      +'<div class="hint">'+L.why+'</div></div>'
+      +'<b style="color:var(--teal);font-size:13px;white-space:nowrap">省'+nt(L.save)+'/月</b></div>';
+  }).join('');
+  document.getElementById('allin').innerHTML='三個都堵起來,一年 '+nt(planTotal()*12)
+    +'<br><span style="font-weight:600;font-size:11px">你剛剛看到的那個歲數,是沒堵的版本</span>';
+  appsRender();
+}
+
+/* ── CMoney 理財 App 直達 ──
+   0727 Melon:算完分數後,依不同目的連去籌碼K線或其他 CMoney 理財 App。
+   ⚠️ 連結待確認:各 App 的 deep link／商店頁都還沒拿到,url 一律 null → 先 toast 佔位。
+      拿到後把 url 填進去就會自動變成真的導頁,goApp() 不用改。
+      要加 App 只需要在這個陣列多加一列(purpose = 依目的分流的依據)。 */
+var APPS=[
+  {k:'chips', ic:'📊', nm:'籌碼K線', purpose:'看盤與籌碼分析', url:null}
+  /* 待 Melon 回覆後補:定期定額／記帳管帳／其他 CMoney 理財 App */
+];
+function appsRender(){
+  document.getElementById('apps').innerHTML=APPS.map(function(a){
+    return '<button class="act" onclick="goApp(\''+a.k+'\')"><span class="ic">'+a.ic+'</span>'+a.nm
+      +'<span style="font-weight:600;opacity:.75">'+a.purpose+'</span></button>';
+  }).join('');
+}
+function goApp(k){
+  var a=APPS.filter(function(x){ return x.k===k; })[0]; if(!a) return;
+  track('wc_go_app',{app:a.k});
+  if(a.url){ location.href=a.url; return; }
+  UK.toast(a.nm+'入口整合中,連結確認後開放');
+}
+
+/* ── ⋯ 選單:極簡分享=複製連結 ── */
+function menuOpen(){ document.getElementById('mnFallback').style.display='none';
+  document.getElementById('mnMask').classList.add('on'); try{ history.pushState({m:1},''); }catch(e){} }
+function menuClose(){ document.getElementById('mnMask').classList.remove('on'); }
+/* 三條路依序試,全失敗也有出路,不會變死按鈕。
+   順序刻意是 execCommand 優先:它必須跑在使用者手勢的呼叫堆疊裡,
+   一放進 clipboard API 的 promise callback 就永遠回 false(踩過)。
+   clipboard API 在 webview 常被 NotAllowedError 打回,所以它當第二順位。 */
+function copyLink(){
+  var lk=shLink();
+  function ok(via){ toast('連結已複製,貼給朋友'); track('wc_copy',{via:via}); menuClose(); }
+  function legacy(){
+    try{
+      var ta=document.createElement('textarea');
+      ta.value=lk; ta.setAttribute('readonly','');
+      ta.style.position='fixed'; ta.style.top='0'; ta.style.opacity='0';
+      document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, lk.length);
+      var done=document.execCommand('copy'); document.body.removeChild(ta);
+      if(done){ ok('execCommand'); return true; }
+    }catch(e){}
+    return false;
+  }
+  function manual(){
+    var w=document.getElementById('mnFallback'), i=document.getElementById('mnLink');
+    i.value=lk; w.style.display=''; i.focus(); i.select();
+    toast('自動複製被擋下——長按下面那行');   /* 說實話:不能沿用「已複製」的 toast */
+    track('wc_copy',{via:'manual'});
+  }
+  if(legacy()) return;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(lk).then(function(){ ok('api'); }, manual);
+  } else manual();
+}
+
+/* ── 分享:改走 UK.share(0727)──
+   原本這裡有一份手寫 canvas。kit 的 UK.share 已經是「三支自營小程式共用」的版式
+   (註解原文),而且早就內建 wcheck 金色主題——等於本單元的卡本來就該由它畫。
+   換過來之後:版式與 bored/detox 一致、少 90 行、也不用自己碰 toBlob / navigator.share。
+
+   數字只出現一次:kit 的版面 ② 是數字塊(score+unitTxt)、③ 是大字結論(sub+tint)。
+   bored 在 sub 又寫一次「無聊值 94／100」,所以同一個數字出現兩遍;
+   這裡 sub/tint 一律不帶數字,破產歲數只由 ② 呈現。 */
+/* 從 location 推導,不寫死單元路徑:/wealth 或 /wealth-check 都對 */
+function shLink(){ return location.origin + location.pathname.replace(/\/index\.html$/,'').replace(/\/$/,''); }
+function card(){
+  return {
+    theme:'wcheck',
+    head:'💸 幾歲破產',
+    score:age, unitTxt:'歲・存款歸零',   /* ② 數字塊:整張卡唯一出現數字的地方 */
+    sub:'照這個月的花法',                /* ③ 大字結論:不帶數字 */
+    tint:'你的錢撐不到那麼久',
+    punch:'情境試算・非財務預測',        /* ④ 說明行拿來擺法遵(kit 版式沒有獨立的免責欄位) */
+    emoji:'⏳',
+    stamp: age<=35 ? '快歸零' : (age<=45 ? '有點險' : (age<=60 ? '還算穩' : '很能撐')),
+    qrHint:'掃碼,算你自己的',
+    title:'我的破產倒數',
+    text:'我 '+age+' 歲那年存款歸零。你撐到幾歲?',
+    url: shLink()
+  };
+}
+function share(){ track('wc_share'); UK.share.open(card); }
+
+/* init */
+STACK=['v0']; CUR='v0';
+resetAns(); entryRender(); rxRender();
+UK.homeHint();          /* 單機直開時顯示「從發票載具首頁進入」的正規路徑 */
+track('wc_view');
+/* 交付前在 console 打 UK.selfCheck() 做機械自檢(觸控尺寸/橫向捲動/死按鈕) */
+</script>
+</body>
+</html>
