@@ -6,8 +6,8 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>無聊快篩｜發票載具</title>
-<script src="qrcode.min.js?v=2d4d0dcd"></script>
-<script src="unit-kit.js?v=2d4d0dcd"></script>
+<script src="qrcode.min.js?v=5e16ee20"></script>
+<script src="unit-kit.js?v=5e16ee20"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--mut:#7A8494;--line:#F0E0E1;--bg:#FFF6F5}
@@ -775,8 +775,11 @@ function card() {
     theme: 'bored', emoji: '😶', sub: '無聊值 ' + score + '／100', tint: '生活半徑 ' + radTxt(s.radius),
     score: score, unitTxt: '/100',
     head: '😶 無聊快篩',
-    /* 圖上印最刺的那句(圖被轉傳時只有圖活著,笑點要長在圖裡) */
-    punch: (EVH[COPY.evh] || EVH[0])(s),
+    /* 圖上那句用「照你這個X法,你很快就要Y了」的句型(Robert 0728 指定的形狀)。
+       主題要對得上這顆單元——這裡量的是無聊,不是花錢,所以不寫「照你這個花法」。 */
+    punch: score >= 85 ? '照你這個活法，你很快就要跟沙發長在一起了'
+         : score >= 70 ? '照你這個活法，下週的你跟這週一模一樣'
+         :               '照你這個活法，至少還有得救',
     stamp: score >= 85 ? '可預測' : (score >= 70 ? '超穩定' : (score >= 50 ? '有點悶' : '還有救')),
     qrHint: '掃碼，驗你自己的圓',
     title: '我的無聊快篩',
