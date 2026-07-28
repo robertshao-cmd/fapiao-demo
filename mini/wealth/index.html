@@ -9,8 +9,8 @@
 <title>幾歲破產|發票載具</title>
 <!-- vendored / 共用層:不改。unit-kit 這裡只用到 UK.selfCheck()(唯讀機械自檢),
      nav/state/share 依 0726 決策維持本單元手寫版本。 -->
-<script src="qrcode.min.js?v=f659ab6a"></script>
-<script src="unit-kit.js?v=f659ab6a"></script>
+<script src="qrcode.min.js?v=f96692fd"></script>
+<script src="unit-kit.js?v=f96692fd"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--red-deep:#A50011;--gold:#FFD34D;--teal:#0E7C7B;--mut:#7A8494;--bg:#FFF6F5;--line:#F0E0E1}
@@ -64,13 +64,19 @@
      不是「錢在累積」,兩者畫面語言完全相反,方向不能搞錯。
      用 CSS keyframes 自己跑,不吃 JS 計時器;.top{transition/animation:none} 那條
      全站 reduced-motion 規則已經會把這個 animation 整個關掉,這裡不用再判斷一次。 */
-  .fountain{position:relative;height:52px;margin-bottom:4px}
-  .coin{position:absolute;left:50%;bottom:0;font-size:19px;line-height:1;
-        animation:spray 1.7s ease-out infinite;will-change:transform,opacity}
-  @keyframes spray{
-    0%{transform:translate(-50%,0) scale(.55);opacity:0}
-    18%{opacity:1}
-    100%{transform:translate(calc(-50% + var(--dx)),-64px) scale(1);opacity:0}
+  /* 扣款畫面(0728 改版):錢包在底、鈔票從錢包被抽走、翻著飛遠、消失。
+     跟舊的「噴泉」差在敘事主詞——噴泉只是錢在動,這版有一個被扣款的錢包當受害者。
+     ease-in = 越飛越快,是「被抽走」不是「飄走」。 */
+  .drain{position:relative;height:64px;margin-bottom:2px}
+  .drain .wallet{position:absolute;left:50%;bottom:0;transform:translateX(-50%);font-size:27px;line-height:1;
+                 animation:wince 1.9s ease-in-out infinite}
+  @keyframes wince{0%,100%{transform:translateX(-50%) rotate(0)}52%{transform:translateX(-50%) rotate(-7deg)}60%{transform:translateX(-50%) rotate(5deg)}68%{transform:translateX(-50%) rotate(0)}}
+  .bill{position:absolute;left:50%;bottom:14px;font-size:19px;line-height:1;opacity:0;
+        animation:flyaway 1.9s ease-in infinite;will-change:transform,opacity}
+  @keyframes flyaway{
+    0%{transform:translate(-50%,4px) rotate(0deg) scale(.5);opacity:0}
+    14%{opacity:1}
+    100%{transform:translate(calc(-50% + var(--dx)),-74px) rotate(var(--rt)) scale(1.05);opacity:0}
   }
   .sting{margin-top:8px;font-size:13px;font-weight:800;color:var(--red-deep);min-height:18px}
   .sting b{font-size:14.5px}
@@ -106,6 +112,9 @@
   .allin{background:#EAF5F1;border:1.5px solid #B9DACD;border-radius:12px;padding:11px 13px;margin-top:10px;font-size:12.5px;font-weight:800;color:#0B5D5C;text-align:center;line-height:1.7}
   .idle{background:#FFF9E9;border:1.5px solid #F0DFAE;border-radius:12px;padding:11px 13px;margin-top:8px;font-size:12.5px;font-weight:700;color:#7A5E12;text-align:center;line-height:1.8}
   .idle b{color:#B8912F;font-size:14px}
+  .lesson{font-size:12.5px;font-weight:700;color:#5A4548;line-height:1.9;padding:7px 0;border-bottom:1px dashed var(--line)}
+  .lesson:last-child{border-bottom:none}
+  .lesson b{color:#8A6210}
   .hint{font-size:10.5px;color:var(--mut);font-weight:600;line-height:1.6;margin-top:2px}
   /* 分享浮層的樣式由 kit 的 .uk-* 提供(0727 改走 UK.share),這裡只留 ⋯ 選單自己的 */
   /* ⋯ 選單的樣式(#mnMask/.mn-*)已於 0728 移除:改用 kit 的 .uk-* 浮層,
@@ -160,14 +169,15 @@
 
   <div id="v2" style="display:none">
     <div class="card scan">
-      <!-- 純裝飾:噴出去的錢,不是可互動元件,螢幕閱讀器跳過 -->
-      <div class="fountain" aria-hidden="true">
-        <span class="coin" style="--dx:-58px;animation-delay:-.15s">💸</span>
-        <span class="coin" style="--dx:-32px;animation-delay:-.55s">🪙</span>
-        <span class="coin" style="--dx:-8px;animation-delay:-1.05s">💵</span>
-        <span class="coin" style="--dx:6px;animation-delay:-.35s">💸</span>
-        <span class="coin" style="--dx:30px;animation-delay:-.85s">🪙</span>
-        <span class="coin" style="--dx:56px;animation-delay:-1.3s">💵</span>
+      <!-- 純裝飾:錢包被扣款、鈔票飛走,不是可互動元件,螢幕閱讀器跳過 -->
+      <div class="drain" aria-hidden="true">
+        <span class="bill" style="--dx:-64px;--rt:-38deg;animation-delay:-.15s">💸</span>
+        <span class="bill" style="--dx:-36px;--rt:-22deg;animation-delay:-.75s">💵</span>
+        <span class="bill" style="--dx:-12px;--rt:-9deg;animation-delay:-1.35s">💸</span>
+        <span class="bill" style="--dx:14px;--rt:12deg;animation-delay:-.45s">💵</span>
+        <span class="bill" style="--dx:40px;--rt:24deg;animation-delay:-1.05s">💸</span>
+        <span class="bill" style="--dx:66px;--rt:40deg;animation-delay:-1.65s">💵</span>
+        <span class="wallet">👛</span>
       </div>
       <div id="scanTxt">吸入近 90 天發票…</div>
       <!-- 機車但不明說:讓真實金額自己噴出來刺人,不寫「你很浪費」這種說明書句子 -->
@@ -189,10 +199,9 @@
     <!-- 0727:結果頁只留一條主路(省錢處方)。原本並列的「讓錢長大」已移除。 -->
     <button class="btn t" onclick="show('v4');rxRender();track('wc_path_save')">把漏洞堵起來<small>看能往後拖幾年</small></button>
     <!-- 次要出口:放在兩條主路之下,不跟結果數字與主 CTA 搶第一屏 -->
-    <div class="acts">
-      <button class="act" onclick="goApp('chips')"><span class="ic">📊</span>籌碼K線</button>
-      <button class="act" onclick="share()"><span class="ic">💸</span>曬倒數</button>
-    </div>
+    <!-- 0728:籌碼K線出口從結果頁移除(兩處只留一處會重複;投資導流集中在 v4 文案),
+         次要動作只留分享 -->
+    <button class="btn l" onclick="share()">💸 曬破產倒數,看誰撐得久</button>
   </div>
 
   <!-- 0727:拿掉「啟用」三顆假開關(按了不會真的發生任何事)。
@@ -201,12 +210,16 @@
     <div class="card"><b style="font-size:13.5px;color:var(--teal)">省錢處方</b>
       <div id="rx"></div>
       <div class="allin" id="allin"></div></div>
-    <!-- 不是廣告位:接著上面那筆省下來的錢往下講,讓入口是結論不是插播 -->
+    <!-- 0728:App 直達鈕移除,改成投資識讀文案——好笑,但用語是真的。
+         每句都拿他自己的漏財點開玩笑(手搖/訂閱),術語(複利/本金/資產配置/長期持有)
+         是通識教育不是建議,法遵那行照留。 -->
     <div class="card">
       <b style="font-size:13.5px;color:#5A0E14">省下的錢,自己不會變大</b>
       <div id="idle" class="idle"></div>
-      <div class="hint" style="margin-top:10px">想讓它變大,得先看得懂錢在往哪裡走</div>
-      <div class="acts" id="apps"></div></div>
+      <div class="q" style="margin-top:12px">想讓錢長大,你該——</div>
+      <div class="lesson">認識「<b>複利</b>」:世界第八大奇蹟,前提是你得先有本金。</div>
+      <div class="lesson">理解「<b>資產配置</b>」:手搖飲不是一種資產類別。</div>
+      <div class="lesson">練習「<b>長期持有</b>」:對資產,不是對 30 天沒開的訂閱。</div></div>
     <!-- 法遵:兩段併一句,鐵律要求的字眼一個都沒少 -->
     <div class="note">情境試算、非財務預測;非投資建議,實際報酬隨市場變動。</div>
     <button class="btn l" onclick="goBack()">← 返回</button>
@@ -468,52 +481,19 @@ function rxRender(){
   }).join('');
   document.getElementById('allin').innerHTML='三個都堵起來,一年 '+nt(planTotal()*12)
     +'<br><span style="font-weight:600;font-size:11px">你剛剛看到的那個歲數,是沒堵的版本</span>';
-  appsRender();
+  idleRender();
 }
 
-/* 平台判斷:iOS 給 App Store 連結,Android 給 Play 商店連結。
-   iPadOS 13+ 的 userAgent 偽裝成 Mac,要用 maxTouchPoints 補判斷,不然 iPad 會被當成桌機。
-   桌機/判斷不出來時 fallback 到 android——這支單元是手機小程序,桌機開只是開發預覽用。 */
-function platform(){
-  var ua = navigator.userAgent || '';
-  if (/iPhone|iPad|iPod/.test(ua)) return 'ios';
-  if (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) return 'ios';   /* iPadOS 偽裝 */
-  if (/Android/.test(ua)) return 'android';
-  return 'android';
-}
-/* ── CMoney 理財 App 直達 ──
-   0727 Melon:算完分數後,依不同目的連去籌碼K線或其他 CMoney 理財 App。
-   要加 App 只需要在這個陣列多加一列(purpose = 依目的分流的依據)。
-   ios/android 分開填,goApp() 依 platform() 挑對的連結;只有其中一個平台
-   有連結時,另一個平台會 fallback 用那一個(見 appUrl),不會兩邊都開不了。 */
-var APPS=[
-  {k:'chips', ic:'📊', nm:'籌碼K線', purpose:'看盤與籌碼分析',
-   android:'https://play.google.com/store/apps/details?id=com.cmoney.chipk&hl=zh_TW',
-   ios:'https://apps.apple.com/tw/app/%E8%82%A1%E5%B8%82%E7%B1%8C%E7%A2%BCk%E7%B7%9A-%E5%BF%AB%E9%80%9F%E6%89%BE%E5%87%BA%E4%B8%BB%E5%8A%9B%E7%B1%8C%E7%A2%BC%E9%A3%86%E8%82%A1/id981360113'}
-  /* 待 Melon 回覆後補:定期定額／記帳管帳／其他 CMoney 理財 App */
-];
-function appUrl(a){ return platform()==='ios' ? (a.ios||a.android) : (a.android||a.ios); }
-function appsRender(){
-  /* 用他自己剛看到的數字接話,不是丟一句「投資讓錢變大」的口號。
-     只陳述「不投資會怎樣」(放著就是原數),不承諾報酬——承諾會跟同卡的
-     「實際報酬隨市場變動」自相矛盾,也踩到不得提供投資建議那條。 */
+/* 0728:籌碼K線 App 直達鈕移除(v3/v4 兩處都拿掉),投資導流改成 v4 的識讀文案。
+   platform()/APPS/goApp 那組隨之整段刪除——商店連結(Play + App Store)與
+   平台分流邏輯在 git 歷史 c2f7909、9f42320,要接回來從那裡撿。 */
+function idleRender(){
+  /* 用他自己剛看到的數字接話,只陳述「不投資會怎樣」(放著就是原數),
+     不承諾報酬——承諾會跟同卡的「實際報酬隨市場變動」自相矛盾,
+     也踩到不得提供投資建議那條。 */
   var y=planTotal()*12;
   document.getElementById('idle').innerHTML=
     '一年省下的 <b>'+nt(y)+'</b> 放著不動,明年還是 <b>'+nt(y)+'</b>';
-  document.getElementById('apps').innerHTML=APPS.map(function(a){
-    return '<button class="act" onclick="goApp(\''+a.k+'\')"><span class="ic">'+a.ic+'</span>'+a.nm
-      +'<span style="font-weight:600;opacity:.75">'+a.purpose+'</span></button>';
-  }).join('');
-}
-function goApp(k){
-  var a=APPS.filter(function(x){ return x.k===k; })[0]; if(!a) return;
-  var url=appUrl(a);
-  track('wc_go_app',{app:a.k, platform:platform()});
-  /* window.open(_blank),不是 location.href:跟 UK.poi 的地圖連結、detox 的分享同一個慣例。
-     這個單元是嵌在載具 App 的 webview 裡,location.href 會把整個小程序導航掉——
-     使用者從商店返回時,發票分數、已選的訪談結果全部消失,還得重跑一輪。 */
-  if(url){ window.open(url, '_blank'); return; }
-  UK.toast(a.nm+'入口整合中,連結確認後開放');
 }
 
 /* ── ⋯ 選單:極簡分享=複製連結 ── */
@@ -540,8 +520,8 @@ function card(){
     theme:'wcheck',
     head:'💸 幾歲破產',
     score:age, unitTxt:'歲・存款歸零',   /* ② 數字塊:整張卡唯一出現數字的地方 */
-    sub:'照這個月的花法',                /* ③ 大字結論:不帶數字 */
-    tint:'你的錢撐不到那麼久',
+    sub:'照你這個花法',                  /* ③ 大字結論:不帶數字 */
+    tint:'你很快就要睡路邊了',           /* 0728 文案定調 */
     punch:'情境試算・非財務預測',        /* ④ 說明行拿來擺法遵(kit 版式沒有獨立的免責欄位) */
     emoji:'⏳',
     stamp: age<=35 ? '快歸零' : (age<=45 ? '有點險' : (age<=60 ? '還算穩' : '很能撐')),

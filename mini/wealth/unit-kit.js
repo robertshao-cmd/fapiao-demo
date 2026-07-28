@@ -515,8 +515,20 @@
         ctx.fillStyle = '#111';
         for (var r = 0; r < n; r++) for (var c = 0; c < n; c++) if (q.isDark(r, c)) ctx.fillRect(qx + c * cell, qy + r * cell, Math.ceil(cell), Math.ceil(cell));
       } catch (e) { if (global.console) console.warn('[unit-kit] QR 產生失敗(qrcode.min.js 沒載入?)', e); }
+      /* ⑦ 右側:發票載具 App 圖示徽章(0728)。
+            CTA 區原本 QR 在左、文字在中,右半整塊是空的——版面重心歪一邊。
+            跟 QR 同尺寸同框,像左右書擋:左邊是「怎麼來」(QR),右邊是「來了長什麼樣」
+            (App 的臉:🌱+名字)。也順便回答搜尋框搜完會看到哪顆 icon。 */
+      var BW = qs + pad * 2 || 180, BX = p.w - 74 - BW, BY = by - 10;
+      ctx.fillStyle = '#FFF'; rr(BX, BY, BW, BW, 14); ctx.fill();
+      ctx.strokeStyle = T.line; ctx.lineWidth = 2; ctx.stroke();
+      ctx.textAlign = 'center';
+      ctx.font = '86px sans-serif'; ctx.fillText('🌱', BX + BW / 2, BY + 106);
+      ctx.fillStyle = T.sub2; ctx.font = '800 25px ' + FONT;
+      ctx.fillText('發票載具', BX + BW / 2, BY + 156);
       ctx.textAlign = 'left';
-      ctx.fillStyle = T.ink; fit(d.qrHint || '掃碼，開啟發票載具', '800', 30, p.w - TX - 70);
+      /* 中欄文字上限跟著徽章左緣走,不再撞到右書擋 */
+      ctx.fillStyle = T.ink; fit(d.qrHint || '掃碼，開啟發票載具', '800', 30, BX - TX - 24);
       ctx.fillText(d.qrHint || '掃碼，開啟發票載具', TX, by + 34);
       /* 搜尋框寬度「跟著字走」,不要撐滿剩餘寬度。
          0728:原本 pw = 剩下的全部(約 714px),但裡面只有「🔍 發票載具」約 170px,
@@ -525,7 +537,7 @@
       var padL = 26, iconW = 34, gap = 16, padR = 34;
       ctx.font = '900 34px ' + FONT;
       var textW = ctx.measureText(SEARCH).width;
-      var pw = Math.min(padL + iconW + gap + textW + padR, p.w - TX - 74);
+      var pw = Math.min(padL + iconW + gap + textW + padR, BX - TX - 24);
       var ph = 72, py = by + 58;
       ctx.strokeStyle = T.ink; ctx.lineWidth = 4; rr(TX, py, pw, ph, 36); ctx.stroke();
       ctx.fillStyle = T.ink; ctx.font = '700 30px ' + FONT;
