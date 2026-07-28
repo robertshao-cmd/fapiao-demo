@@ -6,8 +6,8 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>無聊快篩｜發票載具</title>
-<script src="qrcode.min.js?v=f96692fd"></script>
-<script src="unit-kit.js?v=f96692fd"></script>
+<script src="qrcode.min.js?v=2d4d0dcd"></script>
+<script src="unit-kit.js?v=2d4d0dcd"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--mut:#7A8494;--line:#F0E0E1;--bg:#FFF6F5}
@@ -67,6 +67,17 @@
   .big-score{display:flex;align-items:baseline;justify-content:center;gap:8px;margin:0 0 4px}
   .big-score b{font-size:52px;color:var(--red)}
   .big-score span{font-size:13px;color:var(--mut)}
+  /* 攤在沙發上的那一坨:分數越高融得越徹底(reduced-motion 會被關掉,靜態也看得出在攤) */
+  .couch{position:relative;height:36px;margin:0}
+  .couch .sofa{position:absolute;left:50%;bottom:0;transform:translateX(-50%);font-size:30px;line-height:1}
+  .couch .blob{position:absolute;left:50%;bottom:13px;font-size:19px;line-height:1;
+               transform:translateX(-50%);animation:melt 3.6s ease-in-out infinite}
+  .couch.deep .blob{animation-duration:2.6s}
+  .couch.light .blob{animation-duration:5s}
+  @keyframes melt{
+    0%,100%{transform:translateX(-50%) translateY(0)   rotate(-6deg) scaleY(1)}
+    45%    {transform:translateX(-50%) translateY(9px)  rotate(-14deg) scaleY(.82) scaleX(1.12)}
+    70%    {transform:translateX(-50%) translateY(12px) rotate(-18deg) scaleY(.74) scaleX(1.18)}}
   /* 戳章圖示:分數旁邊那顆會刺人的臉 */
   .stampi{font-size:40px!important;line-height:1;align-self:center}
   .stampT{display:inline-block;font-size:12px;font-weight:900;color:#A50011;background:#FFE9EB;
@@ -81,7 +92,7 @@
   .radl b{font-size:17px;color:#2B4BD7}
   .radl span{color:#7A8494}
   /* 發票證據:讓證據自己罵人 */
-  .ev{display:flex;gap:9px;padding:8px 0;border-bottom:1px dashed var(--line)}
+  .ev{display:flex;gap:9px;padding:7px 0;border-bottom:1px dashed var(--line)}
   .ev:last-child{border-bottom:none;padding-bottom:2px}
   .ev{align-items:center}
   .ev .e{font-size:19px;line-height:1.3;flex:none}
@@ -187,7 +198,8 @@
   <div id="v3" style="display:none">
     <div class="uk-trend" id="trend" style="display:none"></div>
     <div class="card" style="text-align:center">
-      <div class="big-score"><span class="stampi" id="stampI">😶</span><b id="scoreN">&mdash;</b><span>/100</span></div>
+      <div class="couch" id="couch"><span class="sofa">🛋️</span><span class="blob" id="blob">🫠</span></div>
+      <div class="big-score"><b id="scoreN">&mdash;</b><span>/100</span></div>
       <div class="stampT" id="stampT"></div>
       <div class="skipnote" id="skipnote" style="display:none">你沒回答，這是純發票版</div>
       <div class="radl">生活半徑 <b id="radN">&mdash;</b> · <span id="radTxt"></span></div>
@@ -536,8 +548,11 @@ function showResult() {
            : score >= 70 ? { i:'😶', t:'可預測' }
            : score >= 50 ? { i:'🙃', t:'有點悶' }
                          : { i:'🚶', t:'還有救' };
-  document.getElementById('stampI').textContent = tier.i;
-  document.getElementById('stampT').textContent = tier.t;
+  document.getElementById('stampT').textContent = tier.i + ' ' + tier.t;
+  /* 沙發上那一坨:分數越高融得越快、越扁 */
+  var couch = document.getElementById('couch');
+  couch.className = 'couch ' + (score >= 85 ? 'deep' : (score >= 70 ? '' : 'light'));
+  document.getElementById('blob').textContent = score >= 85 ? '🫠' : (score >= 50 ? '😪' : '🙂');
   document.getElementById('skipnote').style.display = ST.skipped ? '' : 'none';
 
   /* 生活半徑(併在分數卡裡,一行講完) */
@@ -716,8 +731,8 @@ function planHTML(s) {
     + '<div class="chain">到了之後:結帳報手機條碼 → 發票自動歸戶 → 下次進來這裡的數字會動。'
     + '<br>這就是我們要的那條鏈:出門 → 消費 → 發票 → 再被戳一次。</div>'
     + '</div>'
-    + '<button class="btn p" onclick="openRoute()">🧭 用 Google 地圖帶我走完</button>'
-    + '<div class="sec"><button onclick="planCarrier()">吃喝玩樂，記得刷載具</button></div>';
+    + '<button class="btn p" onclick="openRoute()">🧭 Google map 帶你去</button>'
+    + '<div class="sec"><button onclick="planCarrier()">刷載具，降低無聊值</button></div>';
 }
 
 function renderRx(s) {
