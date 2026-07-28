@@ -2,11 +2,13 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#E4001A">
 <title>解毒吧｜發票載具</title>
-<script src="qrcode.min.js?v=0922339e"></script>
-<script src="unit-kit.js?v=0922339e"></script>
+<script src="qrcode.min.js?v=c18b2c69"></script>
+<script src="unit-kit.js?v=c18b2c69"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F1B2E;--red:#E4001A;--deep:#A50011;--gold:#B8912F;--teal:#177A4C;
@@ -619,6 +621,7 @@ function showResult() {
   document.getElementById('srcNote').textContent =
     UK.dmText('兇手三名：全糖手搖 ×12 · 鹽酥雞 ×5 · 超商甜點 ×7　（都是你自己刷的，發票有寫）');
   renderResultAvatar();
+  paintFam();                /* 複驗過就顯示完成態,不要重整後又問一次 */
   nav.show('v3');
 }
 /* 雷達由 UK.data.POISON 渲染 + 算式印出來(分數要能被用戶自己推回去) */
