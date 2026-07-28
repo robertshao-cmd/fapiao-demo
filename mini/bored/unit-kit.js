@@ -206,7 +206,13 @@
      ⚠️ 這是 kit 層的保證:nav 在「堆疊見底」時一律走這裡,單元不必也不該自己實作。
         (單元傳的 onHome 只在「非嵌入」時當備援,嵌入時一律 postMessage——
          否則某個單元寫成 toast,在殼裡就變成死路。) */
-  UK.HOME = 'http://localhost:5180/';        /* 測試殼;正式版由 App 接手,不會用到 */
+  /* 測試殼位址;正式版由 App 接手,不會用到。
+     不要寫死 localhost:手機從 LAN IP 開單元時,localhost 是手機自己 → 回首頁會斷。
+     跟著目前開啟的主機走,只換 port。 */
+  UK.HOME = (function () {
+    try { return location.protocol + '//' + location.hostname + ':5180/'; }
+    catch (e) { return 'http://localhost:5180/'; }
+  })();
   UK.embedded = function () {
     try { return global.parent && global.parent !== global; } catch (e) { return false; }
   };
@@ -512,13 +518,20 @@
       ctx.textAlign = 'left';
       ctx.fillStyle = T.ink; fit(d.qrHint || '掃碼，開啟發票載具', '800', 30, p.w - TX - 70);
       ctx.fillText(d.qrHint || '掃碼，開啟發票載具', TX, by + 34);
-      var pw = p.w - TX - 74, ph = 78, py = by + 58;
-      ctx.strokeStyle = T.ink; ctx.lineWidth = 4; rr(TX, py, pw, ph, 39); ctx.stroke();
+      /* 搜尋框寬度「跟著字走」,不要撐滿剩餘寬度。
+         0728:原本 pw = 剩下的全部(約 714px),但裡面只有「🔍 發票載具」約 170px,
+         看起來就是一條又長又空的膠囊。改成量完字再加內距。 */
+      var SEARCH = '發票載具';                 /* 固定字——搜這個名字才搜得到東西 */
+      var padL = 26, iconW = 34, gap = 16, padR = 34;
+      ctx.font = '900 34px ' + FONT;
+      var textW = ctx.measureText(SEARCH).width;
+      var pw = Math.min(padL + iconW + gap + textW + padR, p.w - TX - 74);
+      var ph = 72, py = by + 58;
+      ctx.strokeStyle = T.ink; ctx.lineWidth = 4; rr(TX, py, pw, ph, 36); ctx.stroke();
       ctx.fillStyle = T.ink; ctx.font = '700 30px ' + FONT;
-      ctx.fillText('🔍', TX + 26, py + 51);
-      /* 固定字,不是單元的 head/title——搜這個名字才搜得到東西 */
+      ctx.fillText('🔍', TX + padL, py + 48);
       ctx.fillStyle = T.ink; ctx.font = '900 34px ' + FONT;
-      ctx.fillText('發票載具', TX + 76, py + 52);
+      ctx.fillText(SEARCH, TX + padL + iconW + gap, py + 49);
       ctx.textAlign = 'center';
       ctx.fillStyle = T.brand; ctx.font = '700 22px ' + FONT;
       ctx.fillText(UK.dmText('發票載具 × 官方自營（示範）'), cx, p.h - 26);
@@ -560,6 +573,7 @@
         m.innerHTML = '<div class="uk-sheet">'
           + '<button class="uk-sheet-item" id="uk-native-share">📤 分享</button>'
           + '<button class="uk-sheet-item" id="uk-copy">🔗 複製連結</button>'
+          + '<button class="uk-sheet-item" id="uk-reload">🔄 重新載入</button>'
           + '<button class="uk-sheet-cancel">取消</button></div>';
         m.onclick = function (e) { if (e.target === m) UK.menu.close(); };
         m.querySelector('.uk-sheet-cancel').onclick = function () { UK.menu.close(); };
@@ -586,6 +600,17 @@
         }
       };
       m.querySelector('#uk-copy').onclick = copyToClipboard;
+      /* 分享卡在轉圈、系統面板叫不出來、webview 卡住時的逃生門。
+         reload(true) 已廢棄且各家行為不一,改用「網址加一次性參數」強制不吃快取。 */
+      m.querySelector('#uk-reload').onclick = function () {
+        UK.track('menu_reload');
+        UK.menu.close();
+        try {
+          var u = new URL(location.href);
+          u.searchParams.set('_r', String(Date.now()));
+          location.replace(u.toString());          /* replace:不在返回堆疊留一筆 */
+        } catch (e) { location.reload(); }
+      };
       m.classList.add('on');
       try { history.pushState({ uk: 1 }, ''); } catch (e) {}
     },

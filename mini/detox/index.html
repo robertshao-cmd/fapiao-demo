@@ -76,19 +76,8 @@
   input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:30px;height:30px;border-radius:99px;
     background:#fff;border:3px solid var(--ink);box-shadow:2px 2px 0 var(--ink);margin-top:-13px}
 
-  /* 快篩試紙 */
-  .strip{margin:10px auto 0;width:180px}
-  .stick{background:#F7F3EE;border:3px solid var(--ink);border-radius:12px;padding:10px 12px;
-         box-shadow:3px 3px 0 var(--ink)}
-  .well{width:22px;height:22px;border-radius:99px;background:#F3D9D0;border:2.5px solid var(--ink);margin:0 auto 8px}
-  .win{background:#FFFDF8;border:2.5px solid var(--ink);border-radius:5px;height:34px;
-       display:flex;align-items:center;justify-content:center;gap:40px}
-  .line{width:5px;height:22px;border-radius:2px;background:transparent}
-  .line.c{background:var(--ink)}
-  .line.t{opacity:0;transition:opacity .8s}
-  .line.t.show{opacity:1;background:#D7000F}
-  .line.t.half{opacity:.45}
-  .ct{display:flex;justify-content:center;gap:44px;font-size:9px;color:#9A8A8A;margin-top:4px}
+  /* 快篩試紙(.strip/.stick/.well/.win/.line/.ct)已於 0728 全數移除:
+     v3 的試紙卡先前刪掉,v2 的顯影過場也改成毒分身變色,兩個用處都沒了。 */
   .fly{display:flex;justify-content:center;gap:10px;font-size:19px;margin-bottom:6px}
   .fly span{animation:fly 1.5s ease-in-out infinite}
   .fly span:nth-child(2){animation-delay:.25s}.fly span:nth-child(3){animation-delay:.5s}
@@ -139,6 +128,24 @@
   .avPrev.top .avatar.sm{font-size:60px}
   .avPrev.top .avPrevTxt b{font-size:16px;line-height:1.35}
   .avPrev.top .avPrevTxt small{font-size:11.5px;display:block;margin-top:3px}
+  /* 分享圖示(0728):整張卡是按鈕,但沒有記號就沒人知道能點。
+     做成右側一顆有框的小圓——有邊框才讀得出「這是可以按的」,純圖示會被當裝飾。 */
+  .avPrevGo{flex:none;width:34px;height:34px;border-radius:99px;display:flex;
+            align-items:center;justify-content:center;font-size:16px;
+            background:#fff;border:2px solid var(--ink);box-shadow:2px 2px 0 var(--ink)}
+  .avPrev:active .avPrevGo{transform:translate(1px,1px);box-shadow:1px 1px 0 var(--ink)}
+
+  /* 顯影過場的毒分身「中毒中」(0728 取代 C/T 試紙):臉色一段一段變深 */
+  .brew{margin:14px auto 4px;max-width:240px}
+  .brewFace{display:block;font-size:76px;line-height:1;transition:filter .5s ease,transform .5s ease}
+  .brewFace.s1{filter:hue-rotate(-10deg) saturate(1.2)}
+  .brewFace.s2{filter:hue-rotate(-25deg) saturate(1.6);transform:scale(1.04)}
+  .brewFace.s3{filter:hue-rotate(-45deg) saturate(2);transform:scale(1.08) rotate(-2deg)}
+  .brewBar{height:10px;background:#F3E3E3;border:2px solid var(--ink);border-radius:99px;
+           overflow:hidden;margin-top:14px}
+  /* 寬度由 JS 逐段設定;預設 0 是對的——這是「進度」,不是承載資訊的數值 */
+  .brewBar i{display:block;height:100%;width:0;border-radius:99px;transition:width .8s ease;
+             background:linear-gradient(90deg,#8FE0B4,#FFD98A,#E4001A)}
 
   /* 真食安 */
   .prog{height:9px;background:#F3E3E3;border-radius:99px;overflow:hidden;margin-top:9px;border:2px solid var(--ink)}
@@ -237,17 +244,19 @@
 
   <!-- ═══ v2 顯影過場(transient:不入返回堆疊、可跳過) ═══ -->
   <div id="v2" style="display:none">
+    <!-- 0728:試紙 C/T 顯影換成毒分身「中毒過程」。
+         試紙是檢驗語彙,但這一刻要的是開獎前那種「我完了但我想看」的心情。
+         分身臉色由淺到深逐段變化,配靠杯旁白,最後一段停在「準備看數字」。 -->
     <div class="card" style="text-align:center">
       <div class="fly"><span>🧾</span><span>🧾</span><span>🧾</span></div>
-      <div class="strip"><div class="stick">
-        <div class="well"></div>
-        <div class="win"><span class="line c"></span><span class="line t" id="tLine"></span></div>
-        <div class="ct"><span>C</span><span>T</span></div>
-      </div></div>
+      <div class="brew" id="brewWrap">
+        <span class="brewFace" id="brewFace">🙂</span>
+        <div class="brewBar"><i id="brewFill"></i></div>
+      </div>
       <div class="scan" id="scanTxt">吸入發票中…</div>
       <div class="note" id="scanNote" style="text-align:center"></div>
     </div>
-    <div class="sec"><button onclick="skipScan()">跳過動畫 &rsaquo;</button></div>
+    <div class="sec"><button onclick="skipScan()">我不敢看了，直接給數字 &rsaquo;</button></div>
   </div>
 
   <!-- ═══ v3 結果:趨勢 + 落差 + 雷達 + 算式 + 分身卡 + 唯一主 CTA ═══ -->
@@ -262,6 +271,7 @@
         <b id="avPrevSay">—</b>
         <small id="avPrevMeta">—</small>
       </span>
+      <span class="avPrevGo" aria-hidden="true">📤</span>
     </button>
 
     <div class="card">
@@ -277,7 +287,7 @@
     <button class="btn p" onclick="nav.show('v5')">💊 去解毒——把毒值降下來</button>
     <div class="acts">
       <button class="act" onclick="openSafe()"><span class="ic">🛡️</span>真食安比對</button>
-      <button class="act" onclick="nav.show('v0')"><span class="ic">🏠</span>回解毒吧</button>
+      <button class="act" onclick="retest()"><span class="ic">🔄</span>重新驗</button>
     </div>
   </div>
 
@@ -290,6 +300,7 @@
       <div class="prog"><i id="progBar"></i></div>
       <div class="note" id="progTxt">掃描中…</div>
       <div class="note" style="font-size:10px;color:#9A8A8A">比對範圍：近 90 天發票的商家與品項 × 食藥署與各縣市衛生局公告。僅轉載官方原文，標註來源與日期。</div>
+      <div class="note" style="font-size:10px;color:#9A8A8A" id="fsNote"></div>
     </div>
     <div id="safeResult" style="display:none">
       <div class="ok" id="okLine">✓　未命中現行公告名單</div>
@@ -325,6 +336,7 @@
         <b id="avPrevSay2">—</b>
         <small id="avPrevMeta2">—</small>
       </span>
+      <span class="avPrevGo" aria-hidden="true">📤</span>
     </button>
     <div class="card" style="text-align:center">
       <div style="font-size:11px;font-weight:900;color:var(--gold)">目前綜合中毒</div>
@@ -337,12 +349,11 @@
       <div class="note" id="stNote">點卡片看它憑什麼叫解藥。<br>
         <span style="color:#9A8A8A">解毒站＝通過審核的健康商家，只做正面認證；名單與距離為示範。</span></div>
     </div>
-    <!-- 消費鏈路的最後一哩(0728):人已經在店裡了,條碼要在這頁叫得出來。
-         沒有這顆,毒值就永遠降不下去——降毒的唯一條件是「開發票」。 -->
-    <button class="btn p" onclick="UK.carrier.open({from:'v5'})">📸 結帳了？叫出我的載具條碼</button>
-    <div class="note" style="text-align:center">給店員掃完，這餐的發票就會自己回到你的載具——下次複驗就看得到它。</div>
+    <!-- 0728:這裡原本有一顆獨立的「叫出我的載具條碼」。
+         已刪除——條碼現在整合進每一家的「掃載具解毒」按鈕裡了,
+         留著會變成兩個入口做同一件事,而且那顆脫離了「你要去哪一家」的脈絡。 -->
     <button class="banner" id="subBn" onclick="subscribe(this)">
-      <b>🗓 開獎日 ＝ 全民複驗日</b><small>對完獎，順手複驗一次——看看 T 線有沒有變淺</small></button>
+      <b>🗓 開獎日 ＝ 全民複驗日</b><small>對完獎，順手複驗一次——看看毒值有沒有降</small></button>
   </div>
 
   <!-- ═══ v6 毒分身:一頁一個焦點(大臉 + 一個主動作) ═══ -->
@@ -400,8 +411,11 @@ var SAY = {
   fine: ['「難得，你今天像個人」','「保持住，我還想活久一點」']
 };
 function pick(arr, n){ return arr[n % arr.length]; }
-function avState(){
-  var s = (typeof score === 'number') ? score : UK.data.composite();
+/* override:要問「某個分數會長什麼臉」時傳進來(例:過場想先知道結果臉)。
+   不傳就用目前的 score,再退回 composite()。 */
+function avState(override){
+  var s = (typeof override === 'number') ? override
+        : ((typeof score === 'number') ? score : UK.data.composite());
   if (s >= 85) return { face:'😵', tint:'中毒重症', anim:'dying',  say:pick(SAY.dead, s), color:'#A50011', stamp:'中毒重症' };
   if (s >= 70) return { face:'🤢', tint:'毒素偏高', anim:'dying',  say:pick(SAY.sick, s), color:'#C8551B', stamp:'毒素超標' };
   if (s >= 50) return { face:'😐', tint:'普普通通', anim:'wheeze', say:pick(SAY.meh, s),  color:'#B8912F', stamp:'毒素累積' };
@@ -426,7 +440,7 @@ function renderResultAvatar() {
   });
   ['avPrevMeta', 'avPrevMeta2'].forEach(function (id) {
     var m = document.getElementById(id); if (!m) return;
-    m.textContent = st.tint + ' · ' + score + '/100 · 點開看你的分身 →';
+    m.textContent = st.tint + ' · ' + score + '/100 · 點開看分身、曬給朋友';
   });
 }
 
@@ -508,20 +522,59 @@ function guessUpd(v) {
 }
 function skipGuess() { guessed = false; guess = null; startTest(); }
 
-/* ── 顯影過場(可跳過;timer 會清掉,不會晚一步又跳) ── */
+/* ── 顯影過場:毒分身「中毒中」(可跳過;timer 會清掉,不會晚一步又跳) ──
+   0728:要的是開獎前那種「我完了但我想看」的心情,所以分身臉色一段一段變深,
+   旁白一句比一句酸。四段對應 brewFace 的 s1/s2/s3。 */
 var timers = [];
+/* 每一毒各自的中毒旁白——「不同毒況」要講不同的話,不是四句罐頭。
+   key 對應 UK.data.POISON 的 k。 */
+var BREW_LINE = {
+  sugar:  { say:'糖分入場……量有點多',     sub:'手搖那幾杯我都看到了' },
+  oil:    { say:'油脂進來了——臉開始不對',  sub:'鹽酥雞你以為沒人記得？發票記得' },
+  salt:   { say:'鈉在堆積……嘴巴渴了吧',    sub:'湯喝光的那幾餐，都在這裡' },
+  proc:   { say:'加工品下鍋…成分表好長',    sub:'那些看不懂的字，你吃了不少' },
+  caf:    { say:'咖啡因灌進來了',           sub:'難怪你昨天睡不著' }
+};
+/* 建一段「照你自己的毒排序」的過場:毒最重的先上,臉一段比一段慘,
+   最後一張直接用 avState() 的臉——跟結果頁、分身頁講同一張臉,不會兩套。 */
+function buildBrew() {
+  var top = UK.data.POISON.slice().sort(function (a, b) { return b.v - a.v; }).slice(0, 3);
+  var steps = [{ at:0, face:'🙂', cls:'', w:8, say:'吸入發票中…', sub:'你上次刷卡的時候，沒想到會有今天' }];
+  var faces = ['😀', '😬', '🤢'], clss = ['s1', 's2', 's3'];
+  top.forEach(function (p, i) {
+    var line = BREW_LINE[p.k] || { say:p.nm + ' 進來了', sub:'發票上寫得清清楚楚' };
+    steps.push({
+      at: 700 + i * 700,
+      face: faces[i], cls: clss[i],
+      w: 30 + i * 28,
+      say: line.say,
+      sub: line.sub + '（' + p.nm + ' ' + p.v + '）'
+    });
+  });
+  /* 收尾那張臉 = 這次即將算出的結果臉。
+     一定要傳 composite(),不能用目前的 score——重驗時 score 還是上一輪的舊值,
+     過場收在舊臉、結果頁跳成新臉,兩張對不起來(0728 實測抓到)。 */
+  var end = avState(UK.data.composite());
+  steps.push({ at: 700 + top.length * 700, face:end.face, cls:'s3', w:96,
+               say:'顯影完成。要看嗎？', sub:'數字已經算好了，賴不掉' });
+  return steps;
+}
 function startTest() {
   nav.show('v2');
-  document.getElementById('tLine').classList.remove('show');
-  document.getElementById('scanTxt').textContent = '吸入發票中…';
-  document.getElementById('scanNote').textContent =
-    UK.dmText('正在分析近 30 天 ' + UK.data.INV.d30.n + ' 張發票、' + UK.data.INV.d30.shops + ' 家商家（示範）');
+  var face = document.getElementById('brewFace');
+  var fill = document.getElementById('brewFill');
+  var brew = buildBrew();
   timers = [];
-  timers.push(setTimeout(function () {
-    document.getElementById('scanTxt').textContent = '顯影中——兩條線見真章…';
-    document.getElementById('tLine').classList.add('show');
-  }, 900));
-  timers.push(setTimeout(finish, 2600));
+  brew.forEach(function (b) {
+    timers.push(setTimeout(function () {
+      face.textContent = b.face;
+      face.className = 'brewFace' + (b.cls ? ' ' + b.cls : '');
+      fill.style.width = b.w + '%';
+      document.getElementById('scanTxt').textContent = b.say;
+      document.getElementById('scanNote').textContent = UK.dmText(b.sub);
+    }, b.at));
+  });
+  timers.push(setTimeout(finish, brew[brew.length - 1].at + 700));
 }
 function skipScan() { timers.forEach(clearTimeout); timers = []; finish(); }
 function finish() {
@@ -572,11 +625,37 @@ function toggleHow() {
   document.getElementById('caret').style.transform = on ? 'rotate(90deg)' : '';
 }
 
-/* ── 真食安比對:命中 / 全數未命中 兩態(?hit=0 演示未命中) ── */
+/* ── 真食安比對 ──
+   0728 定調:食安比對不該由解毒吧自己做一份——載具裡已經有「食安快篩」小程式,
+   這裡應該把人導過去,不要兩邊各養一套名單、講不一樣的話。
+
+   ⚠️ SLUG 待填:食安快篩在 dev registry 的實際 slug 我查不到
+      (ailab-dev 的 registry 端點有登入牆,列不出清單)。
+      填法:把 slug 填進下面 FOODSAFE.slug 一處即可,其餘會自己生效。
+      填之前 openSafe() 走本地示範版,並在畫面上說清楚「正式版會導去食安快篩」——
+      不假裝已經接上。 */
+var FOODSAFE = {
+  slug: '',                                  /* ← 例:'food-safety';填了就直接導過去 */
+  url: function () {
+    if (!this.slug) return null;
+    /* 跟著目前所在的主機走:dev 開就是 dev,正式版由 App 接手 */
+    return 'https://ailab-dev.cmoney.tw/' + this.slug;
+  }
+};
 var SAFE_HIT = (function () {
   try { return new URLSearchParams(location.search).get('hit') !== '0'; } catch (e) { return true; }
 })();
-function openSafe() { nav.show('v4'); runSafe(); }
+function openSafe() {
+  var u = FOODSAFE.url();
+  if (u) {                                   /* 已接通:直接把人送去食安快篩 */
+    UK.track('dx_safe_handoff', { slug: FOODSAFE.slug });
+    location.href = u;
+    return;
+  }
+  var n = document.getElementById('fsNote');
+  if (n) n.textContent = UK.dmText('這頁是解毒吧的示範版。正式版會直接導去載具裡的「食安快篩」小程式，名單以那邊為準。');
+  nav.show('v4'); runSafe();                 /* 未接通:走本地示範版 */
+}
 function runSafe() {
   var res = document.getElementById('safeResult');
   res.style.display = 'none';
@@ -639,7 +718,7 @@ function stRow(s) {
     + '<small>' + s.meta + '</small>'
     + (canOrder(s) ? '<span class="shoptag">📱 可線上點餐</span>' : '') + '</span>'
     + '<button class="uk-vf' + (verified[s.key] ? ' done' : '') + '" onclick="verify(this,\'' + s.key + '\')">'
-    + (verified[s.key] ? '✅ 已排入' : '就衝這家') + '</button></div>';
+    + (verified[s.key] ? '✅ 已解毒' : '掃載具解毒') + '</button></div>';
 }
 function renderStations() {
   document.getElementById('stations').innerHTML =
@@ -647,6 +726,7 @@ function renderStations() {
   var n = document.getElementById('stNote');
   if (n && STATIONS.some(canOrder)) {
     n.innerHTML = '點卡片看它憑什麼叫解藥。標「📱 可線上點餐」的可以直接點：' + GO_STEPS + '<br>'
+      + '<b>毒值只有結帳掃載具才會降</b>——沒有發票就沒有證據，按鈕按再多次也不算。<br>'
       + '<span style="color:#9A8A8A">解毒站＝通過審核的健康商家，只做正面認證；名單與距離為示範。</span>';
   }
   renderResultAvatar();   /* v5 最上面那顆預覽,分數一變(核銷/重驗)就要跟著換 */
@@ -658,23 +738,37 @@ STATIONS.forEach(function (s) {
                  /* 三步放第一行:kit 會把「可線上點餐」標籤接在 info 尾巴,
                     讓它接在位置那行才不會黏在三步後面 */
                  info: (canOrder(s) ? GO_STEPS + '\n' : '') + s.info,
-                 partner:(s.shop === 'nnw'), addLabel:'就衝這家',
+                 partner:(s.shop === 'nnw'), addLabel:'掃載具解毒',
                  onAdd: function (vf) { verify(vf, s.key); } };
 });
-/* 核銷:完成態 + 防重複 + 分數持久化 */
+
+/* ── 降毒的唯一途徑:去吃 + 結帳掃載具(0728 改) ──
+   舊版按一下「就衝這家」毒值就掉 7,但使用者根本還沒去吃——那是假的降毒,
+   而且把「消費 → 開發票 → 數據回流」這條鏈路整段跳過了。
+   現在按鈕只負責叫出載具條碼;真正降毒發生在條碼被掃之後(carrier 的 onDone)。
+   沒有發票 = 沒有證據 = 不降毒。 */
 function verify(btn, key) {
-  if (verified[key]) { UK.toast('這家已經在你的解毒清單裡了（示範）'); return; }
+  if (verified[key]) { UK.toast('這家已經解過毒了——換一家,或明天再來'); return; }
+  UK.carrier.open({
+    from: 'station:' + key,
+    onDone: function () { applyDetox(key); }
+  });
+  UK.track('dx_detox_intent', { shop: key });
+}
+/* 條碼真的被掃了才會走到這裡 */
+function applyDetox(key) {
+  if (verified[key]) return;                      /* 防重複:連掃兩次只算一次 */
   if (score === null) score = (typeof ST.n === 'number') ? ST.n : UK.data.composite();
   verified[key] = true;
   var old = score; score = Math.max(40, score - 7);
   ST = UK.state.save(KEY, { n:score, prev:ST.prev, guess:guess, sub:ST.sub, fam:ST.fam });
-  if (btn) { btn.textContent = '✅ 已排入'; btn.classList.add('done'); }
   document.getElementById('sc2').textContent = score;
   document.getElementById('scNote').innerHTML =
-    '🎉 發票已核銷：綜合中毒 ' + old + ' → <b style="color:var(--teal)">' + score + '</b>，T 線變淺了（糖毒 −5 · 油毒 −2）';
-  UK.toast('核銷成功（示範）：「' + POI[key].name + '」 · 毒值 ' + old + ' → ' + score);
+    '🎉 這張發票進你的載具了：綜合中毒 ' + old + ' → <b style="color:var(--teal)">' + score
+    + '</b>（糖毒 −5 · 油毒 −2）<br><span style="color:#9A8A8A">下次複驗會看到它——毒值降的是真的，因為發票是真的。</span>';
+  UK.toast('解毒成功（示範）：「' + POI[key].name + '」 · 毒值 ' + old + ' → ' + score);
   UK.track('dx_verify', { shop:key, score:score });
-  renderStations();     /* 解毒站列表的「已排入」狀態要跟著核銷結果更新 */
+  renderStations();     /* 解毒站列表的「已解毒」狀態要跟著更新 */
   entryRender();
 }
 /* 開獎日訂閱:真狀態切換(不是死按鈕) */

@@ -77,16 +77,8 @@
   .busted{font-size:12px;font-weight:800;color:#A50011;background:#FFE9EB;border-radius:11px;
           padding:9px 12px;margin-top:8px;line-height:1.6}
   .rowbtn{flex:none;align-self:center;font-size:11.5px;padding:8px 9px}
-  /* 景點卡展開後的「這附近可以吃」:合作商家收在這裡(位置下移,標保留) */
   .spot{margin-top:10px}
   .spot .row{margin-top:0}
-  .eatsT{display:block;width:100%;text-align:left;font-size:11.5px;font-weight:800;color:#5A6472;
-         background:#fff;border-radius:0 0 15px 15px;padding:11px 13px;min-height:44px;
-         border-top:1px dashed var(--line);margin-top:-4px}
-  .eats{background:#fff;border-radius:0 0 15px 15px;padding:0 10px 10px;margin-top:-4px}
-  .erow{display:flex;align-items:center;gap:8px;min-height:44px;padding:8px 3px;border-top:1px dashed var(--line);cursor:pointer}
-  .erow b{font-size:12.5px;font-weight:800;flex:1;min-width:0}
-  .erow .ed{font-size:10.5px;color:#7A8494;font-weight:700;white-space:nowrap}
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -223,9 +215,6 @@ var PUSH = [
   '外送員今天不想見你'                /* 4 */
 ];
 function push() { return PUSH[COPY.push] || PUSH[0]; }
-/* 到店怎麼點:Melon 0727 原話,一行講完,不做三個 bullet */
-var STEPS = '掃桌上的碼 → 直接點餐 → 結帳時報載具';
-
 /* -- 證據卡標題:要刺、要口語、數字要在句子裡 --
    換句改最上面的 COPY.evh / COPY.liar,其餘都留著讓 Robert 挑。
    s.n=近 30 天張數,s.conv=其中在超商的張數(會跟著發票變,不寫死)。 */
@@ -298,7 +287,7 @@ function curAns() { return Object.keys(ANS).length ? ANS : (ST.ans || {}); }
 var _sessionStart = Date.now();
 function placeName(k) {
   var sp = SPOTS.filter(function (p) { return p.k === k; })[0];
-  return sp ? sp.name : (EATS[k] ? EATS[k].name : k);
+  return sp ? sp.name : k;
 }
 function noShow() {
   var picks = ST.picks || {}, keys = Object.keys(picks);
@@ -506,72 +495,40 @@ function evidence(s, ans) {
   return L.slice(0, EV_MAX);
 }
 
-/* ── 好去處:景點為主軸(Melon 0727) ──
-   景點卡在上;合作商家(UK.shops)收進景點卡展開後的「這附近可以吃」——標保留,位置下移。
-   推薦理由(why)綁回發票證據,所以會隨半徑/連續天數變動;不做 LBS 排序(只用靜態距離)。 */
-var EATS = {
-  nnw:     { shop:'nnw',     emoji:'🍝', name:'暖暖窩義式廚房',          km:4.2, q:'暖暖窩義式廚房',
-    why:function(s){ return '你已經 ' + s.streak + ' 天沒離開' + s.topShop + '半徑，這裡 4.2 公里'; } },
-  yuanwei: { shop:'yuanwei', emoji:'🥗', name:'原味時代健康餐盒 府中店', km:1.1, q:'原味時代健康餐盒 府中店',
-    why:function(s){ return '1.1 公里，比你週末的 ' + radTxt(s.radius) + '只多一點'; } },
-  guoyang: { shop:'guoyang', emoji:'🥤', name:'果漾 Fresh 冷壓蔬果飲',   km:2.4, q:'果漾 Fresh 冷壓蔬果飲',
-    why:function(s){ return s.convPct + '% 的發票在超商，這杯至少不是微波的'; } }
-};
+/* ── 好去處:只有景點,一列一個(0728 拍板砍掉餐廳那段) ──
+   推薦理由(why)綁回發票證據,所以會隨半徑/連續天數變動;不做 LBS 排序(只用靜態距離)。
+   註:合作商家導流(UK.shops + 「這附近可以吃」展開區)整段移除。要接回來的話,
+   kit 的 UK.shops 還在:列上加 data-shop,地點卡的 CTA 會自動變成「看菜單」直達點餐頁。 */
 var SPOTS = [
   { k:'yuanwei_park', emoji:'🌳', name:'府中商圈 · 林家花園', km:1.3, q:'林本源園邸',
-    eats:['yuanwei','guoyang'],
     why:function(s){ return '1.3 公里，比你週末的 ' + radTxt(s.radius) + '多一點——今天先破這個'; } },
   { k:'riverside',    emoji:'🚲', name:'大稻埕河濱自行車道', km:6.8, q:'大稻埕河濱自行車道',
-    eats:['nnw','guoyang'],
     why:function(s){ return '新店嘗試 ' + s.newShops + ' 家。這裡沒有店，只有風'; } },
   { k:'nancun',       emoji:'🏘️', name:'四四南村',           km:7.6, q:'四四南村',
-    eats:['nnw'],
     why:function(s){ return '走完等於你這個月的移動總量'; } },
   { k:'hushan',       emoji:'⛰️', name:'虎山親山步道',       km:9.5, q:'虎山親山步道',
-    eats:[],
     why:function(s){ return '外送員這個月見你 ' + s.deliv + ' 次，山一次都沒見過你'; } },
   { k:'yingge',       emoji:'🏺', name:'鶯歌老街 陶藝體驗',   km:14.0, q:'鶯歌老街',
-    eats:[],
     why:function(s){ return '你的紀錄是 ' + radTxt(s.radius) + '。14 公里，一次作廢'; } }
 ];
 
-/* 傳給 UK.poi 的字典:景點與吃的都在同一份(kit 的 bind 介面不動,只在 init 呼叫一次) */
+/* 傳給 UK.poi 的字典(kit 的 bind 介面不動,只在 init 呼叫一次) */
 var POI = {};
 SPOTS.forEach(function (p) {
   POI[p.k] = { emoji:p.emoji, name:p.name, q:p.q, why:'', info:'',
     addLabel:'就衝這裡', onAdd:function (vf, row) { togglePick(vf, row); } };
 });
-Object.keys(EATS).forEach(function (k) {
-  var e = EATS[k];
-  POI[k] = { emoji:e.emoji, name:e.name, q:e.q, why:'', info:'',
-    addLabel:'排進清單', onAdd:function (vf, row) { togglePick(vf, row); } };
-});
 
-/* 同一家店可能掛在好幾個景點下面。只在最近的那個景點展開,不然一次跳出兩三段就變吵 */
-var _bustedSpotK = null;
-function markBustedSpot(list) {
-  var ns = noShow();
-  _bustedSpotK = null;
-  if (!ns) return;
-  for (var i = 0; i < list.length; i++) {
-    if ((list[i].eats || []).indexOf(ns.k) > -1) { _bustedSpotK = list[i].k; return; }
-  }
-}
-function canOrder(shopKey) { return !!shopKey && UK.shops.url(shopKey) !== null; }
 function spotsSorted() { return SPOTS.slice().sort(function (a, b) { return a.km - b.km; }); }
-function orderableEats(p) { return (p.eats || []).filter(function (k) { return canOrder(EATS[k].shop); }); }
 
-/* 景點卡 */
+/* 景點卡:一列 = emoji + 名字 + 距離 + 一句理由 + 一顆「就衝這裡」 */
 function spotHTML(p, s) {
   var why = p.why(s);
   POI[p.k].why = why;
-  /* 三步說明放在 kit 地點卡的 info(就在 CTA 上面那一行);沒東西可點的景點不硬塞 */
-  POI[p.k].info = orderableEats(p).length ? STEPS : ('距離 ' + p.km + ' 公里');
+  POI[p.k].info = '距離 ' + p.km + ' 公里';
   var picked = (ST.picks || {})[p.k];
-  var eats = (p.eats || []);
   var ns = noShow();
-  var busted = ns && ns.k === p.k;                                   /* 上次排的就是這個景點 */
-  var bustedEat = ns && p.k === _bustedSpotK;                        /* 排的是它底下那家店(只標最近的那個景點) */
+  var busted = ns && ns.k === p.k;                     /* 上次排的就是這個景點 */
   return '<div class="spot">'
     + '<div class="row" data-poi="' + p.k + '" role="button" tabindex="0">'
     + '<span class="re">' + p.emoji + '</span>'
@@ -581,50 +538,14 @@ function spotHTML(p, s) {
     + '<i>' + why + '</i></div>'
     + '<button class="uk-vf rowbtn' + (picked ? ' done' : '') + '" data-label="就衝這裡">'
     + (picked ? '✅ 已排入' : '就衝這裡') + '</button>'
-    + '</div>'
-    /* 上次排的那家在這個景點的「可以吃」裡 → 預設展開,不要讓他還得自己點開才被抓到 */
-    /* 刻意不給 id:v4 與 v5 渲染同一批景點,id 會撞號(kit 註解裡那個 P0)。
-       展開靠「按鈕的下一個兄弟」找,兩頁各自獨立。 */
-    + (eats.length
-        ? '<button class="eatsT" data-action="eats" data-k="' + p.k + '" aria-expanded="' + (bustedEat ? 'true' : 'false') + '">'
-          + '這附近可以吃 · ' + eats.length + ' 家 ' + (bustedEat ? '⌃' : '⌄') + '</button>'
-          + '<div class="eats"' + (bustedEat ? '' : ' hidden') + '>'
-          + eats.map(function (k) { return eatHTML(k, s); }).join('') + '</div>'
-        : '')
-    + '</div>';
-}
-/* 這附近可以吃:合作商家的「📱 可線上點餐」標留著,只是位置下移到這裡 */
-function eatHTML(k, s) {
-  var e = EATS[k];
-  POI[k].why = e.why(s);
-  POI[k].info = canOrder(e.shop) ? STEPS : ('距離 ' + e.km + ' 公里');   /* 合作標記 kit 會自己接在後面 */
-  var picked = (ST.picks || {})[k];
-  var ns = noShow();
-  return '<div class="erow" data-poi="' + k + '" data-shop="' + e.shop + '" role="button" tabindex="0">'
-    + '<span>' + e.emoji + '</span><b>' + e.name + '</b>'
-    + (ns && ns.k === k ? '<span class="tag no">上次你說要來</span>' : '')
-    + '<span class="tag' + (canOrder(e.shop) ? '' : ' no') + '">' + UK.shops.tag(e.shop) + '</span>'
-    + '<span class="ed">' + e.km + 'km</span>'
-    + '<button class="uk-vf rowbtn' + (picked ? ' done' : '') + '" data-label="排入">'
-    + (picked ? '✅' : '排入') + '</button></div>';
-}
-/* 傳「被點的那顆按鈕」進來,不傳 key —— 這樣 v4／v5 各自的那塊互不干擾 */
-function toggleEats(bn) {
-  var box = bn.nextElementSibling;
-  if (!box || box.className !== 'eats') box = bn.parentNode.querySelector('.eats');
-  if (!box) return;
-  var open = box.hasAttribute('hidden');
-  if (open) box.removeAttribute('hidden'); else box.setAttribute('hidden', '');
-  bn.setAttribute('aria-expanded', open ? 'true' : 'false');
-  bn.textContent = bn.textContent.replace(/[⌄⌃]\s*$/, open ? '⌃' : '⌄');
-  if (open) UK.track('eats_open', { spot: bn.getAttribute('data-k') });
+    + '</div></div>';
 }
 function togglePick(vf, row) {
   if (!vf) return;
   var k = row.getAttribute('data-poi'), picks = ST.picks || {};
   var label = vf.getAttribute('data-label') || '就衝這裡';
   if (picks[k]) { delete picks[k]; vf.classList.remove('done'); vf.textContent = label; }
-  else { picks[k] = 1; vf.classList.add('done'); vf.textContent = (label === '排入' ? '✅' : '✅ 已排入');
+  else { picks[k] = 1; vf.classList.add('done'); vf.textContent = '✅ 已排入';
          UK.toast('排進出走清單了——別又滑掉'); }
   /* 記下「什麼時候排的」與「當時幾張發票」——下次回來就是用這兩個數字拆穿他 */
   ST.picks = picks; ST.pickAt = Date.now(); ST.pickInv = invN();
@@ -633,7 +554,6 @@ function togglePick(vf, row) {
 }
 function showRx() {
   var s = applyDims(), list = spotsSorted().slice(0, 3);
-  markBustedSpot(list);
   document.getElementById('rxLeadT').textContent = push();
   document.querySelector('#rxLead small').textContent = '半徑 ' + radTxt(s.radius) + ' · 這 3 個都在圓外';
   document.getElementById('rxList').innerHTML = list.map(function (p) { return spotHTML(p, s); }).join('');
@@ -641,7 +561,6 @@ function showRx() {
 }
 function showAll() {
   var s = applyDims(), list = spotsSorted();
-  markBustedSpot(list);
   document.getElementById('allList').innerHTML = list.map(function (p) { return spotHTML(p, s); }).join('');
   nav.show('v5'); UK.track('all_view');
 }
@@ -667,8 +586,6 @@ function card() {
 UK.poi.bind(POI);                    /* 整列可點 → 地點卡;按鈕區不觸發 */
 document.addEventListener('click', function (e) {     /* 列上的按鈕自己接(kit 只管開地點卡) */
   if (!e.target.closest) return;
-  var eb = e.target.closest('[data-action="eats"]');
-  if (eb) { toggleEats(eb); return; }
   var btn = e.target.closest('.uk-vf');
   if (!btn) return;
   var row = btn.closest('[data-poi]');

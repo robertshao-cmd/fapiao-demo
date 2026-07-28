@@ -125,6 +125,9 @@ function markSeen(s){ try{ var m=seen(); if(!m[s]){ m[s]=1; localStorage.setItem
 function urlOf(u){
   /* 外部站(點到):shopId 填了才是「直達店家頁」;沒填就只有裸網域,不是可驗的入口 */
   if (u.ext) return u.shopId ? (u.ext + '/' + u.shopId + '/order') : u.ext;
+  /* 用 location.hostname,不要寫死 localhost。
+     手機從 LAN IP 開這個殼時,localhost 指的是「手機自己」→ 一定連線被拒。
+     跟著殼被開啟的位址走:localhost 開就是 localhost,192.168.x.x 開就是同一台。 */
   if (SRC === 'local') return './' + u.slug + '/';   /* 靜態發佈版:同層資料夾 */
   return 'https://ailab-dev.cmoney.tw/' + (u.devSlug || u.slug);
 }
