@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#E4001A">
 <title>解毒吧｜發票載具</title>
-<script src="qrcode.min.js?v=da39b6e5"></script>
-<script src="unit-kit.js?v=da39b6e5"></script>
+<script src="qrcode.min.js?v=9e69cf26"></script>
+<script src="unit-kit.js?v=9e69cf26"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F1B2E;--red:#E4001A;--deep:#A50011;--gold:#B8912F;--teal:#177A4C;
@@ -435,10 +435,14 @@ function pick(arr, n){ return arr[n % arr.length]; }
 function avState(override){
   var s = (typeof override === 'number') ? override
         : ((typeof score === 'number') ? score : UK.data.composite());
-  if (s >= 85) return { face:'😵', tint:'中毒重症', anim:'dying',  say:pick(SAY.dead, s), color:'#A50011', stamp:'中毒重症' };
-  if (s >= 70) return { face:'🤢', tint:'毒素偏高', anim:'dying',  say:pick(SAY.sick, s), color:'#C8551B', stamp:'毒素超標' };
-  if (s >= 50) return { face:'😐', tint:'普普通通', anim:'wheeze', say:pick(SAY.meh, s),  color:'#B8912F', stamp:'毒素累積' };
-  return          { face:'😄', tint:'挺健康的', anim:'fine',   say:pick(SAY.fine, s), color:'#177A4C', stamp:'尚屬健康' };
+  /* tint 是分享卡上反白色塊裡那一行,縮圖唯一讀得到的一句話——
+     0728:原本「中毒重症／毒素偏高／普普通通／挺健康的」是檢驗報告腔,
+     跟 SAY 那些靠杯台詞完全不搭,而且「普普通通」根本沒人想轉發。
+     改成反諷版:用醃漬/保存期限的語彙笑自己,4-6 字,縮圖讀得到。 */
+  if (s >= 85) return { face:'😵', tint:'醃到入味了',   anim:'dying',  say:pick(SAY.dead, s), color:'#A50011', stamp:'醃漬完成' };
+  if (s >= 70) return { face:'🤢', tint:'油糖雙修有成', anim:'dying',  say:pick(SAY.sick, s), color:'#C8551B', stamp:'修行有成' };
+  if (s >= 50) return { face:'😐', tint:'還沒壞而已',   anim:'wheeze', say:pick(SAY.meh, s),  color:'#B8912F', stamp:'尚可食用' };
+  return          { face:'😄', tint:'乾淨得可疑',   anim:'fine',   say:pick(SAY.fine, s), color:'#177A4C', stamp:'查無異狀' };
 }
 function topEmoji(){ var t = UK.data.topPoison(); return String(t.nm).split(' ')[0] || '🧋'; }
 
@@ -826,12 +830,20 @@ function renderAvatar() {
 }
 
 /* ── 分享卡:一張圖 + 圖內 QR(kit 負責畫) ── */
+/* 稱號依「你自己最重的兩項毒」組出來。
+   0728:原本寫死「螞蟻人 × 酥脆星人」,不管你的毒其實是鈉還是咖啡因都這樣叫,
+   分享出去就變成大家的卡長得一樣——那就沒人想轉了。 */
+var TITLE = { sugar:'螞蟻人', oil:'酥脆星人', salt:'重鹹派', proc:'成分表苦手', caf:'咖啡因續命族' };
+function persona() {
+  var top2 = UK.data.POISON.slice().sort(function (a, b) { return b.v - a.v; }).slice(0, 2);
+  return top2.map(function (p) { return TITLE[p.k] || String(p.nm).split(' ')[1] || '未知毒'; }).join(' × ');
+}
 function avatarCard() {
   var st = avState();
   return {
     theme:'detox', emoji:st.face, acc:topEmoji(),
-    sub:'螞蟻人 × 酥脆星人', tint:st.tint, score:score, unitTxt:'/100 綜合毒值',
-    head:'🧪 解 毒 吧 ・ 檢 驗 報 告', punch:'你的發票，驗得出你的毒', stamp:st.stamp,
+    sub:persona(), tint:st.tint, score:score, unitTxt:'/100 綜合毒值',
+    head:'🧪 解 毒 吧 ・ 檢 驗 報 告', punch:'不是我說的，是你的發票說的', stamp:st.stamp,
     title:'我的毒分身', text:'我的毒分身已經' + st.tint + '（毒值 ' + score + '）\n敢驗你自己的嗎？',
     qrHint:'掃碼，驗你自己的', url:location.origin + location.pathname
   };

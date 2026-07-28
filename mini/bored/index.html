@@ -6,8 +6,8 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>無聊快篩｜發票載具</title>
-<script src="qrcode.min.js?v=da39b6e5"></script>
-<script src="unit-kit.js?v=da39b6e5"></script>
+<script src="qrcode.min.js?v=9e69cf26"></script>
+<script src="unit-kit.js?v=9e69cf26"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--mut:#7A8494;--line:#F0E0E1;--bg:#FFF6F5}
@@ -81,8 +81,11 @@
   .rowbtn{flex:none;align-self:center;font-size:11.5px;padding:8px 9px}
   .spot{margin-top:10px}
   .spot .row{margin-top:0}
-  /* 篩選條:精選 / 我的清單 / 全部 */
-  .fbar{display:flex;gap:7px;margin:10px 2px 0}
+  /* 篩選條:精選 / 我的清單 / 全部 —— 釘在標題列下面,清單隨時看得到。
+     top 用 --topH(JS 量出來的標題列實高),因為那條有 safe-area,寫死會露餡。 */
+  .fbar{display:flex;gap:7px;padding:10px 2px;margin:0 -2px;
+        position:sticky;top:var(--topH,58px);z-index:8;background:var(--bg)}
+  .fbar.stuck{box-shadow:0 6px 12px -8px rgba(31,36,48,.35)}
   .fbar .uk-chip{flex:1;text-align:center;font-size:12px;padding:9px 4px;min-height:44px}
   .fbar .uk-chip b{color:inherit}
   /* 出走計畫:最優順序 + 一鍵開地圖 + 到店報載具 */
@@ -161,8 +164,8 @@
     <div class="sec"><button onclick="UK.share.open(card)">曬我的無聊值</button></div>
   </div>
 
-  <!-- v4 解悶處方:只有景點,一列一個(0728 拍板砍掉合作商家那段)
-       上方篩選條:精選 / 已排入(含最優路線與到店報載具)/ 全部 -->
+  <!-- v4 好去處:三個模式共用一頁(精選／我的清單／全部),篩選條釘在標題列下面。
+       原本的 v5「全部好去處」併進來了——少一頁,清單永遠在同一個位置。 -->
   <div id="v4" style="display:none">
     <div class="subh" id="rxLead"><span id="rxLeadT">你終於要出門了？</span>
       <small></small></div>
@@ -173,14 +176,6 @@
     </div>
     <div id="planBox"></div>
     <div id="rxList"></div>
-    <div class="sec" id="rxSec"><button onclick="showAll()">看全部好去處 &rsaquo;</button></div>
-  </div>
-
-  <!-- v5 全部好去處 -->
-  <div id="v5" style="display:none">
-    <div class="subh">全部好去處
-      <small>自己挑</small></div>
-    <div id="allList"></div>
   </div>
 
   <!-- v7 空狀態(transient:一次性頁,有引導也有出路) -->
@@ -319,7 +314,7 @@ function noShow() {
 }
 
 /* 返回堆疊:v2 過場、v7 空狀態不入堆疊(這是 kit 幫你處理好的坑) */
-var VIEWS = ['v0','v1','v2','v3','v4','v5','v7'];
+var VIEWS = ['v0','v1','v2','v3','v4','v7'];   /* 原 v5「全部好去處」已併進 v4 的篩選條 */
 var nav = UK.nav.create({
   views: VIEWS,
   transient: ['v2','v7'],
@@ -415,10 +410,10 @@ function gate() {
 UK.chips.bind(document, { onPick: function (k, v, cleared) {
   /* 篩選條跟訪談共用 kit 的 chips,要先攔下來——不然它會被當成第三個答案,把門檻算壞 */
   if (k === 'mode') {
-    if (cleared || v === 'pick') { RXMODE = 'pick'; markMode('pick'); renderRx(); return; }
-    /* 「全部」是換頁,不是換篩選 → 高亮要留在目前的模式,返回 v4 時才不會對不上 */
-    if (v === 'all') { markMode(RXMODE); showAll(); return; }
-    RXMODE = 'mine'; renderRx(); UK.track('plan_view', { n:pickedSpots().length });
+    RXMODE = cleared ? 'pick' : v;                 /* 再點一次同一顆 = 回精選 */
+    markMode(RXMODE);
+    renderRx();
+    UK.track('rx_mode', { mode:RXMODE, n:pickedSpots().length });
     return;
   }
   if (cleared) delete ANS[k]; else ANS[k] = v;
@@ -641,15 +636,15 @@ function planHTML(s) {
 
 function renderRx(s) {
   s = s || applyDims();
-  var mine = pickedSpots();
+  var mine = pickedSpots(), all = spotsSorted();
   document.getElementById('mineN').textContent = mine.length;
-  var list = (RXMODE === 'mine') ? mine : spotsSorted().slice(0, 3);
+  var list = RXMODE === 'mine' ? mine : (RXMODE === 'all' ? all : all.slice(0, 3));
   document.getElementById('planBox').innerHTML = (RXMODE === 'mine') ? planHTML(s) : '';
   document.getElementById('rxList').innerHTML = list.map(function (p) { return spotHTML(p, s); }).join('');
-  document.getElementById('rxSec').style.display = (RXMODE === 'mine') ? 'none' : '';
-  document.querySelector('#rxLead small').textContent = (RXMODE === 'mine')
-    ? (mine.length ? '排了 ' + mine.length + ' 個地方。走不走是你的事。' : '還沒排任何地方')
-    : '半徑 ' + radTxt(s.radius) + ' · 這 3 個都在圓外';
+  document.querySelector('#rxLead small').textContent =
+      RXMODE === 'mine' ? (mine.length ? '排了 ' + mine.length + ' 個地方。走不走是你的事。' : '還沒排任何地方')
+    : RXMODE === 'all'  ? all.length + ' 個地方,自己挑'
+    :                     '半徑 ' + radTxt(s.radius) + ' · 這 3 個都在圓外';
 }
 function showRx() {
   var s = applyDims();
@@ -657,11 +652,8 @@ function showRx() {
   renderRx(s);
   nav.show('v4'); UK.track('rx_view', { radius:s.radius, mode:RXMODE });
 }
-function showAll() {
-  var s = applyDims(), list = spotsSorted();
-  document.getElementById('allList').innerHTML = list.map(function (p) { return spotHTML(p, s); }).join('');
-  nav.show('v5'); UK.track('all_view');
-}
+/* 「全部」不再是獨立頁,是 v4 的一個模式(留這支是為了外部呼叫不斷掉) */
+function showAll() { RXMODE = 'all'; markMode('all'); showRx(); }
 
 /* -- 分享卡:一張圖 + 圖內 QR(kit 負責畫) -- */
 function card() {
@@ -695,6 +687,23 @@ document.addEventListener('keydown', function (e) {   /* 列是 role=button,鍵�
   if (!row || e.target.tagName === 'BUTTON') return;
   e.preventDefault(); UK.poi.open(row, POI);
 });
+/* 篩選條要黏在標題列正下方。標題列有 safe-area,高度會變,所以量出來寫進 --topH;
+   轉向或字級變化時重量一次。 */
+function syncTopH() {
+  var t = document.querySelector('.top');
+  if (t) document.documentElement.style.setProperty('--topH', Math.round(t.getBoundingClientRect().height) + 'px');
+}
+syncTopH();
+window.addEventListener('resize', syncTopH);
+window.addEventListener('orientationchange', syncTopH);
+/* 黏住的時候補一道陰影,讓下面的卡看起來是從它底下滑過去 */
+window.addEventListener('scroll', function () {
+  var f = document.querySelector('.fbar');
+  if (!f) return;
+  var top = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--topH')) || 58;
+  f.classList.toggle('stuck', f.getBoundingClientRect().top <= top + 1);
+}, { passive: true });
+
 applyDims();
 entryRender();
 nav.reset('v0');

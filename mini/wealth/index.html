@@ -9,8 +9,8 @@
 <title>幾歲破產|發票載具</title>
 <!-- vendored / 共用層:不改。unit-kit 這裡只用到 UK.selfCheck()(唯讀機械自檢),
      nav/state/share 依 0726 決策維持本單元手寫版本。 -->
-<script src="qrcode.min.js?v=da39b6e5"></script>
-<script src="unit-kit.js?v=da39b6e5"></script>
+<script src="qrcode.min.js?v=9e69cf26"></script>
+<script src="unit-kit.js?v=9e69cf26"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--red-deep:#A50011;--gold:#FFD34D;--teal:#0E7C7B;--mut:#7A8494;--bg:#FFF6F5;--line:#F0E0E1}
@@ -94,12 +94,8 @@
   .idle b{color:#B8912F;font-size:14px}
   .hint{font-size:10.5px;color:var(--mut);font-weight:600;line-height:1.6;margin-top:2px}
   /* 分享浮層的樣式由 kit 的 .uk-* 提供(0727 改走 UK.share),這裡只留 ⋯ 選單自己的 */
-  #mnMask{position:fixed;inset:0;background:rgba(15,20,30,.5);display:none;align-items:flex-end;z-index:99}
-  #mnMask.on{display:flex}
-  .mn-sheet{width:100%;max-width:430px;margin:0 auto;background:#fff;border-radius:20px 20px 0 0;padding:14px 14px calc(16px + env(safe-area-inset-bottom,0));max-height:88%;overflow-y:auto}
-  .mn-item{display:block;width:100%;padding:14px;font-size:15px;font-weight:800;color:var(--ink);border-radius:12px;min-height:48px;text-align:center}
-  .mn-cancel{color:var(--mut);font-weight:700}
-  .mn-link{display:block;width:100%;min-height:44px;padding:11px 12px;font-family:inherit;font-size:13px;font-weight:700;color:#33404F;text-align:center;background:#F5F6F8;border:1.5px solid #D8DEE6;border-radius:12px;-webkit-user-select:all;user-select:all}
+  /* ⋯ 選單的樣式(#mnMask/.mn-*)已於 0728 移除:改用 kit 的 .uk-* 浮層,
+     連手動複製連結那塊也搬進 kit 了,這裡整組變死碼。 */
   /* .act 第三行(purpose)字要比 App 名小一階 */
   .act span:not(.ic){font-size:9.5px;line-height:1.3}
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
@@ -204,18 +200,8 @@
 
   <!-- 分享面板由 UK.share 自己建(0727 起共用 kit 版式),這裡不再自備 -->
 
-  <!-- ⋯ 極簡選單:分享入口只做「複製連結」,不做多社群選單 -->
-  <div id="mnMask"><div class="mn-sheet">
-    <button class="mn-item" onclick="copyLink()">🔗 複製連結</button>
-    <!-- 離開單元的入口:從頂部列搬到這裡,頂部列只負責回第一頁 -->
-    <button class="mn-item" onclick="menuClose();goHome()">🏠 回發票載具首頁</button>
-    <!-- 自動複製被容器擋下時的出路:連結直接攤出來給你選,不用 prompt(容器會吃掉) -->
-    <div id="mnFallback" style="display:none">
-      <div class="note" style="margin-top:2px">瀏覽器擋掉自動複製了&mdash;&mdash;長按下面這行複製</div>
-      <input id="mnLink" class="mn-link" readonly onclick="this.select()">
-    </div>
-    <button class="mn-item mn-cancel" onclick="menuClose()">取消</button>
-  </div></div>
+  <!-- ⋯ 選單改由 UK.menu 建(0728):三支共用,這裡不再自備 markup。
+       含手動複製連結的退路,那段也搬進 kit 了。 -->
 
 </div>
 <div class="toast" id="tst"></div>
@@ -278,10 +264,9 @@ function killScan(){ if(_t){ clearInterval(_t); _t=null; } }
 /* 浮層一律關掉;回傳有沒有真的關掉東西。
    分享卡是 kit 建的浮層,要用 UK.share.close()(它自己回傳有沒有關到) */
 function closeSheets(){
-  var mn=document.getElementById('mnMask'), hit=false;
-  if(mn.classList.contains('on')){ menuClose(); hit=true; }
-  if(UK.share.close()) hit=true;
-  return hit;
+  /* 0728:選單也改成 kit 的了,所以整組浮層(條碼/地點卡/選單/分享卡)
+     直接交給 UK.closeTopSheet() 依序關——不要在這裡自己列一份會漏。 */
+  return UK.closeTopSheet();
 }
 function goBack(){
   killScan();
@@ -450,17 +435,28 @@ function rxRender(){
   appsRender();
 }
 
+/* 平台判斷:iOS 給 App Store 連結,Android 給 Play 商店連結。
+   iPadOS 13+ 的 userAgent 偽裝成 Mac,要用 maxTouchPoints 補判斷,不然 iPad 會被當成桌機。
+   桌機/判斷不出來時 fallback 到 android——這支單元是手機小程序,桌機開只是開發預覽用。 */
+function platform(){
+  var ua = navigator.userAgent || '';
+  if (/iPhone|iPad|iPod/.test(ua)) return 'ios';
+  if (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) return 'ios';   /* iPadOS 偽裝 */
+  if (/Android/.test(ua)) return 'android';
+  return 'android';
+}
 /* ── CMoney 理財 App 直達 ──
    0727 Melon:算完分數後,依不同目的連去籌碼K線或其他 CMoney 理財 App。
    要加 App 只需要在這個陣列多加一列(purpose = 依目的分流的依據)。
-   url 一律填 Android Play 商店頁 —— 目前只拿到這條,沒有 iOS App Store 連結,
-   所以是「一律開 Play 商店」,不是「偵測平台各開各的」。iPhone 使用者點了會
-   看到瀏覽器打開 Play 商店網頁版(能看介紹,但裝不了)。iOS 連結補齊前先這樣。 */
+   ios/android 分開填,goApp() 依 platform() 挑對的連結;只有其中一個平台
+   有連結時,另一個平台會 fallback 用那一個(見 appUrl),不會兩邊都開不了。 */
 var APPS=[
   {k:'chips', ic:'📊', nm:'籌碼K線', purpose:'看盤與籌碼分析',
-   url:'https://play.google.com/store/apps/details?id=com.cmoney.chipk&hl=zh_TW'}
+   android:'https://play.google.com/store/apps/details?id=com.cmoney.chipk&hl=zh_TW',
+   ios:'https://apps.apple.com/tw/app/%E8%82%A1%E5%B8%82%E7%B1%8C%E7%A2%BCk%E7%B7%9A-%E5%BF%AB%E9%80%9F%E6%89%BE%E5%87%BA%E4%B8%BB%E5%8A%9B%E7%B1%8C%E7%A2%BC%E9%A3%86%E8%82%A1/id981360113'}
   /* 待 Melon 回覆後補:定期定額／記帳管帳／其他 CMoney 理財 App */
 ];
+function appUrl(a){ return platform()==='ios' ? (a.ios||a.android) : (a.android||a.ios); }
 function appsRender(){
   /* 用他自己剛看到的數字接話,不是丟一句「投資讓錢變大」的口號。
      只陳述「不投資會怎樣」(放著就是原數),不承諾報酬——承諾會跟同卡的
@@ -475,47 +471,23 @@ function appsRender(){
 }
 function goApp(k){
   var a=APPS.filter(function(x){ return x.k===k; })[0]; if(!a) return;
-  track('wc_go_app',{app:a.k});
+  var url=appUrl(a);
+  track('wc_go_app',{app:a.k, platform:platform()});
   /* window.open(_blank),不是 location.href:跟 UK.poi 的地圖連結、detox 的分享同一個慣例。
      這個單元是嵌在載具 App 的 webview 裡,location.href 會把整個小程序導航掉——
-     使用者從 Play 商店返回時,發票分數、已選的訪談結果全部消失,還得重跑一輪。 */
-  if(a.url){ window.open(a.url, '_blank'); return; }
+     使用者從商店返回時,發票分數、已選的訪談結果全部消失,還得重跑一輪。 */
+  if(url){ window.open(url, '_blank'); return; }
   UK.toast(a.nm+'入口整合中,連結確認後開放');
 }
 
 /* ── ⋯ 選單:極簡分享=複製連結 ── */
-function menuOpen(){ document.getElementById('mnFallback').style.display='none';
-  document.getElementById('mnMask').classList.add('on'); try{ history.pushState({m:1},''); }catch(e){} }
-function menuClose(){ document.getElementById('mnMask').classList.remove('on'); }
-/* 三條路依序試,全失敗也有出路,不會變死按鈕。
-   順序刻意是 execCommand 優先:它必須跑在使用者手勢的呼叫堆疊裡,
-   一放進 clipboard API 的 promise callback 就永遠回 false(踩過)。
-   clipboard API 在 webview 常被 NotAllowedError 打回,所以它當第二順位。 */
-function copyLink(){
-  var lk=shLink();
-  function ok(via){ toast('連結已複製,貼給朋友'); track('wc_copy',{via:via}); menuClose(); }
-  function legacy(){
-    try{
-      var ta=document.createElement('textarea');
-      ta.value=lk; ta.setAttribute('readonly','');
-      ta.style.position='fixed'; ta.style.top='0'; ta.style.opacity='0';
-      document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, lk.length);
-      var done=document.execCommand('copy'); document.body.removeChild(ta);
-      if(done){ ok('execCommand'); return true; }
-    }catch(e){}
-    return false;
-  }
-  function manual(){
-    var w=document.getElementById('mnFallback'), i=document.getElementById('mnLink');
-    i.value=lk; w.style.display=''; i.focus(); i.select();
-    toast('自動複製被擋下——長按下面那行');   /* 說實話:不能沿用「已複製」的 toast */
-    track('wc_copy',{via:'manual'});
-  }
-  if(legacy()) return;
-  if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(lk).then(function(){ ok('api'); }, manual);
-  } else manual();
-}
+/* ⋯ 選單改走 UK.menu(0728):三支共用同一組(分享／複製連結／重新載入)。
+   原本這裡自己實作了一份,而且它的複製邏輯比 kit 當時的版本好——
+   所以不是把它丟掉,是把那套 execCommand 優先＋手動攤連結的做法搬進 kit,
+   三支一起受惠,這裡才換過來。home:true 保留「回發票載具首頁」那一項
+   (頂部列只負責回第一頁,離開單元的出口刻意收在選單裡)。 */
+function menuOpen(){ UK.menu.open(shLink(), { title:'幾歲破產', text:'我的錢撐到幾歲?你敢算嗎?', home:true }); }
+function menuClose(){ UK.menu.close(); }
 
 /* ── 分享:改走 UK.share(0727)──
    原本這裡有一份手寫 canvas。kit 的 UK.share 已經是「三支自營小程式共用」的版式

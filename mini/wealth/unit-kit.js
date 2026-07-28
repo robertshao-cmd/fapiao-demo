@@ -574,6 +574,10 @@
           + '<button class="uk-sheet-item" id="uk-native-share">📤 分享</button>'
           + '<button class="uk-sheet-item" id="uk-copy">🔗 複製連結</button>'
           + '<button class="uk-sheet-item" id="uk-reload">🔄 重新載入</button>'
+          + '<button class="uk-sheet-item" id="uk-gohome" style="display:none">🏠 回發票載具首頁</button>'
+          + '<div id="uk-copy-fb" style="display:none">'
+          + '<div class="uk-note">瀏覽器擋掉自動複製了——長按下面這行複製</div>'
+          + '<input id="uk-copy-link" class="uk-copy-link" readonly></div>'
           + '<button class="uk-sheet-cancel">取消</button></div>';
         m.onclick = function (e) { if (e.target === m) UK.menu.close(); };
         m.querySelector('.uk-sheet-cancel').onclick = function () { UK.menu.close(); };
@@ -582,11 +586,37 @@
       var lk = link || location.href.split('?')[0];
       var title = (meta && meta.title) || document.title;
       var text = (meta && meta.text) || '';
+      /* 每次開都先收掉上一次的手動複製區,不然殘留在那邊像是又失敗了 */
+      var fb = m.querySelector('#uk-copy-fb'); if (fb) fb.style.display = 'none';
+      /* 三條路依序試,全失敗也有出路,不會變死按鈕。
+         0728:這段是從 wealth 搬上來的——它踩過兩個坑,原本 kit 的版本會踩到:
+         1. execCommand 必須跑在使用者手勢的呼叫堆疊裡,一放進 clipboard API 的
+            promise callback 就永遠回 false,所以它要排第一順位;
+         2. 失敗時不能用 prompt(),容器/webview 會直接吃掉——要把連結攤在面板上讓人長按。
+         clipboard API 在 webview 常被 NotAllowedError 打回,所以排第二。 */
       function copyToClipboard() {
-        function ok() { UK.toast('連結已複製，貼給朋友'); UK.menu.close(); }
-        function ng() { global.prompt('長按複製連結', lk); UK.menu.close(); }
-        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(lk).then(ok, ng);
-        else ng();
+        function ok(via) { UK.toast('連結已複製，貼給朋友'); UK.track('menu_copy', { via: via }); UK.menu.close(); }
+        function legacy() {
+          try {
+            var ta = document.createElement('textarea');
+            ta.value = lk; ta.setAttribute('readonly', '');
+            ta.style.position = 'fixed'; ta.style.top = '0'; ta.style.opacity = '0';
+            document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, lk.length);
+            var done = document.execCommand('copy'); document.body.removeChild(ta);
+            if (done) { ok('execCommand'); return true; }
+          } catch (e) {}
+          return false;
+        }
+        function manual() {
+          var w = document.getElementById('uk-copy-fb'), i = document.getElementById('uk-copy-link');
+          i.value = lk; w.style.display = ''; i.focus(); i.select();
+          UK.toast('自動複製被擋下——長按下面那行');   /* 說實話:不能沿用「已複製」的 toast */
+          UK.track('menu_copy', { via: 'manual' });
+        }
+        if (legacy()) return;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(lk).then(function () { ok('api'); }, manual);
+        } else manual();
       }
       m.querySelector('#uk-native-share').onclick = function () {
         if (navigator.share) {
@@ -611,6 +641,16 @@
           location.replace(u.toString());          /* replace:不在返回堆疊留一筆 */
         } catch (e) { location.reload(); }
       };
+      /* 選用:「回發票載具首頁」。預設不顯示——detox/bored 靠標題列與 homeHint 回去,
+         選單裡再放一顆是重複。wealth 刻意把離開單元的出口收在選單裡,傳 home:true 開啟。 */
+      var gh = m.querySelector('#uk-gohome');
+      if (meta && meta.home) {
+        gh.style.display = '';
+        gh.onclick = function () { UK.menu.close(); UK.exitToHome(); };
+      } else {
+        gh.style.display = 'none';
+        gh.onclick = null;
+      }
       m.classList.add('on');
       try { history.pushState({ uk: 1 }, ''); } catch (e) {}
     },
@@ -804,6 +844,7 @@
   + '.uk-chip.on{border-color:#2B4BD7;color:#2B4BD7;background:#EDF1FE}'
   + '.uk-vf{min-height:44px;font-size:12px;font-weight:800;background:#FFE9EB;color:#A50011;border-radius:9px;padding:8px 10px;border:none}'
   + '.uk-vf.done{background:#9BB3A6;color:#fff}'
+  + '.uk-copy-link{display:block;width:100%;min-height:44px;padding:11px 12px;font-family:inherit;font-size:13px;font-weight:700;color:#33404F;text-align:center;background:#F5F6F8;border:1.5px solid #D8DEE6;border-radius:12px;-webkit-user-select:all;user-select:all}'
   + '.uk-carrier-wrap{background:#fff;border:2px solid #1F2430;border-radius:14px;padding:12px 10px;margin-top:12px}'
   + '.uk-carrier-wrap canvas{width:100%;max-width:320px;height:auto;display:block;margin:0 auto;image-rendering:pixelated}'
   + '.uk-carrier-code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:20px;font-weight:800;letter-spacing:3px;color:#1F2430;margin-top:8px}'
