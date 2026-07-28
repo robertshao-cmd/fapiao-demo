@@ -6,8 +6,8 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>無聊快篩｜發票載具</title>
-<script src="qrcode.min.js?v=9e69cf26"></script>
-<script src="unit-kit.js?v=9e69cf26"></script>
+<script src="qrcode.min.js?v=02bcb254"></script>
+<script src="unit-kit.js?v=02bcb254"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--mut:#7A8494;--line:#F0E0E1;--bg:#FFF6F5}
@@ -41,7 +41,29 @@
   .sec button{font-size:12.5px;font-weight:800;color:#8A5A5E;text-decoration:underline;text-underline-offset:3px;padding:12px 6px;min-height:44px}
   .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
   .q{font-size:13px;font-weight:800;color:#5A0E14;margin-top:12px}
-  .scan{text-align:center;padding:40px 0;font-size:13.5px;font-weight:800;color:#8A5A5E}
+  .scan{text-align:center;padding:26px 14px 20px;font-size:13.5px;font-weight:800;color:#8A5A5E}
+  /* 雷達:你在中間,圈一直往外掃 —— 掃了半天發現你就在原地 */
+  .radar{position:relative;width:132px;height:132px;margin:0 auto 14px}
+  .radar .ring{position:absolute;inset:0;border:2px solid var(--red);border-radius:50%;
+               opacity:0;animation:sweep 1.9s ease-out infinite}
+  .radar .r2{animation-delay:.95s}
+  .radar .dot{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:40px;
+              animation:jiggle 1.9s ease-in-out infinite}
+  /* 想跑的那一隻:走出去兩步就被拉回來 */
+  .radar .run{position:absolute;left:50%;top:50%;margin-left:-10px;margin-top:-12px;font-size:20px;
+              animation:tryRun 1.9s ease-in-out infinite}
+  @keyframes sweep{0%{transform:scale(.22);opacity:.9}70%{opacity:.35}100%{transform:scale(1);opacity:0}}
+  @keyframes jiggle{0%,100%{transform:translate(-50%,-50%) rotate(-4deg)}
+                    50%{transform:translate(-50%,-50%) rotate(4deg) scale(1.06)}}
+  @keyframes tryRun{0%,100%{transform:translate(0,0);opacity:0}
+                    25%{transform:translate(34px,-4px);opacity:1}
+                    55%{transform:translate(46px,0);opacity:1}
+                    75%{transform:translate(6px,2px);opacity:.6}}
+  .scanTxt{min-height:38px;line-height:1.6}
+  .scanTxt b{display:block;font-size:14.5px;color:#5A0E14}
+  .scanTxt small{display:block;font-size:11.5px;font-weight:700;color:var(--mut);margin-top:3px}
+  .bar{height:5px;background:#F3E3E4;border-radius:99px;overflow:hidden;margin-top:14px}
+  .bar i{display:block;height:100%;width:0;background:var(--red);border-radius:99px;transition:width .5s ease}
   .big-score{display:flex;align-items:baseline;justify-content:center;gap:8px;margin:0 0 4px}
   .big-score b{font-size:52px;color:var(--red)}
   .big-score span{font-size:13px;color:var(--mut)}
@@ -49,6 +71,8 @@
   .stampi{font-size:40px!important;line-height:1;align-self:center}
   .stampT{display:inline-block;font-size:12px;font-weight:900;color:#A50011;background:#FFE9EB;
           border-radius:99px;padding:4px 12px}
+  /* 跳過訪談時的一行:分數是純發票算的,不能讓他以為那兩題有算進去 */
+  .skipnote{font-size:11px;font-weight:700;color:var(--mut);margin-top:6px}
   /* 訪談標題 */
   .lead{font-size:15px;font-weight:900;line-height:1.6;padding:14px 4px 0}
   .lead small{display:block;font-size:11.5px;font-weight:700;color:var(--mut);margin-top:6px}
@@ -143,7 +167,14 @@
 
   <!-- v2 過場(transient:不入返回堆疊、可跳過) -->
   <div id="v2" style="display:none">
-    <div class="card scan" id="scanTxt">吸入發票中…</div>
+    <div class="card scan">
+      <div class="radar">
+        <span class="ring"></span><span class="ring r2"></span>
+        <span class="dot">😶</span><span class="run">🚶</span>
+      </div>
+      <div class="scanTxt" id="scanTxt"><b>翻你的發票…</b></div>
+      <div class="bar"><i id="scanBar"></i></div>
+    </div>
     <div class="sec"><button onclick="skipScan()">跳過動畫 &rsaquo;</button></div>
   </div>
 
@@ -154,6 +185,7 @@
     <div class="card" style="text-align:center">
       <div class="big-score"><span class="stampi" id="stampI">😶</span><b id="scoreN">&mdash;</b><span>/100</span></div>
       <div class="stampT" id="stampT"></div>
+      <div class="skipnote" id="skipnote" style="display:none">你沒回答，這是純發票版</div>
       <div class="radl">生活半徑 <b id="radN">&mdash;</b> · <span id="radTxt"></span></div>
     </div>
     <div class="card">
@@ -242,6 +274,24 @@ var EVH = [
   function (s) { return s.conv + ' 張同一種店，我幫你數的'; }               /* 4 */
 ];
 /* 被抓到說謊時換這組(這一格本來就最好笑,別浪費) */
+/* -- 掃描過場的台詞:主句戳他,小字補刀。四拍,每拍 620ms。
+      要換整組就改 SCAN_SET(現在用第 0 組),不要只改一句,節奏會歪。 -- */
+var SCAN = [
+  [ ['翻你的發票…',        '47 張,翻得很快,因為都一樣'],
+    ['定位中…',            '找不到,因為你沒動'],
+    ['對你剛才的答案…',    '嗯哼'],
+    ['量你的半徑…',        '尺不用拉太長'] ],
+  [ ['吸入發票中…',        '一股超商味'],
+    ['標記你的座標…',      '標一個點就夠了'],
+    ['比對你剛才說的…',    '發票在笑'],
+    ['算你的生活半徑…',    '算完會有點痛'] ],
+  [ ['清點你的日常…',      '清單很短,別緊張'],
+    ['畫你的活動範圍…',    '一個圈,收工'],
+    ['查證你的說法…',      '查到了,不用查太久'],
+    ['結算無聊值…',        '你確定要看?'] ]
+];
+var SCAN_SET = 0;
+
 var EVH_LIAR = [
   function (s) { return '你嘴上這樣講，發票不是這樣寫'; },                  /* 0 ← 目前用這句 */
   function (s) { return '你剛才那句，' + s.conv + ' 張發票舉手反對'; },      /* 1 */
@@ -432,13 +482,21 @@ var _t = [];
 function scan() { scanRun(false); }
 function scanRun(skipped) {
   nav.show('v2');
-  var steps = ['吸入發票中…','標記你的座標…','比對你剛才的答案…','算你的生活半徑…'], i = 0;
-  var el = document.getElementById('scanTxt');
-  el.textContent = steps[0];
+  var steps = SCAN[SCAN_SET] || SCAN[0], i = 0;
+  var el = document.getElementById('scanTxt'), bar = document.getElementById('scanBar');
+  var s = stats();
+  function paint(n) {
+    var line = steps[n];
+    /* 第一句把張數帶進去(數字要是他自己的,不然只是裝飾) */
+    var sub = (n === 0) ? (s.n + ' 張,翻得很快,因為都一樣') : line[1];
+    el.innerHTML = '<b>' + line[0] + '</b><small>' + sub + '</small>';
+    bar.style.width = Math.round((n + 1) / steps.length * 100) + '%';
+  }
+  paint(0);
   _t = [];
   var h = setInterval(function () {
     i++;
-    if (i < steps.length) el.textContent = steps[i];
+    if (i < steps.length) paint(i);
     else { clearInterval(h); finish(skipped); }
   }, 620);
   _t.push(function () { clearInterval(h); });
@@ -476,6 +534,7 @@ function showResult() {
                          : { i:'🚶', t:'還有救' };
   document.getElementById('stampI').textContent = tier.i;
   document.getElementById('stampT').textContent = tier.t;
+  document.getElementById('skipnote').style.display = ST.skipped ? '' : 'none';
 
   /* 生活半徑(併在分數卡裡,一行講完) */
   document.getElementById('radN').textContent = radTxt(s.radius);
