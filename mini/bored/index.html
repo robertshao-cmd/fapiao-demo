@@ -6,8 +6,8 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>無聊快篩｜發票載具</title>
-<script src="qrcode.min.js?v=c18b2c69"></script>
-<script src="unit-kit.js?v=c18b2c69"></script>
+<script src="qrcode.min.js?v=da39b6e5"></script>
+<script src="unit-kit.js?v=da39b6e5"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--mut:#7A8494;--line:#F0E0E1;--bg:#FFF6F5}
@@ -81,6 +81,18 @@
   .rowbtn{flex:none;align-self:center;font-size:11.5px;padding:8px 9px}
   .spot{margin-top:10px}
   .spot .row{margin-top:0}
+  /* 篩選條:精選 / 我的清單 / 全部 */
+  .fbar{display:flex;gap:7px;margin:10px 2px 0}
+  .fbar .uk-chip{flex:1;text-align:center;font-size:12px;padding:9px 4px;min-height:44px}
+  .fbar .uk-chip b{color:inherit}
+  /* 出走計畫:最優順序 + 一鍵開地圖 + 到店報載具 */
+  .plan{background:#fff;border-radius:16px;padding:14px;margin-top:12px;box-shadow:0 2px 10px rgba(31,36,48,.06)}
+  .plan h3{font-size:13.5px;font-weight:900;color:#5A0E14}
+  .plan ol{margin:8px 0 0 18px;font-size:12.5px;line-height:2;color:#3C4657}
+  .plan ol b{color:var(--ink)}
+  .plan .tot{font-size:11.5px;color:var(--mut);font-weight:700;margin-top:6px}
+  .plan .chain{font-size:11.5px;line-height:1.8;color:#8A5A00;font-weight:800;
+               margin-top:10px;padding-top:9px;border-top:1px dashed var(--line)}
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -149,12 +161,19 @@
     <div class="sec"><button onclick="UK.share.open(card)">曬我的無聊值</button></div>
   </div>
 
-  <!-- v4 解悶處方:只有景點,一列一個(0728 拍板砍掉合作商家那段) -->
+  <!-- v4 解悶處方:只有景點,一列一個(0728 拍板砍掉合作商家那段)
+       上方篩選條:精選 / 已排入(含最優路線與到店報載具)/ 全部 -->
   <div id="v4" style="display:none">
     <div class="subh" id="rxLead"><span id="rxLeadT">你終於要出門了？</span>
       <small></small></div>
+    <div class="fbar" data-chips="mode">
+      <button class="uk-chip on" data-v="pick">精選</button>
+      <button class="uk-chip" data-v="mine">我的清單 <b id="mineN">0</b></button>
+      <button class="uk-chip" data-v="all">全部</button>
+    </div>
+    <div id="planBox"></div>
     <div id="rxList"></div>
-    <div class="sec"><button onclick="showAll()">看全部好去處 &rsaquo;</button></div>
+    <div class="sec" id="rxSec"><button onclick="showAll()">看全部好去處 &rsaquo;</button></div>
   </div>
 
   <!-- v5 全部好去處 -->
@@ -283,7 +302,7 @@ function clamp(v) { return Math.max(2, Math.min(98, v || 0)); }
 function curAns() { return Object.keys(ANS).length ? ANS : (ST.ans || {}); }
 
 /* ══ 沒去偵測 ══════════════════════════════════════════════
-   上次按了「就衝這裡」,這次回來發票張數一張都沒多 → 他沒去。
+   上次按了「帶你衝」,這次回來發票張數一張都沒多 → 他沒去。
    兩個都是事實(存的 pick + 發票數),所以不用寫「你很懶」,把兩件事並排就夠痛。
    只在「上一個 session 排的」才算 —— 剛按下去馬上罵人會像壞掉。 */
 var _sessionStart = Date.now();
@@ -383,7 +402,9 @@ function shareMeta() {
 /* -- 訪談:兩題都要答才能往下 -- */
 function resetAns() {
   ANS = {};
-  document.querySelectorAll('[data-chips] [data-v]').forEach(function (c) { c.classList.remove('on'); });
+  /* 只清訪談那兩組——不要連篩選條的選中態一起清掉(它不是答案) */
+  document.querySelectorAll('[data-chips="q1"] [data-v],[data-chips="q2"] [data-v]')
+    .forEach(function (c) { c.classList.remove('on'); });
   gate();
 }
 function gate() {
@@ -392,9 +413,23 @@ function gate() {
   b.textContent = need >= 2 ? '先回答上面兩題' : (need === 1 ? '還有 1 題' : '好了，驗我的發票');
 }
 UK.chips.bind(document, { onPick: function (k, v, cleared) {
+  /* 篩選條跟訪談共用 kit 的 chips,要先攔下來——不然它會被當成第三個答案,把門檻算壞 */
+  if (k === 'mode') {
+    if (cleared || v === 'pick') { RXMODE = 'pick'; markMode('pick'); renderRx(); return; }
+    /* 「全部」是換頁,不是換篩選 → 高亮要留在目前的模式,返回 v4 時才不會對不上 */
+    if (v === 'all') { markMode(RXMODE); showAll(); return; }
+    RXMODE = 'mine'; renderRx(); UK.track('plan_view', { n:pickedSpots().length });
+    return;
+  }
   if (cleared) delete ANS[k]; else ANS[k] = v;
   gate();
 } });
+/* 篩選條的選中態:離開「我的清單」時要把亮起來的那顆收回 */
+function markMode(v) {
+  document.querySelectorAll('[data-chips="mode"] [data-v]').forEach(function (c) {
+    c.classList.toggle('on', c.getAttribute('data-v') === v);
+  });
+}
 function skip() { ANS = {}; ST.ans = {}; scanRun(true); }
 
 /* -- 掃描過場(可跳過;timer 會清掉,不會晚一步又跳) -- */
@@ -518,12 +553,12 @@ var SPOTS = [
 var POI = {};
 SPOTS.forEach(function (p) {
   POI[p.k] = { emoji:p.emoji, name:p.name, q:p.q, why:'', info:'',
-    addLabel:'就衝這裡', onAdd:function (vf, row) { togglePick(vf, row); } };
+    addLabel:'🧾 發票載具帶你衝', onAdd:function (vf, row) { togglePick(vf, row); } };
 });
 
 function spotsSorted() { return SPOTS.slice().sort(function (a, b) { return a.km - b.km; }); }
 
-/* 景點卡:一列 = emoji + 名字 + 距離 + 一句理由 + 一顆「就衝這裡」 */
+/* 景點卡:一列 = emoji + 名字 + 距離 + 一句理由 + 一顆「帶你衝」 */
 function spotHTML(p, s) {
   var why = p.why(s);
   POI[p.k].why = why;
@@ -538,14 +573,14 @@ function spotHTML(p, s) {
     + '<div class="meta"><span>' + p.km + ' 公里</span>'
     + (busted ? '<span class="tag no">上次你說要來</span>' : '') + '</div>'
     + '<i>' + why + '</i></div>'
-    + '<button class="uk-vf rowbtn' + (picked ? ' done' : '') + '" data-label="就衝這裡">'
-    + (picked ? '✅ 已排入' : '就衝這裡') + '</button>'
+    + '<button class="uk-vf rowbtn' + (picked ? ' done' : '') + '" data-label="帶你衝">'
+    + (picked ? '✅ 已排入' : '帶你衝') + '</button>'
     + '</div></div>';
 }
 function togglePick(vf, row) {
   if (!vf) return;
   var k = row.getAttribute('data-poi'), picks = ST.picks || {};
-  var label = vf.getAttribute('data-label') || '就衝這裡';
+  var label = vf.getAttribute('data-label') || '帶你衝';
   if (picks[k]) { delete picks[k]; vf.classList.remove('done'); vf.textContent = label; }
   else { picks[k] = 1; vf.classList.add('done'); vf.textContent = '✅ 已排入';
          UK.toast('排進出走清單了——別又滑掉'); }
@@ -553,13 +588,74 @@ function togglePick(vf, row) {
   ST.picks = picks; ST.pickAt = Date.now(); ST.pickInv = invN();
   ST = UK.state.save(KEY, ST);
   UK.track('rx_pick', { poi:k, on:!!picks[k] });
+  /* 清單數字與「我的清單」內容要當場跟著動(在 v4 才需要重畫) */
+  if (nav.current() === 'v4') renderRx();
+}
+/* ══ 出走計畫(我的清單)═════════════════════════════════════
+   排入 → 看得到清單 → 由近到遠的順序 → 一鍵開 Google 地圖 → 到店報載具 → 發票回來。
+   路線順序用距離排(由近到遠),不假裝是 Google 的最佳化演算法——Maps 的 URL API
+   沒有 optimize 參數,講「最優」就是騙人。地圖那一鍵是真的帶著全部站點開出去。 */
+var RXMODE = 'pick';                              /* pick | mine */
+function pickedSpots() {
+  var picks = ST.picks || {};
+  return spotsSorted().filter(function (p) { return picks[p.k]; });
+}
+function mapsRouteURL(list) {
+  if (!list.length) return null;
+  var qs = list.map(function (p) { return encodeURIComponent(p.q); });
+  var dest = qs.pop();
+  var u = 'https://www.google.com/maps/dir/?api=1&destination=' + dest + '&travelmode=driving';
+  if (qs.length) u += '&waypoints=' + qs.join('%7C');
+  return u;
+}
+function openRoute() {
+  var list = pickedSpots(); if (!list.length) return;
+  UK.track('plan_route', { n:list.length });
+  window.open(mapsRouteURL(list), '_blank');
+}
+function planCarrier() {
+  UK.carrier.open({ from:'plan', onDone: function () {
+    UK.toast('這筆會進你的載具——下次進來無聊值就會動');
+  } });
+}
+function planHTML(s) {
+  var list = pickedSpots();
+  if (!list.length) {
+    return '<div class="plan"><h3>清單是空的</h3>'
+      + '<div class="chain" style="border:none;padding:0;margin-top:6px">'
+      + '你連想去哪都還沒決定。回「精選」按一下「帶你衝」。</div></div>';
+  }
+  var tot = list.reduce(function (a, p) { return a + p.km; }, 0);
+  return '<div class="plan">'
+    + '<h3>🗺️ 由近到遠,這樣走</h3>'
+    + '<ol>' + list.map(function (p) {
+        return '<li><b>' + p.name + '</b>　' + p.km + ' 公里</li>'; }).join('') + '</ol>'
+    + '<div class="tot">' + list.length + ' 站 · 直線距離合計 ' + (Math.round(tot * 10) / 10)
+    + ' 公里 · 你的半徑是 ' + radTxt(s.radius) + '</div>'
+    + '<div class="chain">到了之後:結帳報手機條碼 → 發票自動歸戶 → 下次進來這裡的數字會動。'
+    + '<br>這就是我們要的那條鏈:出門 → 消費 → 發票 → 再被戳一次。</div>'
+    + '</div>'
+    + '<button class="btn p" onclick="openRoute()">🧭 用 Google 地圖帶我走完</button>'
+    + '<div class="sec"><button onclick="planCarrier()">到了要報載具,先看我的條碼</button></div>';
+}
+
+function renderRx(s) {
+  s = s || applyDims();
+  var mine = pickedSpots();
+  document.getElementById('mineN').textContent = mine.length;
+  var list = (RXMODE === 'mine') ? mine : spotsSorted().slice(0, 3);
+  document.getElementById('planBox').innerHTML = (RXMODE === 'mine') ? planHTML(s) : '';
+  document.getElementById('rxList').innerHTML = list.map(function (p) { return spotHTML(p, s); }).join('');
+  document.getElementById('rxSec').style.display = (RXMODE === 'mine') ? 'none' : '';
+  document.querySelector('#rxLead small').textContent = (RXMODE === 'mine')
+    ? (mine.length ? '排了 ' + mine.length + ' 個地方。走不走是你的事。' : '還沒排任何地方')
+    : '半徑 ' + radTxt(s.radius) + ' · 這 3 個都在圓外';
 }
 function showRx() {
-  var s = applyDims(), list = spotsSorted().slice(0, 3);
+  var s = applyDims();
   document.getElementById('rxLeadT').textContent = push();
-  document.querySelector('#rxLead small').textContent = '半徑 ' + radTxt(s.radius) + ' · 這 3 個都在圓外';
-  document.getElementById('rxList').innerHTML = list.map(function (p) { return spotHTML(p, s); }).join('');
-  nav.show('v4'); UK.track('rx_view', { radius:s.radius });
+  renderRx(s);
+  nav.show('v4'); UK.track('rx_view', { radius:s.radius, mode:RXMODE });
 }
 function showAll() {
   var s = applyDims(), list = spotsSorted();

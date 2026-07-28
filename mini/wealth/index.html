@@ -9,8 +9,8 @@
 <title>幾歲破產|發票載具</title>
 <!-- vendored / 共用層:不改。unit-kit 這裡只用到 UK.selfCheck()(唯讀機械自檢),
      nav/state/share 依 0726 決策維持本單元手寫版本。 -->
-<script src="qrcode.min.js?v=c18b2c69"></script>
-<script src="unit-kit.js?v=c18b2c69"></script>
+<script src="qrcode.min.js?v=da39b6e5"></script>
+<script src="unit-kit.js?v=da39b6e5"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--red-deep:#A50011;--gold:#FFD34D;--teal:#0E7C7B;--mut:#7A8494;--bg:#FFF6F5;--line:#F0E0E1}
@@ -452,11 +452,13 @@ function rxRender(){
 
 /* ── CMoney 理財 App 直達 ──
    0727 Melon:算完分數後,依不同目的連去籌碼K線或其他 CMoney 理財 App。
-   ⚠️ 連結待確認:各 App 的 deep link／商店頁都還沒拿到,url 一律 null → 先 toast 佔位。
-      拿到後把 url 填進去就會自動變成真的導頁,goApp() 不用改。
-      要加 App 只需要在這個陣列多加一列(purpose = 依目的分流的依據)。 */
+   要加 App 只需要在這個陣列多加一列(purpose = 依目的分流的依據)。
+   url 一律填 Android Play 商店頁 —— 目前只拿到這條,沒有 iOS App Store 連結,
+   所以是「一律開 Play 商店」,不是「偵測平台各開各的」。iPhone 使用者點了會
+   看到瀏覽器打開 Play 商店網頁版(能看介紹,但裝不了)。iOS 連結補齊前先這樣。 */
 var APPS=[
-  {k:'chips', ic:'📊', nm:'籌碼K線', purpose:'看盤與籌碼分析', url:null}
+  {k:'chips', ic:'📊', nm:'籌碼K線', purpose:'看盤與籌碼分析',
+   url:'https://play.google.com/store/apps/details?id=com.cmoney.chipk&hl=zh_TW'}
   /* 待 Melon 回覆後補:定期定額／記帳管帳／其他 CMoney 理財 App */
 ];
 function appsRender(){
@@ -474,7 +476,10 @@ function appsRender(){
 function goApp(k){
   var a=APPS.filter(function(x){ return x.k===k; })[0]; if(!a) return;
   track('wc_go_app',{app:a.k});
-  if(a.url){ location.href=a.url; return; }
+  /* window.open(_blank),不是 location.href:跟 UK.poi 的地圖連結、detox 的分享同一個慣例。
+     這個單元是嵌在載具 App 的 webview 裡,location.href 會把整個小程序導航掉——
+     使用者從 Play 商店返回時,發票分數、已選的訪談結果全部消失,還得重跑一輪。 */
+  if(a.url){ window.open(a.url, '_blank'); return; }
   UK.toast(a.nm+'入口整合中,連結確認後開放');
 }
 
