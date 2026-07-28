@@ -187,8 +187,8 @@ button:focus-visible{outline:3px solid #7FD1CC;outline-offset:2px;border-radius:
 .t5 .n{font-size:11px;color:var(--muted);font-family:var(--mono);width:44px;text-align:right}
 .split{display:flex;gap:9px}
 .donutcard{flex:1;padding:13px;display:flex;gap:12px;align-items:center}
-.donut{width:62px;height:62px;border-radius:50%;background:conic-gradient(var(--teal) 0 62%,#E3C77A 62% 100%);position:relative;flex-shrink:0}
-.donut::after{content:"62%";position:absolute;top:11px;right:11px;bottom:11px;left:11px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--teal-deep)}
+.donut{width:62px;height:62px;border-radius:50%;background:conic-gradient(var(--teal) 0 59%,#E3C77A 59% 100%);position:relative;flex-shrink:0}
+.donut::after{content:"59%";position:absolute;top:11px;right:11px;bottom:11px;left:11px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--teal-deep)}
 .legend{font-size:11px;color:var(--muted);font-weight:600;line-height:1.9}
 .legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px}
 .rebuy{flex:1;padding:13px}
@@ -333,7 +333,7 @@ window.onerror=function(m,s,l,c){try{if(document.body&&document.body.classList.c
         <div class="body" id="ob-1">
           <div class="sec-label">店家資料 · 統編一鍵帶入</div>
           <div class="card frm">
-            <div class="frow"><label>統一編號</label><input class="finput mono" id="ubn" value="24549210" aria-label="統一編號"></div>
+            <div class="frow"><label>統一編號</label><input class="finput mono" id="ubn" value="24567890" aria-label="統一編號"></div>
             <button class="btn ghost" style="padding:10px 0;font-size:12.5px" onclick="autoFill()">🔎 以統編自動帶入登記資料</button>
             <div class="frow"><label>店名</label><input class="finput" id="f-name" placeholder="—" readonly></div>
             <div class="frow"><label>地址</label><input class="finput" id="f-addr" placeholder="—" readonly></div>
@@ -469,7 +469,7 @@ window.onerror=function(m,s,l,c){try{if(document.body&&document.body.classList.c
       <section class="scene" id="data">
         <div class="apphead">
           <div class="brand">發票載具 商家助手</div>
-          <div class="rw"><h2>經營數據</h2><span class="st">今日 · <b>7/14（一）</b></span></div>
+          <div class="rw"><h2>經營數據</h2><span class="st">今日 · <b>7/28（二）</b></span></div>
           <div class="sub"><span>每一筆數字都對得到一張真實發票</span></div>
         </div>
         <div class="body">
@@ -502,13 +502,13 @@ window.onerror=function(m,s,l,c){try{if(document.body&&document.body.classList.c
           </div>
           <div class="split">
             <div class="card donutcard">
-              <div class="donut" aria-label="回頭客 62%"></div>
-              <div class="legend"><span><i style="background:var(--teal)"></i>回頭客 62%</span><br><span><i style="background:#E3C77A"></i>新客 38%</span></div>
+              <div class="donut" aria-label="回頭客 59%"></div>
+              <div class="legend"><span><i style="background:var(--teal)"></i>回頭客 59%</span><br><span><i style="background:#E3C77A"></i>新客 41%</span></div>
             </div>
             <div class="card rebuy">
               <div style="font-size:10.5px;color:var(--muted);font-weight:700">30 天回購率</div>
-              <div class="v">31%</div>
-              <div class="d up" style="font-size:10px;font-weight:800;color:var(--ok)">▲ 3pp · 商圈義式平均 19%</div>
+              <div class="v">34%</div>
+              <div class="d up" style="font-size:10px;font-weight:800;color:var(--ok)">▲ 3pp · 商圈義式平均 27%</div>
             </div>
           </div>
           <div class="card aisum">
@@ -527,7 +527,7 @@ window.onerror=function(m,s,l,c){try{if(document.body&&document.body.classList.c
       <section class="scene" id="grow">
         <div class="apphead">
           <div class="brand">發票載具 商家助手</div>
-          <div class="rw"><h2>生意增長</h2><span class="st">本期開獎日 · <b>7/25</b></span></div>
+          <div class="rw"><h2>生意增長</h2><span class="st">下期開獎日 · <b>9/25</b></span></div>
           <div class="sub"><span>沒帶來客人，一毛不收——按核銷計費</span></div>
         </div>
         <div class="body">
@@ -546,7 +546,7 @@ window.onerror=function(m,s,l,c){try{if(document.body&&document.body.classList.c
           <div class="sec-label" style="margin-top:4px">檔期與券</div>
           <div class="card" style="padding:4px 14px">
             <div class="growrow">
-              <span class="l">7/25 開獎日檔期 · 到店券<small>對完獎的人潮直接導到你店裡 · 已核銷才收 3–6%</small></span>
+              <span class="l">9/25 開獎日檔期 · 到店券<small>對完獎的人潮直接導到你店裡 · 已核銷才收 3–6%</small></span>
               <button class="switch on" onclick="flip(this)" aria-label="開獎日檔期開關"></button>
             </div>
             <div class="growrow">

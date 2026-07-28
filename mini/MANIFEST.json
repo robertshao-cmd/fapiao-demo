@@ -1,10 +1,10 @@
 {
   "units": {
     "detox": "24ec35d808cdb4b2ce3eec5bf178c72ae85bce5f983471515bab2032ba84fb75",
-    "bored": "80d4a542c967e5a18406eec6902373255b68f2b0773e1d9575dc5bd823c40e3b",
+    "bored": "a9a936a2008e7fae3f358b9ad42a75d4006bc098a48cbe1ef0032ce766ebe0ef",
     "wealth": "a43472b1e7e45df0203a5759f9aafab85041a5842e04e091b91079dcb9ae7afa"
   },
   "shell": "e820b2f1b23b9627606d4586bed8f40a36c21ce8f237b6a0818596b1b2f475dd",
   "kit": "26be8b9c169b70e66ede99816d36dced5654f7daf0ef0f11afdda68c2e60fdd1",
-  "stamp": "02bcb254"
+  "stamp": "3bac41d0"
 }

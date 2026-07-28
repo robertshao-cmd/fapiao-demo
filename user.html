@@ -987,10 +987,10 @@ window.onerror=function(m,s,l,c){try{if(document.body&&document.body.classList.c
             </div>
           </div>
 
-          <button class="banner" onclick="toast('7/25 開獎日購物節（提案新增）：對完獎領券出門，槓龜也請你喝一杯')">
+          <button class="banner" onclick="toast('9/25 開獎日購物節（提案新增）：對完獎領券出門，槓龜也請你喝一杯')">
             <span class="know">你知道嗎？</span>
             <b>開獎日也是購物節</b>
-            <small>7/25 對完獎領券出門 · 24 家小程序夥伴等你 →</small>
+            <small>9/25 對完獎領券出門 · 24 家小程序夥伴等你 →</small>
             <span class="mons">🌳</span><span class="ptag">提案新增</span>
           </button>
 
@@ -1453,7 +1453,7 @@ window.onerror=function(m,s,l,c){try{if(document.body&&document.body.classList.c
               <div class="dx-st"><span class="lg">🥤</span><span class="in"><b>果漾 Fresh 冷壓蔬果飲 <span class="dx-cross">✚</span></b><small>無加糖 · 650m · 步行 9 分</small></span><span class="ac"><button onclick="dxVerify(2)">模擬到店核銷</button></span></div>
               <div class="gx-note" style="margin-top:6px">解毒站＝通過審核的健康商家（只做正面認證）；名單與距離為示範。</div>
             </div>
-            <button class="tm-banner" onclick="toast('已訂閱（示範）：7/25 開獎日＝全民複驗日，對完獎順手複驗')"><b>🗓 7/25 開獎日 ＝ 全民複驗日</b><small>對完獎，順手複驗一次——看看 T 線有沒有變淺</small></button>
+            <button class="tm-banner" onclick="toast('已訂閱（示範）：9/25 開獎日＝全民複驗日，對完獎順手複驗')"><b>🗓 9/25 開獎日 ＝ 全民複驗日</b><small>對完獎，順手複驗一次——看看 T 線有沒有變淺</small></button>
             <div id="dxBackTeam" style="display:none"><button class="gx-btn tm" onclick="openTeam()">🐣 回去看看阿呷（牠被你救活了）</button></div>
           </div>
         </div>
@@ -1510,7 +1510,7 @@ window.onerror=function(m,s,l,c){try{if(document.body&&document.body.classList.c
               </div>
               <div class="gx-note" style="margin-top:7px">其他隊伍一律匿名顯示 · 前三名解鎖團體解毒券（綁核銷）</div>
             </div>
-            <button class="tm-banner" onclick="toast('已加入（示範）：7/25 全隊回「中毒快篩」複驗，進步幅度計入隊伍積分')"><b>🗓 7/25 開獎日 ＝ 雙倍餵食日 + 全民複驗日</b><small>對完獎回來餵牠，今天統統加倍</small></button>
+            <button class="tm-banner" onclick="toast('已加入（示範）：9/25 全隊回「中毒快篩」複驗，進步幅度計入隊伍積分')"><b>🗓 9/25 開獎日 ＝ 雙倍餵食日 + 全民複驗日</b><small>對完獎回來餵牠，今天統統加倍</small></button>
             <div class="gx-card">
               <b style="font-size:13px;color:var(--ink)">🙏 敲碗榜（想要誰入駐解毒站？）</b>
               <div class="dx-st f"><span class="lg">🍲</span><span class="in"><b>大蔬鍋 · 蔬食火鍋（府中）</b><small>已敲碗 <span id="tmKn">312</span> 次</small></span><span class="ac"><button onclick="tmKnock()">敲碗 +1</button></span></div>
@@ -1558,7 +1558,7 @@ window.onerror=function(m,s,l,c){try{if(document.body&&document.body.classList.c
           <div class="inv-fly" id="invfly">
             <div class="h">電子發票</div>
             <div class="no" id="inv-no">AB-58814920</div>
-            <div class="st" id="inv-st">✓ 已歸戶載具 /ABC1234 · 7/25 自動對獎</div>
+            <div class="st" id="inv-st">✓ 已歸戶載具 /ABC1234 · 9/25 自動對獎</div>
           </div>
         </div>
       </section>
@@ -1739,7 +1739,7 @@ var history1 = [
 ];
 var coupons = [
   { id:"nn40", store:"nuan", storeName:"暖暖窩義式廚房", title:"回頭客券｜套餐折 NT$40", sub:"單筆滿 200 可用 · 效期至 7/31 · 首購後商家自動發送", tag:"-40", amt:40, min:200, used:false },
-  { id:"lucky", store:"louisa", storeName:"路易莎咖啡", title:"槓龜安慰券｜第二杯半價", sub:"上期未中獎自動發放 · 效期至 7/25（限飲品，示範不折算）", tag:"5折", amt:0, min:0, used:false }
+  { id:"lucky", store:"louisa", storeName:"路易莎咖啡", title:"槓龜安慰券｜第二杯半價", sub:"上期未中獎自動發放 · 效期至 8/25（限飲品，示範不折算）", tag:"5折", amt:0, min:0, used:false }
 ];
 
 function $(id){ return document.getElementById(id); }
@@ -2637,7 +2637,7 @@ function startMagic(){
   if (isOnline()){
     $("invfly").className = "inv-fly";
     $("inv-no").textContent = "AB-58814920";
-    $("inv-st").innerHTML = "✓ 已歸戶載具 /ABC1234 · 7/25 自動對獎";
+    $("inv-st").innerHTML = "✓ 已歸戶載具 /ABC1234 · 9/25 自動對獎";
   } else {
     $("invfly").className = "inv-fly pend";
     $("inv-no").textContent = m === "宅配" ? "（簽收結帳開立）" : (m === "外送" ? "（送達結帳開立）" : "（到店結帳開立）");

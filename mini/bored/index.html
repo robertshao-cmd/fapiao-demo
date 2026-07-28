@@ -6,8 +6,8 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>無聊快篩｜發票載具</title>
-<script src="qrcode.min.js?v=02bcb254"></script>
-<script src="unit-kit.js?v=02bcb254"></script>
+<script src="qrcode.min.js?v=3bac41d0"></script>
+<script src="unit-kit.js?v=3bac41d0"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--mut:#7A8494;--line:#F0E0E1;--bg:#FFF6F5}
@@ -105,6 +105,10 @@
   .rowbtn{flex:none;align-self:center;font-size:11.5px;padding:8px 9px}
   .spot{margin-top:10px}
   .spot .row{margin-top:0}
+  /* 「全部」的分組標頭:來源要看得見,官方那組附可查連結 */
+  .grp{font-size:12px;font-weight:900;color:#5A0E14;margin:16px 4px 2px}
+  .grp small{display:block;font-size:10.5px;font-weight:700;color:var(--mut);margin-top:3px;line-height:1.6}
+  .grp a{color:#2B4BD7}
   /* 篩選條:精選 / 我的清單 / 全部 —— 釘在標題列下面,清單隨時看得到。
      top 用 --topH(JS 量出來的標題列實高),因為那條有 safe-area,寫死會露餡。 */
   .fbar{display:flex;gap:7px;padding:10px 2px;margin:0 -2px;
@@ -590,17 +594,36 @@ function evidence(s, ans) {
    推薦理由(why)綁回發票證據,所以會隨半徑/連續天數變動;不做 LBS 排序(只用靜態距離)。
    註:合作商家導流(UK.shops + 「這附近可以吃」展開區)整段移除。要接回來的話,
    kit 的 UK.shops 還在:列上加 data-shop,地點卡的 CTA 會自動變成「看菜單」直達點餐頁。 */
+/* 來源註冊表:每個景點都要說得出「憑什麼推薦你去」。
+   官方那組是真的可查(2026-07 查證);在地／社群那組是示範資料,不冒充官方——
+   口徑鐵律的同一個原則:要標來源就標得出來,標不出來就說是示範。 */
+var SOURCES = {
+  gov:   { tag:'🏛️ 100 亮點', name:'2026-2027 台灣觀光100亮點', by:'交通部觀光署',
+           note:'中央與地方推薦＋百萬民眾票選',
+           url:'https://spotlightaward.taiwan.net.tw/spotlight_n.php', at:'2026-07 查證' },
+  local: { tag:'💬 在地推薦',  name:'在地與社群分享的去處',       by:'示範資料',
+           note:'正式版接社群熱度與縣市觀光局清單', url:'', at:'' }
+};
+/* 距離是從板橋府中一帶抓的直線距離,示範用。正式版用中台給的座標算。 */
 var SPOTS = [
-  { k:'yuanwei_park', emoji:'🌳', name:'府中商圈 · 林家花園', km:1.3, q:'林本源園邸',
+  { k:'linpark',  src:'local', emoji:'🌳', name:'府中商圈 · 林本源園邸', km:1.3, q:'林本源園邸',
     why:function(s){ return '1.3 公里，比你週末的 ' + radTxt(s.radius) + '多一點——今天先破這個'; } },
-  { k:'riverside',    emoji:'🚲', name:'大稻埕河濱自行車道', km:6.8, q:'大稻埕河濱自行車道',
-    why:function(s){ return '新店嘗試 ' + s.newShops + ' 家。這裡沒有店，只有風'; } },
-  { k:'nancun',       emoji:'🏘️', name:'四四南村',           km:7.6, q:'四四南村',
+  { k:'nancun',   src:'local', emoji:'🏘️', name:'四四南村',             km:7.6, q:'四四南村',
     why:function(s){ return '走完等於你這個月的移動總量'; } },
-  { k:'hushan',       emoji:'⛰️', name:'虎山親山步道',       km:9.5, q:'虎山親山步道',
+  { k:'ntcart',   src:'gov',   emoji:'🖼️', name:'新北市美術館（鶯歌）', km:8.0, q:'新北市美術館',
+    why:function(s){ return '新店嘗試 ' + s.newShops + ' 家。這裡連館都是新的'; } },
+  { k:'dadaocheng',src:'gov',  emoji:'🏮', name:'大稻埕',               km:8.5, q:'大稻埕',
+    why:function(s){ return '官方票選出來的地方,你 90 天內一張發票都沒留在那'; } },
+  { k:'hushan',   src:'local', emoji:'⛰️', name:'虎山親山步道',         km:9.5, q:'虎山親山步道',
     why:function(s){ return '外送員這個月見你 ' + s.deliv + ' 次，山一次都沒見過你'; } },
-  { k:'yingge',       emoji:'🏺', name:'鶯歌老街 陶藝體驗',   km:14.0, q:'鶯歌老街',
-    why:function(s){ return '你的紀錄是 ' + radTxt(s.radius) + '。14 公里，一次作廢'; } }
+  { k:'songshan', src:'gov',   emoji:'🎨', name:'松山文創園區',         km:12.0, q:'松山文創園區',
+    why:function(s){ return '你的圓是 ' + radTxt(s.radius) + '，這裡 12 公里。捷運就到'; } },
+  { k:'maokong',  src:'gov',   emoji:'🍃', name:'貓空',                 km:16.0, q:'貓空纜車',
+    why:function(s){ return '纜車上去,連走路都不用——你連這樣都不去?'; } },
+  { k:'tamsui',   src:'gov',   emoji:'⛵', name:'淡水漁人碼頭',         km:24.0, q:'淡水漁人碼頭',
+    why:function(s){ return '24 公里。你這個月的移動總量還不到它的一半'; } },
+  { k:'wulai',    src:'gov',   emoji:'🚞', name:'烏來台車',             km:28.0, q:'烏來台車',
+    why:function(s){ return '你的紀錄是 ' + radTxt(s.radius) + '。28 公里,一次作廢'; } }
 ];
 
 /* 傳給 UK.poi 的字典(kit 的 bind 介面不動,只在 init 呼叫一次) */
@@ -615,8 +638,11 @@ function spotsSorted() { return SPOTS.slice().sort(function (a, b) { return a.km
 /* 景點卡:一列 = emoji + 名字 + 距離 + 一句理由 + 一顆「帶你衝」 */
 function spotHTML(p, s) {
   var why = p.why(s);
+  var src = SOURCES[p.src] || SOURCES.local;
   POI[p.k].why = why;
-  POI[p.k].info = '距離 ' + p.km + ' 公里';
+  /* 地點卡把來源講完:名稱、誰推的、什麼時候查的。標不出來的就不標。 */
+  POI[p.k].info = '距離 ' + p.km + ' 公里　·　' + src.name
+                + '（' + src.by + (src.at ? '，' + src.at : '') + '）';
   var picked = (ST.picks || {})[p.k];
   var ns = noShow();
   var busted = ns && ns.k === p.k;                     /* 上次排的就是這個景點 */
@@ -625,6 +651,7 @@ function spotHTML(p, s) {
     + '<span class="re">' + p.emoji + '</span>'
     + '<div class="rb"><b>' + p.name + '</b>'
     + '<div class="meta"><span>' + p.km + ' 公里</span>'
+    + '<span class="tag' + (p.src === 'gov' ? '' : ' no') + '">' + src.tag + '</span>'
     + (busted ? '<span class="tag no">上次你說要來</span>' : '') + '</div>'
     + '<i>' + why + '</i></div>'
     + '<button class="uk-vf rowbtn' + (picked ? ' done' : '') + '" data-label="帶你衝">'
@@ -699,7 +726,19 @@ function renderRx(s) {
   document.getElementById('mineN').textContent = mine.length;
   var list = RXMODE === 'mine' ? mine : (RXMODE === 'all' ? all : all.slice(0, 3));
   document.getElementById('planBox').innerHTML = (RXMODE === 'mine') ? planHTML(s) : '';
-  document.getElementById('rxList').innerHTML = list.map(function (p) { return spotHTML(p, s); }).join('');
+  /* 「全部」按來源分組,官方那組附可查的連結;其他模式不分組(混著看比較像處方) */
+  document.getElementById('rxList').innerHTML = (RXMODE === 'all')
+    ? ['gov', 'local'].map(function (key) {
+        var g = list.filter(function (p) { return (p.src || 'local') === key; });
+        if (!g.length) return '';
+        var src = SOURCES[key];
+        return '<div class="grp">' + src.tag + ' ' + src.name
+             + '<small>' + src.by + ' · ' + src.note + (src.at ? ' · ' + src.at : '')
+             + (src.url ? ' · <a href="' + src.url + '" target="_blank" rel="noopener">看名單</a>' : '')
+             + '</small></div>'
+             + g.map(function (p) { return spotHTML(p, s); }).join('');
+      }).join('')
+    : list.map(function (p) { return spotHTML(p, s); }).join('');
   document.querySelector('#rxLead small').textContent =
       RXMODE === 'mine' ? (mine.length ? '排了 ' + mine.length + ' 個地方。走不走是你的事。' : '還沒排任何地方')
     : RXMODE === 'all'  ? all.length + ' 個地方,自己挑'
