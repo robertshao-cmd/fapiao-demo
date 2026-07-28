@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#E4001A">
 <title>解毒吧｜發票載具</title>
-<script src="qrcode.min.js"></script>
-<script src="unit-kit.js"></script>
+<script src="qrcode.min.js?v=0922339e"></script>
+<script src="unit-kit.js?v=0922339e"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F1B2E;--red:#E4001A;--deep:#A50011;--gold:#B8912F;--teal:#177A4C;
@@ -54,6 +54,18 @@
        padding:10px 4px;min-height:58px;font-size:11px;font-weight:900;color:#4A3B3D;letter-spacing:.3px;
        transition:transform .1s,box-shadow .1s}
   .act .ic{font-size:19px;line-height:1}
+  /* 食安快篩用它自己的 icon(油滴＋放大鏡＋鏡內打勾),不要用不相干的 🛡️。
+     幾何照抄線上那支的 icon.svg,只把配色換成在白底按鈕上讀得到的版本。
+     內嵌 data URI:不打外部請求,那支掛了或跨網域擋掉也不會變破圖。 */
+  .fsIc{width:21px;height:21px;display:block;background-repeat:no-repeat;background-size:contain;
+        background-image:url('data:image/svg+xml;utf8,\
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">\
+<path d="M27 13c0 0-13 15.5-13 24a13 13 0 0 0 26 0c0-8.5-13-24-13-24z" fill="%23E4001A"/>\
+<circle cx="41" cy="41" r="10.5" fill="%231F1B2E"/>\
+<circle cx="41" cy="41" r="10.5" fill="none" stroke="%231F1B2E" stroke-width="4"/>\
+<line x1="48.7" y1="48.7" x2="56" y2="56" stroke="%231F1B2E" stroke-width="6" stroke-linecap="round"/>\
+<path d="M36 41.5l3.5 3.5 6.5-7.5" fill="none" stroke="%23FFFFFF" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>\
+</svg>')}
   .act:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--ink)}
   @media (max-width:360px){.act{font-size:10px;padding:9px 2px}.act .ic{font-size:17px}}
 
@@ -222,7 +234,7 @@
     <div class="acts">
       <button class="act" id="actRetest" style="display:none" onclick="retest()">
         <span class="ic">🔄</span>重新驗</button>
-      <button class="act" onclick="gate('v4')"><span class="ic">🛡️</span>真食安比對</button>
+      <button class="act" onclick="gate('v4')"><span class="ic fsIc"></span>食安快篩</button>
       <button class="act" onclick="gate('v5')"><span class="ic">💊</span>解毒站</button>
     </div>
     <div class="note" id="windowNote" style="text-align:center"></div>
@@ -286,8 +298,18 @@
 
     <button class="btn p" onclick="nav.show('v5')">💊 去解毒——把毒值降下來</button>
     <div class="acts">
-      <button class="act" onclick="openSafe()"><span class="ic">🛡️</span>真食安比對</button>
+      <button class="act" onclick="openSafe()"><span class="ic fsIc"></span>食安快篩</button>
       <button class="act" onclick="retest()"><span class="ic">🔄</span>重新驗</button>
+    </div>
+
+    <!-- 家人複驗(0728 從 v4 搬來):接在自己的結果後面,情境比夾在食安頁裡順——
+         「你自己驗完了」才會想到媽媽。放在主 CTA 之後,維持它是分支動作。 -->
+    <div class="card">
+      <b style="font-size:13px">👨‍👩‍👧 你驗完了，那你媽呢？</b>
+      <div style="font-size:12px;font-weight:700;color:#3D3346;line-height:1.75;margin-top:5px">
+        她不會自己來驗——你幫她按一下就好。</div>
+      <div class="note" style="font-size:10px;color:#9A8A8A">需家人在載具 App 完成「家庭歸戶」授權；只比對公告名單，不顯示品項明細。</div>
+      <div id="famBox"><button class="btn l" onclick="family()">一鍵複驗：媽媽的發票（近 90 天）</button></div>
     </div>
   </div>
 
@@ -315,15 +337,10 @@
         </div>
       </div>
       <div class="note">紅線：商家層級警示<b>僅限官方公告原文轉載</b>；毒值只評你自己的消費結構，平台不對商家做任何「毒」標籤。</div>
-      <!-- 主 CTA 提到家人卡之前:家人複驗是分支動作,不該把主路徑推到第二屏 -->
       <button class="btn p" onclick="nav.show('v5')">💊 去看解毒處方</button>
-      <div class="card">
-        <b style="font-size:13px">👨‍👩‍👧 你驗完了，那你媽呢？</b>
-        <div style="font-size:12px;font-weight:700;color:#3D3346;line-height:1.75;margin-top:5px">
-          她不會自己來驗——你幫她按一下就好。</div>
-        <div class="note" style="font-size:10px;color:#9A8A8A">需家人在載具 App 完成「家庭歸戶」授權；只比對公告名單，不顯示品項明細。</div>
-        <div id="famBox"><button class="btn l" onclick="family()">一鍵複驗：媽媽的發票（近 90 天）</button></div>
-      </div>
+      <!-- 0728:家人複驗卡已移到 v3 結果頁。
+           食安比對現在導去專門的「發票食安快篩」,這頁走不到,
+           家人複驗是 detox 自己的東西,不能跟著被孤立。 -->
     </div>
   </div>
 
@@ -629,13 +646,12 @@ function toggleHow() {
    0728 定調:食安比對不該由解毒吧自己做一份——載具裡已經有「食安快篩」小程式,
    這裡應該把人導過去,不要兩邊各養一套名單、講不一樣的話。
 
-   ⚠️ SLUG 待填:食安快篩在 dev registry 的實際 slug 我查不到
-      (ailab-dev 的 registry 端點有登入牆,列不出清單)。
-      填法:把 slug 填進下面 FOODSAFE.slug 一處即可,其餘會自己生效。
-      填之前 openSafe() 走本地示範版,並在畫面上說清楚「正式版會導去食安快篩」——
-      不假裝已經接上。 */
+   已接通(0728):slug = check-food-safety,線上實際標題是「發票食安快篩」。
+   按鈕與卡片一律用這個名字,不要自己另取「真食安比對」——同一個東西
+   兩個名字,使用者會以為是兩支不同的小程式。 */
 var FOODSAFE = {
-  slug: '',                                  /* ← 例:'food-safety';填了就直接導過去 */
+  slug: 'check-food-safety',
+  name: '發票食安快篩',
   url: function () {
     if (!this.slug) return null;
     /* 跟著目前所在的主機走:dev 開就是 dev,正式版由 App 接手 */
@@ -686,11 +702,19 @@ function official(k) {
 }
 function family() {
   ST.fam = true; UK.state.save(KEY, ST);
-  document.getElementById('famBox').innerHTML =
-    '<div class="ok">✓　媽媽近 90 天 38 家商家，全數未命中公告名單</div>'
-    + '<button class="btn l" onclick="UK.share.open(guardCard)">📤 傳「家人守護卡」給媽媽</button>';
+  paintFam();
   UK.toast('已完成家人複驗（載具歸戶授權 · 示範）');
   UK.track('dx_family');
+}
+/* 已複驗過就直接顯示完成態。
+   0728:以前這張卡在 v4,每次進去都重跑一次所以不用還原;搬到 v3 之後
+   它是靜態 markup,不還原的話重新整理就又叫人複驗一次(狀態明明存了)。 */
+function paintFam() {
+  var box = document.getElementById('famBox');
+  if (!box || !ST.fam) return;
+  box.innerHTML =
+    '<div class="ok">✓　媽媽近 90 天 38 家商家，全數未命中公告名單</div>'
+    + '<button class="btn l" onclick="UK.share.open(guardCard)">📤 傳「家人守護卡」給媽媽</button>';
 }
 
 /* ── 解毒站:地點卡 + 已開通商家直達其點餐頁 ── */

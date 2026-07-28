@@ -7,8 +7,8 @@
 <title>幾歲破產|發票載具</title>
 <!-- vendored / 共用層:不改。unit-kit 這裡只用到 UK.selfCheck()(唯讀機械自檢),
      nav/state/share 依 0726 決策維持本單元手寫版本。 -->
-<script src="qrcode.min.js"></script>
-<script src="unit-kit.js"></script>
+<script src="qrcode.min.js?v=0922339e"></script>
+<script src="unit-kit.js?v=0922339e"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--red-deep:#A50011;--gold:#FFD34D;--teal:#0E7C7B;--mut:#7A8494;--bg:#FFF6F5;--line:#F0E0E1}
@@ -88,6 +88,8 @@
   .sec{display:flex;align-items:center;justify-content:center;margin-top:10px}
   .sec button{font-size:12.5px;font-weight:800;color:#8A5A5E;text-decoration:underline;text-underline-offset:3px;padding:12px 8px;min-height:44px}
   .allin{background:#EAF5F1;border:1.5px solid #B9DACD;border-radius:12px;padding:11px 13px;margin-top:10px;font-size:12.5px;font-weight:800;color:#0B5D5C;text-align:center;line-height:1.7}
+  .idle{background:#FFF9E9;border:1.5px solid #F0DFAE;border-radius:12px;padding:11px 13px;margin-top:8px;font-size:12.5px;font-weight:700;color:#7A5E12;text-align:center;line-height:1.8}
+  .idle b{color:#B8912F;font-size:14px}
   .hint{font-size:10.5px;color:var(--mut);font-weight:600;line-height:1.6;margin-top:2px}
   /* 分享浮層的樣式由 kit 的 .uk-* 提供(0727 改走 UK.share),這裡只留 ⋯ 選單自己的 */
   #mnMask{position:fixed;inset:0;background:rgba(15,20,30,.5);display:none;align-items:flex-end;z-index:99}
@@ -132,9 +134,16 @@
       <div class="q">Q3 · 最想砍哪類花費?</div>
       <div class="chips" data-q="cut">
         <button class="chip" data-action="pick" data-d="2" data-k="drink">手搖/咖啡</button><button class="chip" data-action="pick" data-d="2" data-k="deliv">外送</button><button class="chip" data-action="pick" data-d="1" data-k="sub">訂閱</button><button class="chip" data-action="pick" data-d="-3">都不想砍</button></div>
-      <div class="hint" style="margin-top:10px">再點一次可以取消。Q1 沒選不會幫你猜——「不方便說」也是一個答案。</div>
+      <!-- 年齡從結果頁搬到這裡:先問再算,「以 N 歲起算」才不會變成事後補問 -->
+      <div class="q">Q4 · 你現在幾歲?</div>
+      <div class="a0" style="justify-content:flex-start">
+        <input id="a0In" class="a0-in" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="請填"
+               autocomplete="off" aria-label="你現在幾歲(18 到 99)" oninput="a0Input()">
+        <span class="a0-unit">歲</span></div>
+      <div class="a0-err" id="a0Err" style="display:none;text-align:left"></div>
+      <div class="hint" style="margin-top:10px">再點一次可以取消。收入與年齡沒填不會幫你猜——「不方便說」也是一個答案。</div>
     </div>
-    <button class="btn p" id="goScan" onclick="scan()" disabled>先選收入級距</button>
+    <button class="btn p" id="goScan" onclick="scan()" disabled>先填收入與年齡</button>
   </div>
 
   <div id="v2" style="display:none">
@@ -147,12 +156,8 @@
       <div style="font-size:11px;font-weight:800;color:#B8912F">情境試算 · 非財務預測(示範)</div>
       <div class="age"><b id="ageN">43</b><span>歲那年,存款歸零</span></div>
       <div style="font-size:12px;color:var(--mut)" id="yrsLine"></div>
-      <div class="basis">以 <b id="a0N">26</b> 歲起算,不是的話改這裡:</div>
-      <div class="a0">
-        <input id="a0In" class="a0-in" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="26"
-               autocomplete="off" aria-label="你現在幾歲(12 到 99)" oninput="a0Input()">
-        <span class="a0-unit">歲</span></div>
-      <div class="a0-err" id="a0Err" style="display:none"></div>
+      <!-- 年齡已在 Q4 問過,這裡只是把依據寫出來,不再事後補問 -->
+      <div class="basis">以你填的 <b id="a0N">26</b> 歲起算</div>
     </div>
     <div class="card"><b style="font-size:13.5px;color:#5A0E14">💧 三大漏財點(來自發票)</b>
       <div id="leaks"></div></div>
@@ -171,7 +176,11 @@
     <div class="card"><b style="font-size:13.5px;color:var(--teal)">省錢處方</b>
       <div id="rx"></div>
       <div class="allin" id="allin"></div></div>
-    <div class="card"><b style="font-size:13.5px;color:#5A0E14">省下來的錢,自己不會長大</b>
+    <!-- 不是廣告位:接著上面那筆省下來的錢往下講,讓入口是結論不是插播 -->
+    <div class="card">
+      <b style="font-size:13.5px;color:#5A0E14">省下的錢,自己不會變大</b>
+      <div id="idle" class="idle"></div>
+      <div class="hint" style="margin-top:10px">想讓它變大,得先看得懂錢在往哪裡走</div>
       <div class="acts" id="apps"></div></div>
     <!-- 法遵:兩段併一句,鐵律要求的字眼一個都沒少 -->
     <div class="note">情境試算、非財務預測;非投資建議,實際報酬隨市場變動。</div>
@@ -228,8 +237,9 @@ var UK_SLUG = 'wealth';                  /* 給 UK.exitToHome 的 postMessage �
       要換回區間版,只改這一處:把 A0_BANDS 打開、v3 的 <input> 換回 chip 迴圈。
    var A0_BANDS=[{label:'20+',v:25},{label:'30+',v:35},{label:'40+',v:45},{label:'50+',v:55}];
    (同一個區間敏感度風險也在 Q1「月收入」的 3-5萬/5-8萬/8萬以上,這版先不動,等回覆一起處理) */
-var A0_DEFAULT=26, A0_MIN=12, A0_MAX=99;  /* 沒填就用 A0_DEFAULT,並且畫面明寫,不幫使用者猜 */
-var age=43, ANS={income:null, goal:0, cut:0, cutK:null};
+/* 下限 18:發票載具是成年人的理財工具,原本 12 會算出「12 歲起算、54 歲破產、距今 42 年」這種鬼結果 */
+var A0_DEFAULT=26, A0_MIN=18, A0_MAX=99;
+var age=43, ANS={income:null, goal:0, cut:0, cutK:null, age0:null};
 var MIN_INV=5;
 /* ?inv=abc → 0;?inv=-5 → 0(負數不該印在畫面上) */
 var INV=(function(){ try{ var q=new URLSearchParams(location.search).get('inv'); return q===null?47:Math.max(0,+q||0); }catch(e){ return 47; } })();
@@ -327,13 +337,22 @@ function demoFill(){ INV=47; toast('(示範)已灌入近 90 天發票'); resetAn
 
 /* ── 三題:再點一次可取消並回中性值;Q1 沒選不放行(落差不靠預設值製造) ── */
 function resetAns(){
-  ANS={income:null, goal:0, cut:0, cutK:null};
+  ANS={income:null, goal:0, cut:0, cutK:null, age0:null};
   document.querySelectorAll('#v1 .chip').forEach(function(c){ c.classList.remove('on'); });
+  /* 回訪時把上次填的年齡帶回來,不用重打;沒填過就留空 */
+  var el=document.getElementById('a0In'), err=document.getElementById('a0Err');
+  if(typeof ST.age0==='number'){ el.value=String(ST.age0); ANS.age0=ST.age0; } else { el.value=''; }
+  el.classList.remove('bad'); err.style.display='none';
   gate();
 }
+/* 收入與年齡都要有才放行:兩個都是結果頁上會被印出來的依據,不能靠預設值製造 */
 function gate(){
-  var b=document.getElementById('goScan'), ok=(typeof ANS.income==='number');
-  b.disabled=!ok; b.textContent=ok?'好了,驗我的發票':'先選收入級距';
+  var b=document.getElementById('goScan');
+  var hasInc=(typeof ANS.income==='number'), hasAge=(typeof ANS.age0==='number');
+  b.disabled=!(hasInc&&hasAge);
+  b.textContent = (hasInc&&hasAge) ? '好了,驗我的發票'
+                : !hasInc && !hasAge ? '先填收入與年齡'
+                : !hasInc ? '還差收入級距' : '還差年齡';
 }
 document.querySelectorAll('#v1 .chips').forEach(function(g){
   g.addEventListener('click', function(e){
@@ -368,7 +387,7 @@ function scan(){
 function skipScan(){
   if(_t){ clearInterval(_t); _t=null; }
   ST.age=age; ST.ans={income:ANS.income, goal:ANS.goal, cut:ANS.cut, cutK:ANS.cutK};
-  if(typeof ST.age0!=='number') ST.age0=A0_DEFAULT;
+  ST.age0=(typeof ANS.age0==='number')?ANS.age0:A0_DEFAULT;   /* Q4 已是必填,這裡只是保險 */
   save(); entryRender(); showResult(); track('wc_result',{age:age});
 }
 
@@ -390,24 +409,21 @@ function renderAge(){
    清空 → 回到預設起算年齡,畫面照樣寫明「以 26 歲起算」。 */
 function a0Input(){
   var el=document.getElementById('a0In'), err=document.getElementById('a0Err'), raw=el.value.trim();
-  if(raw===''){ ST.age0=A0_DEFAULT; save(); err.style.display='none'; el.classList.remove('bad'); renderAge(); return; }
+  if(raw===''){ ANS.age0=null; err.style.display='none'; el.classList.remove('bad'); gate(); return; }
   var n=/^\d+$/.test(raw)?parseInt(raw,10):NaN;
   if(isNaN(n)||n<A0_MIN||n>A0_MAX){
-    err.textContent='請填 '+A0_MIN+'–'+A0_MAX+' 之間的年齡;先照 '+age0()+' 歲算給你看';
+    err.textContent='請填 '+A0_MIN+'–'+A0_MAX+' 之間的年齡';
     err.style.display=''; el.classList.add('bad');
-    return;                                   /* 不接受就是不接受:不改 ST、不動已算好的結果 */
+    ANS.age0=null; gate();                    /* 不接受就是不接受:不 clamp、也不放行 */
+    return;
   }
   err.style.display='none'; el.classList.remove('bad');
-  ST.age0=n; save(); renderAge(); track('wc_age0',{a0:n});
+  ANS.age0=n; gate(); track('wc_age0',{a0:n});
 }
 function showResult(){
   if(typeof ST.age==='number') age=ST.age;
   document.getElementById('ageN').textContent=age;
   renderAge();
-  /* 回訪時把使用者自己填過的年齡帶回來;沒填過就留空,讓 placeholder 顯示預設值 */
-  var el=document.getElementById('a0In');
-  el.value=(typeof ST.age0==='number'&&ST.age0!==A0_DEFAULT)?String(ST.age0):'';
-  el.classList.remove('bad'); document.getElementById('a0Err').style.display='none';
   var k=cutKey();
   document.getElementById('leaks').innerHTML=ordered().map(function(L){
     return '<div class="leak"><span class="nm">'+L.ic+' '+L.nm+(L.k===k?' <span class="tag">你說想砍這個</span>':'')+'</span>'
@@ -442,6 +458,12 @@ var APPS=[
   /* 待 Melon 回覆後補:定期定額／記帳管帳／其他 CMoney 理財 App */
 ];
 function appsRender(){
+  /* 用他自己剛看到的數字接話,不是丟一句「投資讓錢變大」的口號。
+     只陳述「不投資會怎樣」(放著就是原數),不承諾報酬——承諾會跟同卡的
+     「實際報酬隨市場變動」自相矛盾,也踩到不得提供投資建議那條。 */
+  var y=planTotal()*12;
+  document.getElementById('idle').innerHTML=
+    '一年省下的 <b>'+nt(y)+'</b> 放著不動,明年還是 <b>'+nt(y)+'</b>';
   document.getElementById('apps').innerHTML=APPS.map(function(a){
     return '<button class="act" onclick="goApp(\''+a.k+'\')"><span class="ic">'+a.ic+'</span>'+a.nm
       +'<span style="font-weight:600;opacity:.75">'+a.purpose+'</span></button>';
