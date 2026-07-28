@@ -9,8 +9,8 @@
 <title>幾歲破產|發票載具</title>
 <!-- vendored / 共用層:不改。unit-kit 這裡只用到 UK.selfCheck()(唯讀機械自檢),
      nav/state/share 依 0726 決策維持本單元手寫版本。 -->
-<script src="qrcode.min.js?v=5e16ee20"></script>
-<script src="unit-kit.js?v=5e16ee20"></script>
+<script src="qrcode.min.js?v=7451b68b"></script>
+<script src="unit-kit.js?v=7451b68b"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--red-deep:#A50011;--gold:#FFD34D;--teal:#0E7C7B;--mut:#7A8494;--bg:#FFF6F5;--line:#F0E0E1}
@@ -110,8 +110,6 @@
   .sec{display:flex;align-items:center;justify-content:center;margin-top:10px}
   .sec button{font-size:12.5px;font-weight:800;color:#8A5A5E;text-decoration:underline;text-underline-offset:3px;padding:12px 8px;min-height:44px}
   .allin{background:#EAF5F1;border:1.5px solid #B9DACD;border-radius:12px;padding:11px 13px;margin-top:10px;font-size:12.5px;font-weight:800;color:#0B5D5C;text-align:center;line-height:1.7}
-  .idle{background:#FFF9E9;border:1.5px solid #F0DFAE;border-radius:12px;padding:11px 13px;margin-top:8px;font-size:12.5px;font-weight:700;color:#7A5E12;text-align:center;line-height:1.8}
-  .idle b{color:#B8912F;font-size:14px}
   .lesson{font-size:12.5px;font-weight:700;color:#5A4548;line-height:1.9;padding:7px 0;border-bottom:1px dashed var(--line)}
   .lesson:last-child{border-bottom:none}
   .lesson b{color:#8A6210}
@@ -214,9 +212,9 @@
          每句都拿他自己的漏財點開玩笑(手搖/訂閱),術語(複利/本金/資產配置/長期持有)
          是通識教育不是建議,法遵那行照留。 -->
     <div class="card">
-      <b style="font-size:13.5px;color:#5A0E14">省下的錢,自己不會變大</b>
-      <div id="idle" class="idle"></div>
-      <div class="q" style="margin-top:12px">想讓錢長大,你該——</div>
+      <!-- 0728 UI 減量:原本這裡有黃框把「一年 $36,324」又講兩次(同數字同屏三次)、
+           加上兩個連續標題。砍成一行:數字只留綠框那一次,鉤子與轉折併在同一句。 -->
+      <b style="font-size:13.5px;color:#5A0E14">省下的錢不會自己變大——想讓它長大,你該:</b>
       <div class="lesson">認識「<b>複利</b>」:世界第八大奇蹟,前提是你得先有本金。</div>
       <div class="lesson">理解「<b>資產配置</b>」:手搖飲不是一種資產類別。</div>
       <div class="lesson">練習「<b>長期持有</b>」:對資產,不是對 30 天沒開的訂閱。</div></div>
@@ -481,20 +479,12 @@ function rxRender(){
   }).join('');
   document.getElementById('allin').innerHTML='三個都堵起來,一年 '+nt(planTotal()*12)
     +'<br><span style="font-weight:600;font-size:11px">你剛剛看到的那個歲數,是沒堵的版本</span>';
-  idleRender();
 }
 
 /* 0728:籌碼K線 App 直達鈕移除(v3/v4 兩處都拿掉),投資導流改成 v4 的識讀文案。
    platform()/APPS/goApp 那組隨之整段刪除——商店連結(Play + App Store)與
-   平台分流邏輯在 git 歷史 c2f7909、9f42320,要接回來從那裡撿。 */
-function idleRender(){
-  /* 用他自己剛看到的數字接話,只陳述「不投資會怎樣」(放著就是原數),
-     不承諾報酬——承諾會跟同卡的「實際報酬隨市場變動」自相矛盾,
-     也踩到不得提供投資建議那條。 */
-  var y=planTotal()*12;
-  document.getElementById('idle').innerHTML=
-    '一年省下的 <b>'+nt(y)+'</b> 放著不動,明年還是 <b>'+nt(y)+'</b>';
-}
+   平台分流邏輯在 git 歷史 c2f7909、9f42320,要接回來從那裡撿。
+   同日 UI 減量:黃框 idle(把年度總額又講兩次)也刪了,數字只留綠框那一次。 */
 
 /* ── ⋯ 選單:極簡分享=複製連結 ── */
 /* ⋯ 選單改走 UK.menu(0728):三支共用同一組(分享／複製連結／重新載入)。
