@@ -9,8 +9,8 @@
 <title>幾歲破產|發票載具</title>
 <!-- vendored / 共用層:不改。unit-kit 這裡只用到 UK.selfCheck()(唯讀機械自檢),
      nav/state/share 依 0726 決策維持本單元手寫版本。 -->
-<script src="qrcode.min.js?v=b7ba866f"></script>
-<script src="unit-kit.js?v=b7ba866f"></script>
+<script src="qrcode.min.js?v=f659ab6a"></script>
+<script src="unit-kit.js?v=f659ab6a"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--red-deep:#A50011;--gold:#FFD34D;--teal:#0E7C7B;--mut:#7A8494;--bg:#FFF6F5;--line:#F0E0E1}
@@ -59,7 +59,21 @@
   .save{display:flex;justify-content:space-between;align-items:center;gap:8px;background:#fff;border:1px solid #E8D5D6;border-radius:12px;padding:10px 12px;margin-top:8px;font-size:13px}
   .save button{background:var(--teal);color:#fff;border-radius:9px;padding:9px 12px;font-size:12.5px;font-weight:800;min-height:44px;white-space:nowrap}
   .save button.done{background:#C9D2CE}
-  .scan{text-align:center;padding:40px 0;font-size:13.5px;font-weight:800;color:#8A5A5E}
+  .scan{text-align:center;padding:26px 0 30px;font-size:13.5px;font-weight:800;color:#8A5A5E;overflow:hidden}
+  /* 錢往外噴、飄走、消失——不是掉進罐子裡。這是在講「錢正在離開你」,
+     不是「錢在累積」,兩者畫面語言完全相反,方向不能搞錯。
+     用 CSS keyframes 自己跑,不吃 JS 計時器;.top{transition/animation:none} 那條
+     全站 reduced-motion 規則已經會把這個 animation 整個關掉,這裡不用再判斷一次。 */
+  .fountain{position:relative;height:52px;margin-bottom:4px}
+  .coin{position:absolute;left:50%;bottom:0;font-size:19px;line-height:1;
+        animation:spray 1.7s ease-out infinite;will-change:transform,opacity}
+  @keyframes spray{
+    0%{transform:translate(-50%,0) scale(.55);opacity:0}
+    18%{opacity:1}
+    100%{transform:translate(calc(-50% + var(--dx)),-64px) scale(1);opacity:0}
+  }
+  .sting{margin-top:8px;font-size:13px;font-weight:800;color:var(--red-deep);min-height:18px}
+  .sting b{font-size:14.5px}
   .toast{position:fixed;left:50%;bottom:calc(30px + env(safe-area-inset-bottom,0));transform:translateX(-50%) translateY(20px);background:#1F2430;color:#fff;font-size:13px;padding:10px 18px;border-radius:99px;opacity:0;transition:.25s;pointer-events:none;max-width:88vw;z-index:99}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   .top .tbtn{font-size:21px;font-weight:900;color:#fff;min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center}
@@ -145,7 +159,20 @@
   </div>
 
   <div id="v2" style="display:none">
-    <div class="card scan" id="scanTxt">吸入近 90 天發票…</div>
+    <div class="card scan">
+      <!-- 純裝飾:噴出去的錢,不是可互動元件,螢幕閱讀器跳過 -->
+      <div class="fountain" aria-hidden="true">
+        <span class="coin" style="--dx:-58px;animation-delay:-.15s">💸</span>
+        <span class="coin" style="--dx:-32px;animation-delay:-.55s">🪙</span>
+        <span class="coin" style="--dx:-8px;animation-delay:-1.05s">💵</span>
+        <span class="coin" style="--dx:6px;animation-delay:-.35s">💸</span>
+        <span class="coin" style="--dx:30px;animation-delay:-.85s">🪙</span>
+        <span class="coin" style="--dx:56px;animation-delay:-1.3s">💵</span>
+      </div>
+      <div id="scanTxt">吸入近 90 天發票…</div>
+      <!-- 機車但不明說:讓真實金額自己噴出來刺人,不寫「你很浪費」這種說明書句子 -->
+      <div id="scanSting" class="sting"></div>
+    </div>
     <div class="sec"><button onclick="skipScan()">跳過動畫 ›</button></div>
   </div>
 
@@ -247,8 +274,9 @@ function planTotal(){ var s=0; LEAKS.forEach(function(L){ s+=L.save; }); return 
    排序與標籤一律走 cutKey() 這一個來源——兩邊各自判斷過,
    會出現「排第一卻沒標籤」的鬼狀態。 */
 function cutKey(){ return (ST.ans && ST.ans.cutK) || null; }
-function ordered(){ var k=cutKey(); if(!k) return LEAKS.slice();
+function orderedBy(k){ if(!k) return LEAKS.slice();
   return LEAKS.slice().sort(function(a,b){ return (b.k===k)-(a.k===k); }); }
+function ordered(){ return orderedBy(cutKey()); }
 
 /* ── 返回堆疊:過場(v2)與一次性頁(v6)不入堆疊,且站在其上按返回不誤刪 ── */
 var VIEWS=['v0','v1','v2','v3','v4','v6'], STACK=[], CUR=null;   /* v5 讓錢長大已移除 */
@@ -368,8 +396,16 @@ function scan(){
   if(reduceMotion()){ skipScan(); return; }
   show('v2');
   var t=['吸入近 90 天發票…','計算收支缺口…','定位漏財點…','推演破產倒數…'], i=0, el=document.getElementById('scanTxt');
-  el.textContent=t[0];
-  _t=setInterval(function(){ i++; if(i<t.length){ el.textContent=t[i]; } else { skipScan(); } }, 620);
+  /* 噴出去的錢用真數字說話:前三拍是漏財點(Q3 選的排第一,跟結果頁/處方頁同一個順序,
+     故事接得上),最後一拍收在年度總額——不寫「你很浪費」,讓它自己算給你看。
+     ⚠️ 這裡不能呼叫 ordered()/cutKey():那組讀的是 ST.ans.cutK,要等下面的
+     skipScan() 才會寫入,此刻讀到的是上一輪的舊答案。改用 orderedBy(ANS.cutK)
+     直接讀這次剛選的即時答案,跟 showResult()/rxRender() 走的 ST 分開,互不影響。 */
+  var leaks=orderedBy(ANS.cutK), stg=document.getElementById('scanSting');
+  var stings=leaks.map(function(L){ return L.ic+' '+L.nm+'　每月噴 <b>'+nt(L.leak)+'</b>'; })
+    .concat(['一年下來,噴了 <b>'+nt(leaks.reduce(function(s,L){return s+L.leak;},0)*12)+'</b>']);
+  el.textContent=t[0]; stg.innerHTML=stings[0];
+  _t=setInterval(function(){ i++; if(i<t.length){ el.textContent=t[i]; stg.innerHTML=stings[i]||''; } else { skipScan(); } }, 620);
 }
 function skipScan(){
   if(_t){ clearInterval(_t); _t=null; }
