@@ -156,11 +156,13 @@ body.embed .mcap,body.embed .mcap-mask{display:none}
         <div class="frame on" id="f0"><div class="loading" id="l0"><div class="sp"></div>載入 商家助手…</div></div>
         <div class="frame" id="f1"><div class="loading" id="l1"><div class="sp"></div>載入 生意參謀…</div></div>
         <div class="frame" id="f2"><div class="loading" id="l2"><div class="sp"></div>載入 用戶端預覽…</div></div>
+        <div class="frame" id="f3"><div class="loading" id="l3"><div class="sp"></div>載入 載具首頁…</div></div>
       </div>
       <div class="tabbar">
         <button class="tb on" id="tb0" onclick="sw(0)"><span class="nd">🏪</span>商家助手</button>
         <button class="tb" id="tb1" onclick="sw(1)"><span class="nd">📊</span>生意參謀</button>
         <button class="tb" id="tb2" onclick="sw(2)"><span class="nd">📱</span>用戶端預覽</button>
+        <button class="tb" id="tb3" onclick="sw(3)"><span class="nd">🌱</span>載具首頁</button>
       </div>
     </section>
   </div></div>
@@ -180,9 +182,11 @@ body.embed .mcap,body.embed .mcap-mask{display:none}
 var SRC = [
   "./merchant-app.html?embed=1&v=4.3",
   "./merchant-analytics.html?embed=1&v=4.3",
-  "./user.html?embed=1&store=nuan&v=6.0"
+  "./user.html?embed=1&store=nuan&v=6.0",
+  "./real-home-v7.html?embed=1&v=6.19"
 ];
-var loaded = [false, false, false];
+var loaded = [false, false, false, false];
+var TITLES = ["商家助手", "生意參謀", "用戶端預覽", "載具首頁"];
 var CUR = 0;
 function $(id){ return document.getElementById(id); }
 function mount(i){
@@ -190,14 +194,14 @@ function mount(i){
   loaded[i] = true;
   var ifr = document.createElement("iframe");
   ifr.src = SRC[i];
-  ifr.setAttribute("title", ["商家助手","生意參謀","用戶端預覽"][i]);
+  ifr.setAttribute("title", TITLES[i]);
   ifr.onload = function(){ var l = $("l"+i); if (l) l.style.display = "none"; };
   setTimeout(function(){ var l = $("l"+i); if (l) l.style.display = "none"; }, 4500);
   $("f"+i).appendChild(ifr);
 }
 function sw(i){
   CUR = i;
-  for (var k=0;k<3;k++){
+  for (var k=0;k<4;k++){
     $("f"+k).classList.toggle("on", k===i);
     $("tb"+k).classList.toggle("on", k===i);
   }
@@ -233,7 +237,7 @@ function mcapReload(){
     var l = $("l"+CUR); if (l) l.style.display = "flex";
     try { f.contentWindow.location.reload(); } catch(e){ f.src = f.src; }
     setTimeout(function(){ var l2 = $("l"+CUR); if (l2) l2.style.display = "none"; }, 4500);
-    stoast("↻ 已重新整理「" + ["商家助手","生意參謀","用戶端預覽"][CUR] + "」");
+    stoast("↻ 已重新整理「" + TITLES[CUR] + "」");
   } else { location.reload(); }
 }
 function mcapLine(){

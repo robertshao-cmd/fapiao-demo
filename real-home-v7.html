@@ -309,6 +309,11 @@
 body{display:flex;flex-direction:column;align-items:center;gap:10px;padding:32px 12px;background:#0f0f1a;}
 .demo-note{color:#8ADAD4;font-size:12px;text-align:center;max-width:400px;line-height:1.7;}
 @media (max-width:420px){ body{padding:0} .phone{width:100vw;height:100dvh;border-radius:0;box-shadow:none} }
+/* ===== embed 模式(?embed=1,商家工作台 iframe 嵌入):只留手機畫面 ===== */
+body.embed{padding:0;gap:0;background:var(--skyblue,#CFEAF7)}
+body.embed .demo-note,body.embed .lbl,body.embed .slbl{display:none}
+body.embed .phone{width:100%;height:100vh;border-radius:0;box-shadow:none}
+body.embed .wrap .phone:hover{transform:none;box-shadow:none}
 </style>
 <style>
 .mp-hd{display:flex;align-items:baseline;gap:8px;padding:10px 16px 0}
@@ -468,7 +473,9 @@ body{display:flex;flex-direction:column;align-items:center;gap:10px;padding:32px
   }); } drawC39(); window.addEventListener('load', drawC39);
 })();
 
-function openUnit(k){ location.href = 'user-nopay-v6.9.html?v=6.9&open=' + k; }
+function openUnit(k){ location.href = 'user-nopay-v6.19.html?v=6.19&open=' + k; }
+/* embed 模式(商家工作台 iframe 嵌入) */
+if (/[?&]embed=1/.test(location.search)) document.body.classList.add('embed');
 </script>
 <script>
 /* 首頁小程序列=主 CTA:進場彈跳 + 未讀擺動;點開過就安靜(注意力到被確認為止) */
