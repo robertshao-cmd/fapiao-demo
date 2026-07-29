@@ -6,8 +6,8 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title id="pageTitle">懂你地圖｜發票載具</title>
-<script src="qrcode.min.js?v=84216fc4"></script>
-<script src="unit-kit.js?v=84216fc4"></script>
+<script src="qrcode.min.js?v=7eae329e"></script>
+<script src="unit-kit.js?v=7eae329e"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--mut:#7A8494;--line:#F0E0E1;--bg:#FFF6F5}
@@ -222,7 +222,7 @@
     <div class="card scan">
       <div class="radar">
         <span class="ring"></span><span class="ring r2"></span>
-        <span class="dot">😶</span><span class="run">🚶</span>
+        <span class="dot">🗺️</span><span class="run">🚶</span>
       </div>
       <div class="scanTxt" id="scanTxt"><b>翻你的發票…</b></div>
       <div class="bar"><i id="scanBar"></i></div>
@@ -308,10 +308,11 @@ var COPY = { push: 0 };
    改名只改這裡,畫面上所有出現的地方都吃這兩個字串。
    定位(0729):主角是「有消費軌跡的人」,不是「無聊的人」。
    資料能力要變成貼心感、不是窺探感 —— 文案一律講「因為你去過什麼」,
-   不講「我們看到你」。metric 只出現在最底下那行小字,分數不是重點。
+   不講「我們看到你」。分數已完全退場:畫面上一個數字都不出現,
+   底下那行小字改講事實(幾張發票／幾種類型／半徑幾公里)。
    track 事件名(bored_*)與 theme 不要跟著改,那是契約。
-   沿革:無聊快篩／無聊值 → 舒適圈雷達／舒適圈指數 → 懂你地圖／足跡分數 */
-var NAME = { app: '懂你地圖', metric: '足跡分數' };
+   沿革:無聊快篩／無聊值 → 舒適圈雷達／舒適圈指數 → 懂你地圖(不再有 metric) */
+var NAME = { app: '懂你地圖' };
 
 /* ══ 消費軌跡(示範資料;正式版來自中台 /invoices + 商家類別)═══════════
    0729 定位:推薦的依據是「發票軌跡」,不是問卷、不是興趣標籤。
@@ -452,13 +453,25 @@ var nav = UK.nav.create({
   sheets: function () { return [function () { return UK.closeTopSheet(); }]; }
 });
 
+/* 回訪盒:原本用 kit 的 UK.state.lastBox,那顆是分數盒(大數字＋/100＋漲跌箭頭)。
+   0729 改成懂你地圖之後分數不再是主角、畫面上也不顯示了,所以自己畫一個——
+   沿用 kit 的 .uk-lastbox 樣式與 ago(),只把大數字換成「下一步用得到的事實」:
+   收藏了幾個地方(有收藏才有下一步);還沒收藏就退回發票張數。 */
+function lastBoxFacts() {
+  var np = Object.keys(ST.picks || {}).length;
+  var n = np || invN(), unit = np ? ' 個收藏' : ' 張發票';
+  return '<div class="uk-lastbox"><div><small>上次來過 · ' + UK.state.ago(ST.mat) + '</small>'
+       + '<b>' + n + '<span>' + unit + '</span></b></div>'
+       + '<button class="uk-lastgo" onclick="showResult()">看上次的推薦 ›</button></div>';
+}
+
 /* -- 入口:回訪態 + 空狀態門檻 -- */
 function entryRender() {
   var box = document.getElementById('lastBox'), cta = document.getElementById('cta'),
       re = document.getElementById('retest'), hero = document.querySelector('#v0 .hero');
   if (typeof ST.n === 'number') {
     var ns = noShow();
-    box.innerHTML = UK.state.lastBox({ label:'上次' + NAME.metric, n:ST.n, unit:'/100', at:ST.mat, prev:ST.prev, onclick:"showResult()" })
+    box.innerHTML = lastBoxFacts()
       /* 回訪才有的一行。新用戶的入口仍然只有臉＋一句＋一顆鈕(0724 定調) */
       /* 只講事實(發票沒多),不替他下結論——「不明說」比「說你沒去」更刺,也不會講得比資料多 */
       /* 回訪:收藏過但發票沒多 → 提醒他還沒去,但語氣是「還在等你」不是罵人 */
@@ -494,7 +507,7 @@ function demoFill() {
 function goCarrier() {
   UK.carrier.open({ from: 'empty', onDone: function () { demoFill(); } });
 }
-/* 點標題上的 😶 = 回第一頁,並清掉堆疊(不是往回一層) */
+/* 點標題上的 🗺️ = 回第一頁,並清掉堆疊(不是往回一層) */
 function goTop() {
   if (nav.current() === 'v0') { window.scrollTo(0, 0); return; }
   UK.closeTopSheet(); nav.reset('v0'); UK.track('go_top');
@@ -913,7 +926,8 @@ function openRoute() {
 }
 function planCarrier() {
   UK.carrier.open({ from:'plan', onDone: function () {
-    UK.toast('這筆會進你的載具——下次進來' + NAME.metric + '就會動');
+    /* 不能承諾「馬上」:發票歸戶有落差,半徑要下次進來才長得出來(同 ringsHTML 的註解) */
+    UK.toast('這筆會進你的載具——下次進來，這一帶就會亮起來');
   } });
 }
 /* ══ 足跡地圖(0729)═════════════════════════════════════════
@@ -942,7 +956,7 @@ function ringsHTML(s) {
     return '<i class="' + (b.fill ? 'fill' : (b.plan ? 'plan' : '')) + '"'
          + ' style="width:' + d + 'px;height:' + d + 'px"></i>';
   }).join('');
-  return '<div class="rings"><div class="ringbox">' + circles + '<span class="me">😶</span></div>'
+  return '<div class="rings"><div class="ringbox">' + circles + '<span class="me">📍</span></div>'
     + '<div class="rlegend">'
     + '<b>你的足跡</b><br>'
     + '<span class="lk">■ 已填 ' + nFill + ' 圈</span>——發票證實你到過<br>'
