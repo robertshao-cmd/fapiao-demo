@@ -9,8 +9,8 @@
 <title>幾歲破產|發票載具</title>
 <!-- vendored / 共用層:不改。unit-kit 這裡只用到 UK.selfCheck()(唯讀機械自檢),
      nav/state/share 依 0726 決策維持本單元手寫版本。 -->
-<script src="qrcode.min.js?v=7451b68b"></script>
-<script src="unit-kit.js?v=7451b68b"></script>
+<script src="qrcode.min.js?v=601153b9"></script>
+<script src="unit-kit.js?v=601153b9"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--red-deep:#A50011;--gold:#FFD34D;--teal:#0E7C7B;--mut:#7A8494;--bg:#FFF6F5;--line:#F0E0E1}
@@ -57,8 +57,9 @@
   .two .btn small{display:block;font-weight:600;font-size:10.5px;opacity:.88;margin-top:3px}
   .btn small{display:block;font-weight:600;font-size:10.5px;opacity:.85;margin-top:3px}
   .save{display:flex;justify-content:space-between;align-items:center;gap:8px;background:#fff;border:1px solid #E8D5D6;border-radius:12px;padding:10px 12px;margin-top:8px;font-size:13px}
-  .save button{background:var(--teal);color:#fff;border-radius:9px;padding:9px 12px;font-size:12.5px;font-weight:800;min-height:44px;white-space:nowrap}
-  .save button.done{background:#C9D2CE}
+  /* .save button / .save button.done 已於 0729 移除:啟用機制 0727 拿掉之後
+     rxRender() 不再 render 任何按鈕,這兩條是死碼。要恢復逐項啟用的話,
+     樣式從 git 歷史撿(它們原本長在這裡)。 */
   .scan{text-align:center;padding:26px 0 30px;font-size:13.5px;font-weight:800;color:#8A5A5E;overflow:hidden}
   /* 錢往外噴、飄走、消失——不是掉進罐子裡。這是在講「錢正在離開你」,
      不是「錢在累積」,兩者畫面語言完全相反,方向不能搞錯。
@@ -477,8 +478,14 @@ function rxRender(){
       +'<div class="hint">'+L.why+'</div></div>'
       +'<b style="color:var(--teal);font-size:13px;white-space:nowrap">省'+nt(L.save)+'/月</b></div>';
   }).join('');
-  document.getElementById('allin').innerHTML='三個都堵起來,一年 '+nt(planTotal()*12)
-    +'<br><span style="font-weight:600;font-size:11px">你剛剛看到的那個歲數,是沒堵的版本</span>';
+  /* 0729 文案修正:「三個都堵起來」→「三個都堵的話」。
+     啟用機制 0727 移除之後,planTotal() 是三項無條件相加——使用者沒有答應
+     任何一項,畫面卻用完成式宣告他已經省下這筆。兩個字的差別:
+     「都堵起來」是宣告(我幫你算你做到了),「都堵的話」是假設(如果你做)。
+     這跟本單元 v1 堅持「年齡沒填不放行、不幫你猜」是同一個誠實標準;
+     也跟 detox 修掉的「按一下就降毒」是同一類問題。 */
+  document.getElementById('allin').innerHTML='三個都堵的話,一年可以省 '+nt(planTotal()*12)
+    +'<br><span style="font-weight:600;font-size:11px">你剛剛看到的那個歲數,是一個都沒堵的版本</span>';
 }
 
 /* 0728:籌碼K線 App 直達鈕移除(v3/v4 兩處都拿掉),投資導流改成 v4 的識讀文案。

@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#E4001A">
 <title>解毒吧｜發票載具</title>
-<script src="qrcode.min.js?v=7451b68b"></script>
-<script src="unit-kit.js?v=7451b68b"></script>
+<script src="qrcode.min.js?v=601153b9"></script>
+<script src="unit-kit.js?v=601153b9"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F1B2E;--red:#E4001A;--deep:#A50011;--gold:#B8912F;--teal:#177A4C;
@@ -870,7 +870,21 @@ entryRender();
 nav.reset('v0');
 UK.applyDemoMode(document.body);
 UK.homeHint();          /* 單機直開時顯示「從發票載具首頁進入」的正規路徑 */
-UK.track('dx_view');
+
+/* ── 開啟事件:順便把「這是第幾次來、距上次幾天」一起帶上 ──
+   0728:四個成功訊號(開啟/完成/分享/回訪)裡,回訪原本完全沒有事件。
+   不另發一個 dx_return,而是把回訪資訊掛在 dx_view 上——回訪本來就是
+   「開啟」的一個屬性,拆成兩個事件之後算留存要自己 join,沒必要。
+   visits 存在 state 裡,所以重新整理不會被當成新使用者。 */
+ST.visits = (ST.visits || 0) + 1;
+var _daysSince = (typeof ST.at === 'number') ? Math.floor((Date.now() - ST.at) / 86400000) : null;
+UK.state.save(KEY, ST);
+UK.track('dx_view', {
+  visits: ST.visits,
+  returning: ST.visits > 1,
+  days_since_last: _daysSince,
+  has_result: typeof ST.n === 'number'
+});
 /* 開發時 console 打 UK.selfCheck() 做機械自檢 */
 </script>
 </body>
