@@ -6,8 +6,8 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>無聊快篩｜發票載具</title>
-<script src="qrcode.min.js?v=a1637026"></script>
-<script src="unit-kit.js?v=a1637026"></script>
+<script src="qrcode.min.js?v=64cfcc0e"></script>
+<script src="unit-kit.js?v=64cfcc0e"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--mut:#7A8494;--line:#F0E0E1;--bg:#FFF6F5}
@@ -68,9 +68,9 @@
   .big-score b{font-size:52px;color:var(--red)}
   .big-score span{font-size:13px;color:var(--mut)}
   /* 攤在沙發上的那一坨:分數越高融得越徹底(reduced-motion 會被關掉,靜態也看得出在攤) */
-  .couch{position:relative;height:36px;margin:0}
-  .couch .sofa{position:absolute;left:50%;bottom:0;transform:translateX(-50%);font-size:30px;line-height:1}
-  .couch .blob{position:absolute;left:50%;bottom:13px;font-size:19px;line-height:1;
+  .couch{position:relative;height:30px;margin:0}
+  .couch .sofa{position:absolute;left:50%;bottom:0;transform:translateX(-50%);font-size:26px;line-height:1}
+  .couch .blob{position:absolute;left:50%;bottom:11px;font-size:17px;line-height:1;
                transform:translateX(-50%);animation:melt 3.6s ease-in-out infinite}
   .couch.deep .blob{animation-duration:2.6s}
   .couch.light .blob{animation-duration:5s}
@@ -84,6 +84,9 @@
           border-radius:99px;padding:4px 12px}
   /* 跳過訪談時的一行:分數是純發票算的,不能讓他以為那兩題有算進去 */
   .skipnote{font-size:11px;font-weight:700;color:var(--mut);margin-top:6px}
+  /* 分數 → 行動的因果句(0729):跟半徑同一區塊,不另外佔高度 */
+  .cause{font-size:12px;font-weight:800;color:#A50011;background:#FFF1F2;border-radius:10px;
+         padding:7px 10px;margin-top:7px;line-height:1.6}
   /* 訪談標題 */
   .lead{font-size:15px;font-weight:900;line-height:1.6;padding:14px 4px 0}
   .lead small{display:block;font-size:11.5px;font-weight:700;color:var(--mut);margin-top:6px}
@@ -203,13 +206,15 @@
       <div class="stampT" id="stampT"></div>
       <div class="skipnote" id="skipnote" style="display:none">你沒回答，這是純發票版</div>
       <div class="radl">生活半徑 <b id="radN">&mdash;</b> · <span id="radTxt"></span></div>
+      <!-- 0729:分數要接上行動誘因,不然使用者不知道 93 分能幹嘛 -->
+      <div class="cause" id="cause"></div>
     </div>
     <div class="card">
       <b class="evh" id="evh">&mdash;</b>
       <div id="ev"></div>
     </div>
     <button class="btn p" id="rxCta" onclick="showRx()">你終於要出門了？</button>
-    <div class="sec"><button onclick="UK.share.open(card)">曬我的無聊值</button></div>
+    <div class="sec"><button onclick="shareNow()">曬我的無聊值</button></div>
   </div>
 
   <!-- v4 好去處:三個模式共用一頁(精選／我的清單／全部),篩選條釘在標題列下面。
@@ -459,6 +464,7 @@ function shareLink() { return location.origin + location.pathname; }
    兩條路都是「真的分享出去」。測過還沒測的都不會變成複製連結。 */
 function shareNow() {
   if (typeof score !== 'number') { UK.toast('先測一次,才有東西可以曬'); return; }
+  UK.track('bored_share_click', { score:score, radius:stats().radius, from:nav.current() });
   UK.share.open(card);
 }
 /* 原生分享面板的文字(UK.share.send 會用 card().text,這支留給需要純文字時用) */
@@ -563,6 +569,9 @@ function showResult() {
   couch.className = 'couch ' + (score >= 85 ? 'deep' : (score >= 70 ? '' : 'light'));
   document.getElementById('blob').textContent = score >= 85 ? '🫠' : (score >= 50 ? '😪' : '🙂');
   document.getElementById('skipnote').style.display = ST.skipped ? '' : 'none';
+  /* 0729:講清楚這個數字能幹嘛 —— 出門一趟、發票進來,分項就會動,數字自己會掉。
+     不承諾具體掉幾分(那要真發票回來才算得出來),只講因果方向。 */
+  document.getElementById('cause').textContent = '出門刷一次載具，這個數字就會往下掉';
 
   /* 生活半徑(併在分數卡裡,一行講完) */
   document.getElementById('radN').textContent = radTxt(s.radius);
@@ -595,7 +604,9 @@ function mismatch(s, ans) {
 /* 證據行:一行一句,句子裡自己帶數字。不寫「你很無聊」,也不再補灰色說明。
    固定最多 5 行 —— 行數會變的話,主 CTA 就會被擠出首屏(說謊時本來會變 7 行)。
    排序就是優先序:被抓到說謊的那兩行最好笑,所以排在前面,擠掉後面比較弱的。 */
-var EV_MAX = 5;
+/* 0729:分數卡多了因果句,證據行從 5 收到 4,主 CTA 才留在首屏。
+   排序本來就是優先序,被擠掉的是最弱的那一行(通常是 🆕 或 🛵)。 */
+var EV_MAX = 4;
 function evidence(s, ans) {
   var L = [];
   /* 沒去的那行最痛,排第一 —— 它是「你自己說的」對上「發票沒動」 */
@@ -659,6 +670,20 @@ SPOTS.forEach(function (p) {
 
 function spotsSorted() { return SPOTS.slice().sort(function (a, b) { return a.km - b.km; }); }
 
+/* 精選:挑「在你的圓外面」的,近的先 —— 0729 Rebecca 走查修正。
+   原本固定給 3 個最近的,對半徑大的人(=無聊值低=機動性高)等於推薦他早就去過的範圍,
+   而且還標「這 3 個都在圓外」——半徑 6.5 公里的人看到 1.3 公里的景點,那句是假的。
+   低分的人最該被推薦驅動(想出門、只缺新地點),所以要給他圓外的。
+   圓外不足 3 個才用圓內的補(遠的先),沒有人會被擋掉。 */
+function featured(s) {
+  var all = spotsSorted();
+  var out = all.filter(function (p) { return p.km * 1000 > s.radius; });
+  if (out.length >= 3) return out.slice(0, 3);
+  var inside = all.filter(function (p) { return p.km * 1000 <= s.radius; })
+                  .sort(function (a, b) { return b.km - a.km; });   /* 圓內的話,遠的先 */
+  return out.concat(inside).slice(0, 3);
+}
+
 /* 景點卡:一列 = emoji + 名字 + 距離 + 一句理由 + 一顆「帶你衝」 */
 function spotHTML(p, s) {
   var why = p.why(s);
@@ -693,6 +718,12 @@ function togglePick(vf, row) {
   ST.picks = picks; ST.pickAt = Date.now(); ST.pickInv = invN();
   ST = UK.state.save(KEY, ST);
   UK.track('rx_pick', { poi:k, on:!!picks[k] });
+  /* 0729 主訊號:加入收藏／行程(只在「加入」時送,取消不算) */
+  if (picks[k]) {
+    var sp = SPOTS.filter(function (x) { return x.k === k; })[0] || {};
+    UK.track('bored_save_click', { poi:k, src:sp.src || '', km:sp.km || 0,
+                                   total:Object.keys(picks).length, score:score });
+  }
   /* 清單數字與「我的清單」內容要當場跟著動(在 v4 才需要重畫) */
   if (nav.current() === 'v4') renderRx();
 }
@@ -716,6 +747,9 @@ function mapsRouteURL(list) {
 function openRoute() {
   var list = pickedSpots(); if (!list.length) return;
   UK.track('plan_route', { n:list.length });
+  /* 0729 主訊號:真的點了導航。刷載具只是輔助(發票有時間落差,不能當即時或必要條件) */
+  UK.track('bored_map_click', { n:list.length, km:Math.round(list.reduce(function (a, p) { return a + p.km; }, 0) * 10) / 10,
+                                radius:stats().radius, score:score });
   window.open(mapsRouteURL(list), '_blank');
 }
 function planCarrier() {
@@ -749,7 +783,7 @@ function renderRx(s) {
   s = s || applyDims();
   var mine = pickedSpots(), all = spotsSorted();
   document.getElementById('mineN').textContent = mine.length;
-  var list = RXMODE === 'mine' ? mine : (RXMODE === 'all' ? all : all.slice(0, 3));
+  var list = RXMODE === 'mine' ? mine : (RXMODE === 'all' ? all : featured(s));
   document.getElementById('planBox').innerHTML = (RXMODE === 'mine') ? planHTML(s) : '';
   /* 「全部」按來源分組,官方那組附可查的連結;其他模式不分組(混著看比較像處方) */
   document.getElementById('rxList').innerHTML = (RXMODE === 'all')
@@ -764,16 +798,22 @@ function renderRx(s) {
              + g.map(function (p) { return spotHTML(p, s); }).join('');
       }).join('')
     : list.map(function (p) { return spotHTML(p, s); }).join('');
+  /* 圓外幾個就講幾個,不要一律說「都在圓外」——半徑大的人會抓到這句是假的 */
+  var outN = list.filter(function (p) { return p.km * 1000 > s.radius; }).length;
   document.querySelector('#rxLead small').textContent =
       RXMODE === 'mine' ? (mine.length ? '排了 ' + mine.length + ' 個地方。走不走是你的事。' : '還沒排任何地方')
     : RXMODE === 'all'  ? all.length + ' 個地方,自己挑'
-    :                     '半徑 ' + radTxt(s.radius) + ' · 這 3 個都在圓外';
+    : '半徑 ' + radTxt(s.radius) + ' · ' + (outN === list.length
+        ? '這 ' + list.length + ' 個都在圓外' : outN + ' 個在圓外');
 }
 function showRx() {
   var s = applyDims();
   document.getElementById('rxLeadT').textContent = push();
   renderRx(s);
   nav.show('v4'); UK.track('rx_view', { radius:s.radius, mode:RXMODE });
+  /* 0729 成功訊號:看到推薦清單(主訊號是 map/save,這個是分母) */
+  UK.track('bored_reco_view', { mode:RXMODE, n:document.querySelectorAll('#rxList .spot').length,
+                                radius:s.radius, score:score });
 }
 /* 「全部」不再是獨立頁,是 v4 的一個模式(留這支是為了外部呼叫不斷掉) */
 function showAll() { RXMODE = 'all'; markMode('all'); showRx(); }
