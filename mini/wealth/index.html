@@ -6,11 +6,11 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#E4001A">
-<title>發財體質｜發票載具</title>
+<title>財神開示｜發票載具</title>
 <!-- vendored / 共用層:不改。unit-kit 這裡只用到 UK.selfCheck()(唯讀機械自檢),
      nav/state/share 依 0726 決策維持本單元手寫版本。 -->
-<script src="qrcode.min.js?v=a7700661"></script>
-<script src="unit-kit.js?v=a7700661"></script>
+<script src="qrcode.min.js?v=83fd8494"></script>
+<script src="unit-kit.js?v=83fd8494"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--red-deep:#A50011;--gold:#FFD34D;--teal:#0E7C7B;--mut:#7A8494;--bg:#FFF6F5;--line:#F0E0E1}
@@ -56,6 +56,10 @@
   .tag.ok{color:#0B5D5C;background:#EAF5F1;border-color:#B9DACD}
   /* 限制說明:看得到但不搶戲(0729 口徑風險) */
   .limit{font-size:10px;color:var(--mut);line-height:1.75;margin-top:10px;padding-top:9px;border-top:1px dashed var(--line);text-align:left}
+  /* 問卜開場:先講「不問什麼」,降低填表戒心(0729 個資觀感) */
+  .ritual{font-size:13.5px;font-weight:900;color:#A9720B;background:#FFF9E9;border:1.5px dashed #F0DFAE;
+          border-radius:12px;padding:10px 12px;text-align:center;line-height:1.7}
+  .ritual span{display:block;font-size:10.5px;font-weight:700;color:#8A7A5E;margin-top:3px}
   .two{display:flex;gap:10px;margin-top:12px}
   .two .btn{margin-top:0;font-size:14px;padding:12px 10px}
   .two .btn small{display:block;font-weight:600;font-size:10.5px;opacity:.88;margin-top:3px}
@@ -148,48 +152,53 @@
 <!-- 頂部列:‹ 和 標題/icon 都是「回第一頁」,沒有例外。
      離開單元(回發票載具首頁)移到 ⋯ 選單,不佔用這條列——
      否則在第一頁按 ‹ 會把整個單元收掉,那不叫返回。 -->
-<div class="top"><button class="tbtn" onclick="goTop()" aria-label="回第一頁">‹</button><button class="ttl" onclick="goTop()" aria-label="回第一頁">💰 發財體質</button><span class="top-r"><span class="off">官方自營</span><button class="tbtn" onclick="menuOpen()" aria-label="更多選項">⋯</button></span></div>
+<div class="top"><button class="tbtn" onclick="goTop()" aria-label="回第一頁">‹</button><button class="ttl" onclick="goTop()" aria-label="回第一頁">🧧 財神開示</button><span class="top-r"><span class="off">官方自營</span><button class="tbtn" onclick="menuOpen()" aria-label="更多選項">⋯</button></span></div>
 <div class="wrap">
 
   <!-- 0729 立場反轉:入口不再用「你不敢看」恐嚇。花錢不是罪,問題是這些錢
        有沒有把你往前推。主詞從「你會破產」換成「你能走多遠」。 -->
   <div id="v0">
-    <div class="hero"><div class="big">💰</div>
-      <h1>你的錢,<br>能陪你走到 <em>幾歲</em>?</h1>
-      <p>發票知道你把錢花在哪——先看清楚,才談怎麼賺更多</p></div>
+    <div class="hero"><div class="big">🧧</div>
+      <h1>財神看過你的發票了,<br>要不要聽祂 <em>開示</em>?</h1>
+      <p>擲四筊、問四事——祂只看財庫,不看身分證</p></div>
     <div id="lastBox" style="display:none"></div>
-    <button class="btn p" id="cta" onclick="enter()">算我的發財體質</button>
-    <div class="note">情境試算、非財務預測(示範數據)</div>
+    <button class="btn p" id="cta" onclick="enter()">求一支財籤 🥠</button>
+    <div class="note">娛樂性質・情境試算、非財務預測(示範數據)</div>
   </div>
 
-  <!-- 四題都真的驅動試算:Q1→月收入、Q2→儲蓄率、Q3→收入成長率(投資自己的人成長更快)、
-       Q4→起算年齡。data 屬性放的是真的財務參數,不是以前那種假的「歲數加減」。 -->
+  <!-- 0729 問卷改成「問卜」框架(規避兩件事):
+       (a) 投資意見觀感 —— 財神開示是娛樂占卜語彙,不是理財顧問問診
+       (b) 個資表單觀感 —— 用「擲筊問四事」的口吻,不是欄位表格
+       ⚠️ 只包裝題幹,選項一律保持事實清楚(3–5 萬就寫 3–5 萬)。
+          把選項也神祕化的話使用者答不準,後面的試算就變垃圾。
+       四題仍然真的驅動試算:Q1→月收入、Q2→儲蓄率、Q3→收入成長率、Q4→起算年齡。 -->
   <div id="v1" style="display:none">
     <div class="card">
-      <div class="q">Q1 · 你的月收入大概落在?</div>
+      <div class="ritual">🥠 擲筊問四事<span>財神只問財庫,不問姓名、不問身分證、不問帳號</span></div>
+      <div class="q">第一問 · 你的財庫每月進多少活水?</div>
       <div class="chips" data-q="income">
         <button class="chip" data-action="pick" data-v="40000">3–5 萬</button>
         <button class="chip" data-action="pick" data-v="65000">5–8 萬</button>
         <button class="chip" data-action="pick" data-v="100000">8 萬以上</button>
-        <button class="chip" data-action="pick" data-v="50000" data-est="1">不方便說</button></div>
-      <div class="q">Q2 · 每個月存得下多少?</div>
+        <button class="chip" data-action="pick" data-v="50000" data-est="1">不便明說 🤐</button></div>
+      <div class="q">第二問 · 進來的活水,留得住幾分?</div>
       <div class="chips" data-q="save">
-        <button class="chip" data-action="pick" data-v="0.2">兩成以上</button><button class="chip" data-action="pick" data-v="0.08">存一點</button><button class="chip" data-action="pick" data-v="0">月光,別問</button></div>
-      <!-- 0729 立場反轉:Q3 從「最想砍哪類花費」改成「哪一類最不後悔」。
-           花錢不是罪;而且選「學習」的人收入成長率會加成,這題因此真的影響數字。 -->
-      <div class="q">Q3 · 哪一類花費你最不後悔?</div>
+        <button class="chip" data-action="pick" data-v="0.2">留兩成以上</button><button class="chip" data-action="pick" data-v="0.08">留一點</button><button class="chip" data-action="pick" data-v="0">過路財神 💸</button></div>
+      <!-- 0729 立場反轉:不問「最想砍什麼」(那是省錢視角),問「哪一項供品捨得」。
+           花錢不是罪;選「學習」的人收入成長率加成,這題因此真的影響數字。 -->
+      <div class="q">第三問 · 哪一項供品,你花得心甘情願?</div>
       <div class="chips" data-q="grow">
-        <button class="chip" data-action="pick" data-v="0" data-k="drink">手搖/咖啡</button><button class="chip" data-action="pick" data-v="0" data-k="deliv">外送</button><button class="chip" data-action="pick" data-v="0.01" data-k="learn">學習/訂閱</button><button class="chip" data-action="pick" data-v="0">每一筆都值得</button></div>
-      <!-- 年齡從結果頁搬到這裡:先問再算,「以 N 歲起算」才不會變成事後補問 -->
-      <div class="q">Q4 · 你現在幾歲?</div>
+        <button class="chip" data-action="pick" data-v="0" data-k="drink">手搖/咖啡</button><button class="chip" data-action="pick" data-v="0" data-k="deliv">外送</button><button class="chip" data-action="pick" data-v="0.01" data-k="learn">學習/訂閱</button><button class="chip" data-action="pick" data-v="0">樣樣都值 🙏</button></div>
+      <!-- 年齡:用「財神要對生辰」包裝,比赤裸的「你幾歲」自然。型態不動(自由填寫) -->
+      <div class="q">第四問 · 你的虛歲(財神要對生辰)</div>
       <div class="a0" style="justify-content:flex-start">
         <input id="a0In" class="a0-in" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="請填"
-               autocomplete="off" aria-label="你現在幾歲(18 到 99)" oninput="a0Input()">
+               autocomplete="off" aria-label="你的虛歲(18 到 99)" oninput="a0Input()">
         <span class="a0-unit">歲</span></div>
       <div class="a0-err" id="a0Err" style="display:none;text-align:left"></div>
-      <div class="hint" style="margin-top:10px">再點一次可以取消。收入與年齡沒填不會幫你猜——「不方便說」也是一個答案。</div>
+      <div class="hint" style="margin-top:10px">再擲一次可以改。財庫與生辰沒答,財神不會幫你掰——「不便明說」也是一個答案。</div>
     </div>
-    <button class="btn p" id="goScan" onclick="scan()" disabled>先填收入與年齡</button>
+    <button class="btn p" id="goScan" onclick="scan()" disabled>還差財庫與生辰</button>
   </div>
 
   <div id="v2" style="display:none">
@@ -226,7 +235,7 @@
       <div class="hint" id="spendNote" style="margin-top:8px"></div></div>
     <!-- 0729 立場反轉:主 CTA 從「把漏洞堵起來」改成成長導向 -->
     <button class="btn t" onclick="goGrow()">怎麼讓這個數字往後推<small>把收入做大,比戒咖啡有效</small></button>
-    <button class="btn l" onclick="share()">📤 曬我的發財體質</button>
+    <button class="btn l" onclick="share()">📤 曬我的財神籤</button>
   </div>
 
   <!-- 0729 立場反轉(Rebecca 走查):這頁原本叫「省錢處方」,三項都是叫人少花。
@@ -421,7 +430,7 @@ function entryRender(){
       +'<button class="lastgo" onclick="showResult()">看上次結果 ›</button></div>';
     cta.textContent='再算一次';
     age=ST.age;
-  } else { box.style.display='none'; cta.textContent='算我的發財體質'; }
+  } else { box.style.display='none'; cta.textContent='求一支財籤 🥠'; }
 }
 function enter(){
   if(INV<MIN_INV){ document.getElementById('invN').textContent=INV; CUR='v6'; _show('v6'); return; }
@@ -444,9 +453,9 @@ function gate(){
   var b=document.getElementById('goScan');
   var hasInc=(typeof ANS.income==='number'), hasAge=(typeof ANS.age0==='number');
   b.disabled=!(hasInc&&hasAge);
-  b.textContent = (hasInc&&hasAge) ? '好了,驗我的發票'
-                : !hasInc && !hasAge ? '先填收入與年齡'
-                : !hasInc ? '還差收入級距' : '還差年齡';
+  b.textContent = (hasInc&&hasAge) ? '擲筊,請財神開示 🥠'
+                : !hasInc && !hasAge ? '還差財庫與生辰'
+                : !hasInc ? '還差財庫' : '還差生辰';
 }
 /* data-v 現在放的是浮點財務參數(收入/儲蓄率/成長率),不能用 parseInt */
 document.querySelectorAll('#v1 .chips').forEach(function(g){
@@ -486,7 +495,7 @@ function scan(){
   /* 0729:過場台詞也跟著改立場——不再是「噴了多少」的控訴,而是逐項唸出結構,
      自我投資那筆給正向語氣。ANS.growK 是這次剛選的即時答案(ST 已在上面寫好,
      兩邊同源,不會出現排序不一致)。 */
-  var t=['讀取近 90 天發票…','盤點支出結構…','納入收入成長…','推算可支撐年數…'], i=0, el=document.getElementById('scanTxt');
+  var t=['擲筊…','翻閱近 90 天發票…','清點財庫活水…','財神開示中…'], i=0, el=document.getElementById('scanTxt');
   var sp=orderedBy(ANS.growK), stg=document.getElementById('scanSting');
   var stings=sp.map(function(L){
     return L.ic+' '+L.nm+'　每月 <b>'+nt(L.amt)+'</b>'+(L.kind==='invest'?'　← 這筆算投資':'');
@@ -646,7 +655,7 @@ function goApp(k){
    所以不是把它丟掉,是把那套 execCommand 優先＋手動攤連結的做法搬進 kit,
    三支一起受惠,這裡才換過來。home:true 保留「回發票載具首頁」那一項
    (頂部列只負責回第一頁,離開單元的出口刻意收在選單裡)。 */
-function menuOpen(){ UK.menu.open(shLink(), { title:'發財體質', text:'你的錢能陪你走到幾歲?發票算得出來。', home:true }); }
+function menuOpen(){ UK.menu.open(shLink(), { title:'財神開示', text:'財神看過我的發票了。你要不要也求一支?', home:true }); }
 function menuClose(){ UK.menu.close(); }
 
 /* ── 分享:改走 UK.share(0727)──
@@ -668,17 +677,17 @@ function card(){
   var p=ST.proj||projOf();
   return {
     theme:'wcheck',
-    head:'💰 發財體質',
+    head:'🧧 財神開示',
     score: p.lasts ? (AGE_CAP+'+') : age,
-    unitTxt: p.lasts ? '歲都夠用' : '歲・累積見底',
-    sub:'照這個花法',                    /* ③ 大字結論:不帶數字(kit 會查重) */
-    tint: p.lasts ? '我的錢夠用到 100 歲' : '我的錢撐到 '+age+' 歲',
-    punch:'情境試算・非財務預測',        /* ④ 說明行擺法遵(kit 版式沒有獨立免責欄位) */
-    emoji:'💰',
-    stamp: p.lasts ? '體質很好' : (age>=85 ? '體質不錯' : (age>=75 ? '還行' : '該衝收入了')),
-    qrHint:'掃碼,算你自己的',
-    title:'我的發財體質',
-    text: p.lasts ? '我的錢夠用到 100 歲。你呢?' : '我的錢撐到 '+age+' 歲。你呢?',
+    unitTxt: p.lasts ? '歲都夠用' : '歲・財庫見底',
+    sub:'財神說我的財庫',                /* ③ 大字結論:不帶數字(kit 會查重) */
+    tint: p.lasts ? '夠用到 100 歲' : '撐到 '+age+' 歲',
+    punch:'娛樂性質・情境試算,非財務預測',  /* ④ 說明行擺法遵(kit 版式沒有獨立免責欄位) */
+    emoji:'🧧',
+    stamp: p.lasts ? '上上籤' : (age>=85 ? '上籤' : (age>=75 ? '中籤' : '該衝收入')),
+    qrHint:'掃碼,求你自己的',
+    title:'我的財神籤',
+    text: p.lasts ? '財神說我的財庫夠用到 100 歲。你呢?' : '財神說我的財庫撐到 '+age+' 歲。你呢?',
     url: shLink()
   };
 }
