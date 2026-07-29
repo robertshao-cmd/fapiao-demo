@@ -6,8 +6,8 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title id="pageTitle">舒適圈雷達｜發票載具</title>
-<script src="qrcode.min.js?v=525c4ed0"></script>
-<script src="unit-kit.js?v=525c4ed0"></script>
+<script src="qrcode.min.js?v=62fe5ba0"></script>
+<script src="unit-kit.js?v=62fe5ba0"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--mut:#7A8494;--line:#F0E0E1;--bg:#FFF6F5}
@@ -152,6 +152,19 @@
   .fbar.stuck{box-shadow:0 6px 12px -8px rgba(31,36,48,.35)}
   .fbar .uk-chip{flex:1;text-align:center;font-size:12px;padding:9px 4px;min-height:44px}
   .fbar .uk-chip b{color:inherit}
+  /* 舒適圈地圖:同心環。已填=發票證實你到過的範圍;虛線=排進清單但還沒去;灰=沒動過 */
+  .rings{display:flex;gap:12px;align-items:center;margin-top:2px}
+  .ringbox{position:relative;width:104px;height:104px;flex:none}
+  .ringbox i{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+             border-radius:50%;border:2px solid #E8DADB;box-sizing:border-box}
+  .ringbox i.fill{background:rgba(228,0,26,.13);border-color:rgba(228,0,26,.55)}
+  .ringbox i.plan{border-style:dashed;border-color:#2B4BD7;border-width:2.5px}
+  .ringbox .me{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+               font-size:15px;z-index:2}
+  .rlegend{flex:1;min-width:0;font-size:11px;font-weight:700;line-height:1.75;color:#5A6472}
+  .rlegend b{font-weight:900;color:var(--ink)}
+  .rlegend .lk{color:#A50011}
+  .rlegend .lp{color:#2B4BD7}
   /* 出走計畫:最優順序 + 一鍵開地圖 + 到店報載具 */
   .plan{background:#fff;border-radius:16px;padding:14px;margin-top:12px;box-shadow:0 2px 10px rgba(31,36,48,.06)}
   .plan h3{font-size:13.5px;font-weight:900;color:#5A0E14}
@@ -876,16 +889,52 @@ function planCarrier() {
     UK.toast('這筆會進你的載具——下次進來' + NAME.metric + '就會動');
   } });
 }
+/* ══ 舒適圈地圖(0729)═════════════════════════════════════════
+   四個距離帶。填色的規則刻意分成兩層,因為兩件事的可信度不一樣:
+     · 已填(紅) = 發票算出來的半徑蓋到這一帶 —— 這是「你真的去過」的證據
+     · 虛線(藍) = 這一帶有你排進清單的地方 —— 那只是意圖,還沒發生
+     · 灰      = 沒動過
+   刻意不用「刷載具」當解鎖條件:發票有時間落差(實測歸戶要隔幾天),
+   拿它當即時開關會讓使用者以為壞掉。刷載具的效果會在下次進來時,由半徑自己長出來。 */
+var BANDS = [ { max:1000, t:'1 公里內' }, { max:5000, t:'1–5 公里' },
+              { max:10000, t:'5–10 公里' }, { max:Infinity, t:'10 公里外' } ];
+function ringsHTML(s) {
+  var picks = ST.picks || {};
+  var planned = SPOTS.filter(function (p) { return picks[p.k]; });
+  var band = BANDS.map(function (b, i) {
+    var lo = i ? BANDS[i - 1].max : 0;
+    return { t:b.t, max:b.max,
+      fill: s.radius >= b.max || (s.radius > lo && s.radius <= b.max),   /* 半徑蓋到就算 */
+      plan: planned.some(function (p) { return p.km * 1000 > lo && p.km * 1000 <= b.max; }) };
+  });
+  var nFill = band.filter(function (b) { return b.fill; }).length;
+  var nPlan = band.filter(function (b) { return b.plan && !b.fill; }).length;
+  /* 由外往內畫,外圈先(不然內圈會被蓋掉) */
+  var circles = band.slice().reverse().map(function (b, ri) {
+    var d = 104 - ri * 24;
+    return '<i class="' + (b.fill ? 'fill' : (b.plan ? 'plan' : '')) + '"'
+         + ' style="width:' + d + 'px;height:' + d + 'px"></i>';
+  }).join('');
+  return '<div class="rings"><div class="ringbox">' + circles + '<span class="me">😶</span></div>'
+    + '<div class="rlegend">'
+    + '<b>你的舒適圈</b><br>'
+    + '<span class="lk">■ 已填 ' + nFill + ' 圈</span>——發票證實你到過<br>'
+    + (nPlan ? '<span class="lp">▢ 待解鎖 ' + nPlan + ' 圈</span>——排了還沒去<br>' : '')
+    + '走一趟圈外的地方，下次進來這一圈就會被填掉。'
+    + '</div></div>';
+}
+
 function planHTML(s) {
   var list = pickedSpots();
   if (!list.length) {
-    return '<div class="plan"><h3>清單是空的</h3>'
-      + '<div class="chain" style="border:none;padding:0;margin-top:6px">'
-      + '你連想去哪都還沒決定。回「精選」按一下「帶你衝」。</div></div>';
+    /* 清單空的時候也給地圖——他至少要看到自己的圈有多小,那才是動機 */
+    return '<div class="plan">' + ringsHTML(s)
+      + '<div class="chain">你連想去哪都還沒決定。回「精選」按一下「帶你衝」。</div></div>';
   }
   var tot = list.reduce(function (a, p) { return a + p.km; }, 0);
   return '<div class="plan">'
-    + '<h3>🗺️ 由近到遠,這樣走</h3>'
+    + ringsHTML(s)
+    + '<h3 style="margin-top:12px">🗺️ 由近到遠,這樣走</h3>'
     + '<ol>' + list.map(function (p) {
         return '<li><b>' + p.name + '</b>　' + p.km + ' 公里</li>'; }).join('') + '</ol>'
     + '<div class="tot">' + list.length + ' 站 · 直線距離合計 ' + (Math.round(tot * 10) / 10)
