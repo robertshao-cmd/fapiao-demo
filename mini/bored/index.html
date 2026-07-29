@@ -5,9 +5,9 @@
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>無聊快篩｜發票載具</title>
-<script src="qrcode.min.js?v=64cfcc0e"></script>
-<script src="unit-kit.js?v=64cfcc0e"></script>
+<title id="pageTitle">舒適圈雷達｜發票載具</title>
+<script src="qrcode.min.js?v=d35299d5"></script>
+<script src="unit-kit.js?v=d35299d5"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--mut:#7A8494;--line:#F0E0E1;--bg:#FFF6F5}
@@ -144,7 +144,7 @@
 <body>
 <div class="top">
   <button onclick="nav.back()" aria-label="返回">&lsaquo;</button>
-  <button class="ttl" onclick="goTop()" aria-label="回到第一頁">😶 無聊快篩</button>
+  <button class="ttl" id="appTtl" onclick="goTop()" aria-label="回到第一頁">😶 舒適圈雷達</button>
   <span class="off">官方自營</span>
   <button onclick="shareNow()" aria-label="分享">&ctdot;</button>
 </div>
@@ -214,7 +214,7 @@
       <div id="ev"></div>
     </div>
     <button class="btn p" id="rxCta" onclick="showRx()">你終於要出門了？</button>
-    <div class="sec"><button onclick="shareNow()">曬我的無聊值</button></div>
+    <div class="sec"><button onclick="shareNow()" id="shareLink">曬我的分數</button></div>
   </div>
 
   <!-- v4 好去處:三個模式共用一頁(精選／我的清單／全部),篩選條釘在標題列下面。
@@ -266,6 +266,17 @@ var score = null;
    ═══════════════════════════════════════════════════════════ */
 var COPY = { push: 0, evh: 0, liar: 0 };
 
+/* ══ 命名(0729 Rebecca:「無聊快篩」自創詞、而且罵錯人)═══════════════
+   改名只改這裡,畫面上所有出現的地方都吃這兩個字串。
+   選這一組的理由:
+     ·「舒適圈」是通用詞,不用解釋(Rebecca 說自創詞使用者不懂)
+     ·「雷達」對得上掃描過場那個往外掃的圈,不是硬掛的比喻
+     · 不罵人:宅的人是圈小、愛出門的人是圈大但想找新的,兩群都成立
+     · 分數方向不用反轉:高＝還在圈內＝該出門(反轉要動五個分項與所有文案,不是兩天的事)
+   要換成別的:改下面兩個字串就好,track 事件名(bored_*)與 theme 不要動,那是契約。
+   舊名保留在註解裡:app='無聊快篩' metric='無聊值' */
+var NAME = { app: '舒適圈雷達', metric: '舒適圈指數' };
+
 /* -- 兩題的答案:每一個選項都真的改分數(不是裝飾) -- */
 var Q1 = {                                   /* 週末人在哪 → 生活半徑 */
   home:     { label: '家裡，躺著',     radius: 300  },
@@ -309,7 +320,7 @@ var SCAN = [
   [ ['清點你的日常…',      '清單很短,別緊張'],
     ['畫你的活動範圍…',    '一個圈,收工'],
     ['查證你的說法…',      '查到了,不用查太久'],
-    ['結算無聊值…',        '你確定要看?'] ]
+    ['結算分數…',          '你確定要看?'] ]
 ];
 var SCAN_SET = 0;
 
@@ -406,7 +417,7 @@ function entryRender() {
       re = document.getElementById('retest'), hero = document.querySelector('#v0 .hero');
   if (typeof ST.n === 'number') {
     var ns = noShow();
-    box.innerHTML = UK.state.lastBox({ label:'上次無聊值', n:ST.n, unit:'/100', at:ST.mat, prev:ST.prev, onclick:"showResult()" })
+    box.innerHTML = UK.state.lastBox({ label:'上次' + NAME.metric, n:ST.n, unit:'/100', at:ST.mat, prev:ST.prev, onclick:"showResult()" })
       /* 回訪才有的一行。新用戶的入口仍然只有臉＋一句＋一顆鈕(0724 定調) */
       /* 只講事實(發票沒多),不替他下結論——「不明說」比「說你沒去」更刺,也不會講得比資料多 */
       + (ns ? '<div class="busted">上次你說要衝「' + ns.name + '」。發票一張都沒多。</div>' : '');
@@ -470,8 +481,8 @@ function shareNow() {
 /* 原生分享面板的文字(UK.share.send 會用 card().text,這支留給需要純文字時用) */
 function shareMeta() {
   var s = stats();
-  return { title: '無聊快篩',
-           text: (typeof score === 'number' ? '我的無聊值 ' + score + '，生活半徑 ' + radTxt(s.radius) + '。' : '')
+  return { title: NAME.app,
+           text: (typeof score === 'number' ? '我的' + NAME.metric + ' ' + score + '，生活半徑 ' + radTxt(s.radius) + '。' : '')
                  + (EVH[COPY.evh] || EVH[0])(s) };
 }
 
@@ -754,7 +765,7 @@ function openRoute() {
 }
 function planCarrier() {
   UK.carrier.open({ from:'plan', onDone: function () {
-    UK.toast('這筆會進你的載具——下次進來無聊值就會動');
+    UK.toast('這筆會進你的載具——下次進來' + NAME.metric + '就會動');
   } });
 }
 function planHTML(s) {
@@ -822,9 +833,9 @@ function showAll() { RXMODE = 'all'; markMode('all'); showRx(); }
 function card() {
   var s = stats();
   return {
-    theme: 'bored', emoji: '😶', sub: '無聊值 ' + score + '／100', tint: '生活半徑 ' + radTxt(s.radius),
+    theme: 'bored', emoji: '😶', sub: NAME.metric + ' ' + score + '／100', tint: '生活半徑 ' + radTxt(s.radius),
     score: score, unitTxt: '/100',
-    head: '😶 無聊快篩',
+    head: '😶 ' + NAME.app,
     /* 圖上那句用「照你這個X法,你很快就要Y了」的句型(Robert 0728 指定的形狀)。
        主題要對得上這顆單元——這裡量的是無聊,不是花錢,所以不寫「照你這個花法」。 */
     punch: score >= 85 ? '照你這個活法，你很快就要跟沙發長在一起了'
@@ -832,8 +843,8 @@ function card() {
          :               '照你這個活法，至少還有得救',
     stamp: score >= 85 ? '可預測' : (score >= 70 ? '超穩定' : (score >= 50 ? '有點悶' : '還有救')),
     qrHint: '掃碼，驗你自己的圓',
-    title: '我的無聊快篩',
-    text: '我的無聊值 ' + score + '，生活半徑 ' + radTxt(s.radius) + '。' + (EVH[COPY.evh] || EVH[0])(s) + ' 你呢？',
+    title: '我的' + NAME.app,
+    text: '我的' + NAME.metric + ' ' + score + '，生活半徑 ' + radTxt(s.radius) + '。' + (EVH[COPY.evh] || EVH[0])(s) + ' 你呢？',
     url: location.origin + location.pathname
   };
 }
@@ -869,6 +880,13 @@ window.addEventListener('scroll', function () {
   var top = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--topH')) || 58;
   f.classList.toggle('stuck', f.getBoundingClientRect().top <= top + 1);
 }, { passive: true });
+
+/* 名字只有 NAME 一個來源:標題列與 document.title 都從它長出來,改名不會漏掉 */
+(function applyName() {
+  var t = document.getElementById('pageTitle'), b = document.getElementById('appTtl');
+  if (t) t.textContent = NAME.app + '｜發票載具';
+  if (b) b.textContent = '😶 ' + NAME.app;
+})();
 
 applyDims();
 entryRender();
