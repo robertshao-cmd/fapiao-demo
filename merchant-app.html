@@ -443,6 +443,24 @@ window.onerror=function(m,s,l,c){try{if(document.body&&document.body.classList.c
         </div>
         <div class="body">
           <div class="peak"><b>⚡ 尖峰預測：12:00–13:00 約 34 單</b><small>AI 依歷史單量 × 天氣 × 週期推估 · 建議先備青醬 ×12、燉飯高湯 ×8，內場加 1 人</small></div>
+
+          <!-- 核銷台:客人券夾「到店出示」→ 這裡亮 → 確認核銷 → 用戶端券即標已使用。
+               對應微信卡券核銷鏈路;「按核銷計費」的信任錨點=店家親眼看到核銷那一刻 -->
+          <div class="card" style="padding:12px 13px;border-left:4px solid var(--gold)">
+            <div class="sec-label">🎫 核銷台 <span class="chip gold" style="margin-left:auto" id="rd-count">今日已核銷 233 張</span></div>
+            <div id="rd-empty" style="font-size:11.5px;color:var(--muted);margin-top:8px;line-height:1.7">等客人在小程序券夾按「到店出示」，這裡會亮。<br>核銷成功才計費（3–6%）——沒帶來客人，一毛不收。</div>
+            <div id="rd-live" hidden>
+              <div style="display:flex;align-items:center;gap:9px;margin-top:8px">
+                <span class="chip gold" id="rd-tag">券</span>
+                <div style="flex:1;min-width:0"><b id="rd-title" style="font-size:13px">…</b><small id="rd-sub" style="display:block;font-size:10.5px;color:var(--muted);margin-top:2px">…</small></div>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:10px">
+                <button class="btn primary" style="flex:1;padding:9px 0;font-size:12.5px" onclick="redeemConfirm()">✅ 確認核銷</button>
+                <button class="btn ghost" style="flex:1;padding:9px 0;font-size:12.5px" onclick="redeemDismiss()">不符條件</button>
+              </div>
+            </div>
+          </div>
+
           <button class="demo-in btn ghost" style="padding:9px 0;font-size:12px;border-style:dashed" onclick="newOrder()">▶ 離線示範：模擬一張用戶預點單</button>
           <div id="olist" style="display:flex;flex-direction:column;gap:10px">
             <div class="card order" data-code="N-B07">
@@ -648,6 +666,7 @@ try{
   ch.onmessage=function(e){
     var d=e&&e.data; if(!d||!d.type) return;
     if(d.type==="order") buildIncoming(d.o||{}, true);
+    if(d.type==="present") showPresent(d.p||{});
     if(d.type==="member") addMember(d.m||{});
     if(d.type==="queue") toast("🎫（聯動）"+((d.q&&d.q.storeName)||"")+" 線上取號 "+((d.q&&d.q.no)||"")+"（"+((d.q&&d.q.size)||"")+"）");
     if(d.type==="booking") toast("💆（聯動）"+((d.b&&d.b.name)||"顧客")+" 已預約「"+((d.b&&d.b.svc)||"")+"」"+((d.b&&d.b.time)||""));
@@ -777,6 +796,32 @@ function buildIncoming(o, fromUser){
 }
 var seq=8;
 function newOrder(){ buildIncoming({ paid: PAYSEL }, false); }
+
+/* ---- 核銷台:客人出示券 → 確認核銷 → 回推用戶端標已使用 ---- */
+var RD = null, rdToday = 233;
+function showPresent(p){
+  RD = p;
+  $("rd-empty").hidden = true;
+  $("rd-live").hidden = false;
+  $("rd-tag").textContent = p.tag || "券";
+  $("rd-title").textContent = p.title || "客人出示了一張券";
+  $("rd-sub").textContent = (p.sub || "") + (p.min ? "（門檻:滿 " + p.min + "）" : "");
+  go("orders");
+  toast("🎫（聯動）客人出示「" + (p.title || "券") + "」，請確認核銷");
+}
+function redeemConfirm(){
+  if (!RD) return;
+  send({type:"redeem", id:RD.id});
+  rdToday++;
+  $("rd-count").textContent = "今日已核銷 " + rdToday + " 張";
+  toast("✅ 已核銷「" + (RD.title || "券") + "」· 此券計入按核銷計費（示範）");
+  redeemDismiss();
+}
+function redeemDismiss(){
+  RD = null;
+  $("rd-live").hidden = true;
+  $("rd-empty").hidden = false;
+}
 
 /* ---- grow：發券 → 即時掉進用戶券夾 ---- */
 

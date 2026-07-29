@@ -67,6 +67,8 @@ python checks/verify-demo.py    # exit 0 才算完成
 | `order` | 用戶→商家 | `{o:{code,paid,mode,table,items:[{name,qty}],storeName,coupon}}` | 助手:進看板+toast;參謀:toast |
 | `status` | 商家→用戶 | `{code,stage:"ready"}` | 用戶:訂單跳「請取餐」 |
 | `coupon` | 商家→用戶 | `{c:{store,storeName,title,sub,tag,amt,min}}` | 用戶:券夾插入+toast |
+| `present` | 用戶→商家 | `{p:{id,title,tag,sub,storeName,amt,min}}` | 助手:核銷台亮+跳訂單頁 |
+| `redeem` | 商家→用戶 | `{id}` | 用戶:該券標已使用+toast |
 | `paymode` | 商家→用戶 | `{on:bool}` | 用戶:切線上付款/到店付 |
 | `member` | 用戶→商家 | `{m:{name,phone,no}}` | 助手:會員+1;參謀:toast |
 | `queue`/`booking` | 用戶→商家 | `{q:{storeName,no,size}}` / `{b:{name,svc,time}}` | 助手:toast |

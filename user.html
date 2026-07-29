@@ -470,6 +470,7 @@ button:focus-visible,a:focus-visible{outline:3px solid #7FD1CC;outline-offset:2p
 .coupon .r{width:78px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-left:1px dashed #DFC98B;color:#8A6A1B;font-size:11px;font-weight:700;gap:2px;flex-shrink:0}
 .coupon .r b{font-size:16px}
 .coupon.used{opacity:.5}
+.cpshow{display:block;margin-top:6px;font-size:10px;font-weight:800;color:#fff;background:#0E7C7B;border:none;border-radius:8px;padding:6px 9px;cursor:pointer}
 .coupon.newin{animation:pop .4s ease}
 @keyframes pop{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
 
@@ -1764,6 +1765,8 @@ try {
       finishOrder(true);
     } else if (d.type === "coupon"){
       receiveCoupon(d.c || {});
+    } else if (d.type === "redeem"){
+      markRedeemed(d.id);
     } else if (d.type === "paymode"){
       setPay(!!d.on, true);
     }
@@ -2774,9 +2777,10 @@ function renderCoupons(){
   for (var i=0;i<coupons.length;i++){
     var c = coupons[i];
     html += '<div class="coupon' + (c.used ? ' used' : '') + '"><div class="l"><b>' + c.title + '</b><small>' + c.storeName + ' · ' + c.sub + (c.used ? ' · <b>已使用</b>' : '') + '</small></div>'
-      + '<div class="r"><b>' + c.tag + '</b><span>' + (c.used ? '已使用' : (c.min ? '滿 ' + c.min : '無門檻')) + '</span></div></div>';
+      + '<div class="r"><b>' + c.tag + '</b><span>' + (c.used ? '已使用' : (c.min ? '滿 ' + c.min : '無門檻')) + '</span>'
+      + (c.used ? '' : '<button class="cpshow" onclick="presentCoupon(\'' + c.id + '\')">🎫 到店出示</button>') + '</div></div>';
   }
-  html += '<div class="syncnote">結帳時符合門檻的券會自動套用並顯示折抵。</div>';
+  html += '<div class="syncnote">結帳時符合門檻的券會自動套用並顯示折抵；到店消費點「到店出示」給店員核銷。</div>';
   $("cp-body").innerHTML = html;
 }
 function receiveCoupon(c){
@@ -2790,6 +2794,25 @@ function receiveCoupon(c){
   toast("🎁 " + (c.storeName || "商家") + " 發來優惠券，已放入券夾");
   if (curScene === "coupons") renderCoupons();
   if (BRAND[curScene]) renderBrandHome(curScene);
+}
+
+/* 到店出示 → 商家端核銷台(對應微信「卡券核銷」鏈路;核銷成功才計費) */
+function presentCoupon(id){
+  var c = null;
+  for (var i=0;i<coupons.length;i++) if (coupons[i].id === id) c = coupons[i];
+  if (!c || c.used) return;
+  send({type:"present", p:{ id:c.id, title:c.title, tag:c.tag, sub:c.sub,
+        storeName:c.storeName, amt:c.amt, min:c.min }});
+  toast("🎫 已出示「" + c.title + "」，請店員核銷");
+}
+function markRedeemed(id){
+  for (var i=0;i<coupons.length;i++) if (coupons[i].id === id && !coupons[i].used){
+    coupons[i].used = true;
+    toast("✅ 券已核銷，感謝光臨");
+    if (curScene === "coupons") renderCoupons();
+    if (BRAND[curScene]) renderBrandHome(curScene);
+    return;
+  }
 }
 
 /* ================= init ================= */
