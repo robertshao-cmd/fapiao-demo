@@ -30,6 +30,12 @@ python -m http.server 8125 --directory .
 **BroadcastChannel 同源才通**:`file://` 直開頁面會正常渲染,但雙端聯動(下單/發券)全部靜默失效。
 測聯動一律走 HTTP。
 
+## 同步(這個 repo 有多個工作流在推,開工前先拉)
+
+```bash
+git pull --rebase --autostash && python checks/verify-demo.py
+```
+
 ## 交付前必過(機制,不是提醒)
 
 ```bash
