@@ -6,8 +6,8 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title id="pageTitle">舒適圈雷達｜發票載具</title>
-<script src="qrcode.min.js?v=d35299d5"></script>
-<script src="unit-kit.js?v=d35299d5"></script>
+<script src="qrcode.min.js?v=525c4ed0"></script>
+<script src="unit-kit.js?v=525c4ed0"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--mut:#7A8494;--line:#F0E0E1;--bg:#FFF6F5}
@@ -90,6 +90,28 @@
   /* 訪談標題 */
   .lead{font-size:15px;font-weight:900;line-height:1.6;padding:14px 4px 0}
   .lead small{display:block;font-size:11.5px;font-weight:700;color:var(--mut);margin-top:6px}
+  /* 滑卡:一句話一張,像我往右、不像往左(0729) */
+  .deck{position:relative;height:186px;margin-top:14px;touch-action:pan-y}
+  .dcard{position:absolute;inset:0;background:#fff;border-radius:18px;padding:20px 18px;
+         box-shadow:0 4px 18px rgba(31,36,48,.10);display:flex;flex-direction:column;
+         align-items:center;justify-content:center;text-align:center;cursor:grab;
+         transition:transform .28s ease,opacity .28s ease}
+  .dcard.snap{transition:transform .18s ease}
+  .dcard b{display:block;font-size:19px;font-weight:900;line-height:1.55;margin-top:8px}
+  .dtag{font-size:10.5px;font-weight:900;color:#2B4BD7;background:#EDF1FE;border-radius:99px;padding:3px 10px}
+  .dhint{font-size:11px;font-weight:700;color:var(--mut);margin-top:14px}
+  .dstamp{position:absolute;top:16px;font-size:15px;font-weight:900;padding:5px 12px;border-radius:10px;
+          border:2.5px solid;opacity:0;pointer-events:none;transition:opacity .12s}
+  .dstamp.left {left:16px;  transform:rotate(-12deg);color:#8B96A3;border-color:#8B96A3}
+  .dstamp.right{right:16px; transform:rotate(12deg); color:#A50011;border-color:#A50011}
+  .dbtns{display:flex;gap:9px;margin-top:12px}
+  .dbtn{flex:1;min-height:48px;border-radius:13px;font-size:14px;font-weight:900;border:1.5px solid #D8DEE6}
+  .dbtn.no{background:#fff;color:#5A6472}
+  .dbtn.yes{background:#FFE9EB;color:#A50011;border-color:#F3C6CB}
+  .dprog{display:flex;gap:5px;justify-content:center;margin-top:12px}
+  .dprog i{width:20px;height:4px;border-radius:99px;background:#F0E0E1}
+  .dprog i.on{background:var(--red)}
+  .dprog i.now{background:#8A5A5E}
   /* 生活半徑:併進分數卡,不另開一張(0727 瘦身) */
   .radl{font-size:12.5px;font-weight:800;color:#3C4657;margin-top:7px;padding-top:7px;border-top:1px dashed var(--line)}
   .radl b{font-size:17px;color:#2B4BD7}
@@ -159,28 +181,27 @@
     <div class="sec" id="retest" style="display:none"><button onclick="retest()">重新驗一次</button></div>
   </div>
 
-  <!-- v1 訪談:兩題都要答(落差不能靠預設值製造) -->
+  <!-- v1 訪談:滑卡二選一(0729)。一句話一張卡,像我往右、不像往左。
+       不問「你是誰」,只問「你怎麼過週末」——不要讓人覺得在被套個資。 -->
   <div id="v1" style="display:none">
-    <div class="lead">先老實回答，等下發票會對答案
-      <small>兩題，10 秒。答完才有資格喊冤。</small></div>
-    <div class="card">
-      <div class="q">Q1 · 週末你通常人在哪？</div>
-      <div class="chips" data-chips="q1">
-        <button class="uk-chip" data-v="home">家裡，躺著</button>
-        <button class="uk-chip" data-v="alley">巷口那一圈</button>
-        <button class="uk-chip" data-v="district">同一個商圈</button>
-        <button class="uk-chip" data-v="roam">每週不同地方</button>
+    <div class="lead" id="qLead">先讓我認識你一下
+      <small>不問你是誰，只問你怎麼過。像你就往右滑，不像往左。</small></div>
+    <div class="deck" id="deck">
+      <div class="dcard" id="dcard">
+        <span class="dtag" id="dtag">週末</span>
+        <b id="dtxt">—</b>
+        <span class="dhint">👈 不像我　·　像我 👉</span>
       </div>
-      <div class="q">Q2 · 晚餐通常怎麼來？</div>
-      <div class="chips" data-chips="q2">
-        <button class="uk-chip" data-v="deliver">外送送來</button>
-        <button class="uk-chip" data-v="conv">超商微波</button>
-        <button class="uk-chip" data-v="same">巷口同一家</button>
-        <button class="uk-chip" data-v="vary">到處吃或自己煮</button>
-      </div>
+      <div class="dstamp left"  id="dsL">不像</div>
+      <div class="dstamp right" id="dsR">像我</div>
     </div>
-    <button class="btn p" id="goScan" onclick="scan()" disabled>先回答上面兩題</button>
-    <div class="sec"><button onclick="skip()">懶得選，直接看結果</button></div>
+    <div class="dbtns">
+      <button class="dbtn no"  onclick="swipeCard(-1)" aria-label="不像我">👈 不像我</button>
+      <button class="dbtn yes" onclick="swipeCard(1)"  aria-label="像我">像我 👉</button>
+    </div>
+    <div class="dprog" id="dprog"></div>
+    <button class="btn p" id="goScan" onclick="scan()" disabled>先滑完上面的卡</button>
+    <div class="sec"><button onclick="skip()">懶得滑，直接看結果</button></div>
   </div>
 
   <!-- v2 過場(transient:不入返回堆疊、可跳過) -->
@@ -486,18 +507,99 @@ function shareMeta() {
                  + (EVH[COPY.evh] || EVH[0])(s) };
 }
 
-/* -- 訪談:兩題都要答才能往下 -- */
+/* ══ 訪談:滑卡二選一(0729)═══════════════════════════════════════
+   為什麼改:表單式選項讓人覺得在被套個資,而且四個選項並排像問卷。
+   改成一句話一張卡、像我往右、不像往左 —— 使用者是在描述自己,不是在填欄位。
+   答案值(home/alley/... 與 deliver/conv/...)完全沒變,所以計分模型、
+   「發票對答案」那兩行、以及 ST.ans 的存檔都不用動。
+   全部滑完但沒有一張說「像我」的那一題 → 當成沒答(不編一個預設值出來)。 */
+var CARDS = [
+  { q:'q1', tag:'週末', v:'home',     t:'週末我大多在家，出門是意外' },
+  { q:'q1', tag:'週末', v:'alley',    t:'我活動範圍就巷口那一圈' },
+  { q:'q1', tag:'週末', v:'district', t:'我固定在同一個商圈打轉' },
+  { q:'q1', tag:'週末', v:'roam',     t:'我每週都去不一樣的地方' },
+  { q:'q2', tag:'晚餐', v:'deliver',  t:'晚餐通常是外送送到我面前' },
+  { q:'q2', tag:'晚餐', v:'conv',     t:'晚餐常常是超商加熱一下' },
+  { q:'q2', tag:'晚餐', v:'same',     t:'晚餐幾乎都巷口那一家' },
+  { q:'q2', tag:'晚餐', v:'vary',     t:'晚餐我到處吃，或自己煮' }
+];
+var _di = 0;                        /* 目前第幾張 */
+var _drag = null;                   /* 拖曳狀態 */
+
 function resetAns() {
-  ANS = {};
-  /* 只清訪談那兩組——不要連篩選條的選中態一起清掉(它不是答案) */
-  document.querySelectorAll('[data-chips="q1"] [data-v],[data-chips="q2"] [data-v]')
-    .forEach(function (c) { c.classList.remove('on'); });
+  ANS = {}; _di = 0;
+  paintCard();
   gate();
 }
+function paintCard() {
+  var c = document.getElementById('dcard'), done = _di >= CARDS.length;
+  var prog = document.getElementById('dprog');
+  prog.innerHTML = CARDS.map(function (x, i) {
+    return '<i class="' + (i < _di ? 'on' : (i === _di ? 'now' : '')) + '"></i>';
+  }).join('');
+  if (done) {
+    c.style.display = 'none';
+    document.querySelector('.dbtns').style.display = 'none';
+    document.getElementById('qLead').querySelector('small').textContent =
+      Object.keys(ANS).length === 2 ? '好了，兩題都有答案' : '滑完了。沒說像我的那題就不算，發票自己會說';
+    return;
+  }
+  c.style.display = ''; document.querySelector('.dbtns').style.display = '';
+  var card = CARDS[_di];
+  /* 已經答出來的那一題,剩下的卡直接跳過——不要問已經知道答案的事 */
+  if (ANS[card.q]) { _di++; return paintCard(); }
+  document.getElementById('dtag').textContent = card.tag;
+  document.getElementById('dtxt').textContent = card.t;
+  c.style.transform = ''; c.style.opacity = '';
+  setStamp(0);
+}
+function setStamp(dx) {
+  document.getElementById('dsR').style.opacity = dx > 24 ? Math.min(1, (dx - 24) / 60) : 0;
+  document.getElementById('dsL').style.opacity = dx < -24 ? Math.min(1, (-dx - 24) / 60) : 0;
+}
+/* dir: 1=像我(記下這個答案) / -1=不像我(換下一張) */
+function swipeCard(dir) {
+  if (_di >= CARDS.length) return;
+  var card = CARDS[_di], c = document.getElementById('dcard');
+  if (dir > 0) ANS[card.q] = card.v;
+  c.classList.remove('snap');
+  c.style.transform = 'translateX(' + (dir * 420) + 'px) rotate(' + (dir * 14) + 'deg)';
+  c.style.opacity = '0';
+  UK.track('bored_card_swipe', { q:card.q, v:card.v, yes:dir > 0 });
+  setTimeout(function () { _di++; paintCard(); gate(); }, 200);
+}
+/* 拖曳(手機用手指、桌機用滑鼠;pointer 事件一套搞定) */
+(function bindDrag() {
+  var c = document.getElementById('dcard');
+  if (!c) return;
+  c.addEventListener('pointerdown', function (e) {
+    if (_di >= CARDS.length) return;
+    _drag = { x:e.clientX, id:e.pointerId };
+    c.classList.add('snap');
+    try { c.setPointerCapture(e.pointerId); } catch (err) {}
+  });
+  c.addEventListener('pointermove', function (e) {
+    if (!_drag) return;
+    var dx = e.clientX - _drag.x;
+    c.style.transform = 'translateX(' + dx + 'px) rotate(' + (dx / 22) + 'deg)';
+    setStamp(dx);
+  });
+  function up(e) {
+    if (!_drag) return;
+    var dx = e.clientX - _drag.x; _drag = null;
+    if (Math.abs(dx) > 70) { swipeCard(dx > 0 ? 1 : -1); }
+    else { c.style.transform = ''; setStamp(0); }   /* 沒滑夠 → 彈回去 */
+  }
+  c.addEventListener('pointerup', up);
+  c.addEventListener('pointercancel', function () { _drag = null; c.style.transform = ''; setStamp(0); });
+})();
 function gate() {
   var need = 2 - Object.keys(ANS).length, b = document.getElementById('goScan');
-  b.disabled = need > 0;
-  b.textContent = need >= 2 ? '先回答上面兩題' : (need === 1 ? '還有 1 題' : '好了，驗我的發票');
+  var done = _di >= CARDS.length;
+  b.disabled = !done && need > 0;
+  b.textContent = need === 0 ? '好了，驗我的發票'
+                : done       ? '就這樣，驗我的發票'
+                :              '先滑完上面的卡';
 }
 UK.chips.bind(document, { onPick: function (k, v, cleared) {
   /* 篩選條跟訪談共用 kit 的 chips,要先攔下來——不然它會被當成第三個答案,把門檻算壞 */
@@ -508,8 +610,7 @@ UK.chips.bind(document, { onPick: function (k, v, cleared) {
     UK.track('rx_mode', { mode:RXMODE, n:pickedSpots().length });
     return;
   }
-  if (cleared) delete ANS[k]; else ANS[k] = v;
-  gate();
+  /* 訪談已改成滑卡,這裡只剩篩選條在用 chips */
 } });
 /* 篩選條的選中態:離開「我的清單」時要把亮起來的那顆收回 */
 function markMode(v) {
@@ -517,11 +618,13 @@ function markMode(v) {
     c.classList.toggle('on', c.getAttribute('data-v') === v);
   });
 }
-function skip() { ANS = {}; ST.ans = {}; scanRun(true); }
+function skip() { ANS = {}; ST.ans = {}; ST.ansN = 0; scanRun(true); }
 
 /* -- 掃描過場(可跳過;timer 會清掉,不會晚一步又跳) -- */
 var _t = [];
-function scan() { scanRun(false); }
+/* 滑完卡但沒說「像我」的題目 = 沒答案,那一項會退回純發票推的。
+   要記下答了幾題,結果頁才講得出實話(不能讓人以為那兩題有算進去)。 */
+function scan() { ST.ansN = Object.keys(ANS).length; scanRun(false); }
 function scanRun(skipped) {
   nav.show('v2');
   var steps = SCAN[SCAN_SET] || SCAN[0], i = 0;
@@ -579,7 +682,12 @@ function showResult() {
   var couch = document.getElementById('couch');
   couch.className = 'couch ' + (score >= 85 ? 'deep' : (score >= 70 ? '' : 'light'));
   document.getElementById('blob').textContent = score >= 85 ? '🫠' : (score >= 50 ? '😪' : '🙂');
-  document.getElementById('skipnote').style.display = ST.skipped ? '' : 'none';
+  /* 沒答的題目要說出來:全沒答=純發票版,答一題=那一項是推的。不能讓人以為都算進去了 */
+  var sn = document.getElementById('skipnote');
+  var nAns = (typeof ST.ansN === 'number') ? ST.ansN : Object.keys(curAns()).length;
+  sn.style.display = nAns >= 2 ? 'none' : '';
+  sn.textContent = nAns === 0 ? '你沒回答，這是純發票版'
+                              : '有一題沒說「像我」，那一項是用發票推的';
   /* 0729:講清楚這個數字能幹嘛 —— 出門一趟、發票進來,分項就會動,數字自己會掉。
      不承諾具體掉幾分(那要真發票回來才算得出來),只講因果方向。 */
   document.getElementById('cause').textContent = '出門刷一次載具，這個數字就會往下掉';
