@@ -6,8 +6,8 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title id="pageTitle">舒適圈雷達｜發票載具</title>
-<script src="qrcode.min.js?v=b9db2631"></script>
-<script src="unit-kit.js?v=b9db2631"></script>
+<script src="qrcode.min.js?v=8eac8def"></script>
+<script src="unit-kit.js?v=8eac8def"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--mut:#7A8494;--line:#F0E0E1;--bg:#FFF6F5}
@@ -90,6 +90,34 @@
   /* 訪談標題 */
   .lead{font-size:15px;font-weight:900;line-height:1.6;padding:14px 4px 0}
   .lead small{display:block;font-size:11.5px;font-weight:700;color:var(--mut);margin-top:6px}
+  /* 傾向設定 + 隱私(0729) */
+  .prefrow{display:flex;justify-content:space-between;font-size:11.5px;font-weight:800;color:#5A6472}
+  #pref{width:100%;margin:8px 0 4px}
+  .prefnow{font-size:12.5px;font-weight:900;color:#A50011;text-align:center}
+  .chk{display:flex;gap:9px;align-items:flex-start;margin-top:12px;padding-top:11px;
+       border-top:1px dashed var(--line);font-size:12.5px;font-weight:700;line-height:1.6}
+  .chk input{width:20px;height:20px;flex:none;margin-top:1px}
+  .privacy b{font-size:13px}
+  .privacy p{font-size:11.5px;line-height:1.85;color:#5A6472;margin-top:7px}
+  /* 軌跡摘要條:推薦的依據,講事實不講「我們看到你」 */
+  .tracebar{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 0;margin-bottom:2px}
+  .tracebar::-webkit-scrollbar{display:none}
+  .tracebar span{flex:none;font-size:11px;font-weight:800;background:#fff;border:1px solid var(--line);
+                 border-radius:99px;padding:6px 11px;color:#5A6472}
+  .tracebar span b{color:#A50011}
+  /* 推薦卡 */
+  .rdeck{height:236px}
+  .rcard{padding:22px 18px}
+  .rcard .re{font-size:36px;line-height:1}
+  .rcard b{font-size:19px;font-weight:900;margin-top:6px}
+  .rmeta{display:flex;gap:8px;align-items:center;justify-content:center;margin-top:7px;
+         font-size:11.5px;font-weight:800;color:#7A8494}
+  .rwhy{font-size:13px;font-weight:800;line-height:1.7;color:#8A5A00;margin-top:11px}
+  /* 兩條邏輯用色塊區分,不寫「你被分到哪一類」 */
+  .kdot{position:absolute;top:14px;left:14px;width:9px;height:9px;border-radius:99px;background:#D8DEE6}
+  .kdot.a{background:#A50011}
+  .kdot.b{background:#2B4BD7}
+  .scoreline{font-size:10.5px;font-weight:700;color:var(--mut);text-align:center;margin-top:12px}
   /* 滑卡:一句話一張,像我往右、不像往左(0729) */
   .deck{position:relative;height:186px;margin-top:14px;touch-action:pan-y}
   .dcard{position:absolute;inset:0;background:#fff;border-radius:18px;padding:20px 18px;
@@ -187,34 +215,36 @@
 
   <!-- v0 入口:一頁只有一個主 CTA。不放說明文字、不放隱私長註(0724 定調) -->
   <div id="v0">
-    <div class="hero"><div class="big"><span class="face">😶</span></div>
-      <h1>你的日子，規律到可以被預測</h1><p>你的發票已經寫好答案</p></div>
+    <div class="hero"><div class="big"><span class="face">🗺️</span></div>
+      <h1>你去過的地方，是我們懂你的方式</h1>
+      <p>不用填問卷。你的發票已經說完了</p></div>
     <div id="lastBox"></div>
-    <button class="btn p" id="cta" onclick="enter()">我敢測</button>
+    <button class="btn p" id="cta" onclick="enter()">看我的懂你地圖</button>
     <div class="sec" id="retest" style="display:none"><button onclick="retest()">重新驗一次</button></div>
   </div>
 
-  <!-- v1 訪談:滑卡二選一(0729)。一句話一張卡,像我往右、不像往左。
-       不問「你是誰」,只問「你怎麼過週末」——不要讓人覺得在被套個資。 -->
+  <!-- v1 傾向設定(0729 改版):不再用問卷產生推薦——推薦一律來自發票軌跡。
+       這一頁只做兩件事:調兩種推薦的比重、以及把資料怎麼用講清楚。 -->
   <div id="v1" style="display:none">
-    <div class="lead" id="qLead">先讓我認識你一下
-      <small>不問你是誰，只問你怎麼過。像你就往右滑，不像往左。</small></div>
-    <div class="deck" id="deck">
-      <div class="dcard" id="dcard">
-        <span class="dtag" id="dtag">週末</span>
-        <b id="dtxt">—</b>
-        <span class="dhint">👈 不像我　·　像我 👉</span>
-      </div>
-      <div class="dstamp left"  id="dsL">不像</div>
-      <div class="dstamp right" id="dsR">像我</div>
+    <div class="lead">先調一下口味
+      <small>推薦是從你的發票軌跡來的，這裡只決定兩種口味各占多少。</small></div>
+    <div class="card">
+      <div class="prefrow"><span>你懂的那些</span><span>沒被洗版的</span></div>
+      <input type="range" id="pref" min="0" max="100" step="10" value="40"
+             oninput="onPref(this.value)" aria-label="推薦傾向">
+      <div class="prefnow" id="prefNow">同溫層多一點</div>
+      <label class="chk"><input type="checkbox" id="noCrowd" onchange="onCrowd(this.checked)">
+        <span>我不想人擠人（洗版中的地方直接不要出現）</span></label>
     </div>
-    <div class="dbtns">
-      <button class="dbtn no"  onclick="swipeCard(-1)" aria-label="不像我">👈 不像我</button>
-      <button class="dbtn yes" onclick="swipeCard(1)"  aria-label="像我">像我 👉</button>
+    <div class="card privacy">
+      <b>這些推薦是怎麼來的</b>
+      <p>我們讀的是你已經歸戶在載具裡的發票：<b>去過哪一類的店、去了幾次、最近一次多久以前</b>。
+        用這些找「同一類但你還沒去過」的地方。</p>
+      <p>不讀你買了什麼品項來評價你，不把你的紀錄給商家，也不會拿它推銷。
+        推薦不準就往下滑，我們只會越推越準，不會越推越多。</p>
     </div>
-    <div class="dprog" id="dprog"></div>
-    <button class="btn p" id="goScan" onclick="scan()" disabled>先滑完上面的卡</button>
-    <div class="sec"><button onclick="skip()">懶得滑，直接看結果</button></div>
+    <button class="btn p" onclick="scan()">看我的推薦</button>
+    <div class="sec"><button onclick="skip()">先看推薦，設定等一下再說</button></div>
   </div>
 
   <!-- v2 過場(transient:不入返回堆疊、可跳過) -->
@@ -230,25 +260,31 @@
     <div class="sec"><button onclick="skipScan()">跳過動畫 &rsaquo;</button></div>
   </div>
 
-  <!-- v3 結果:一屏只給三件事——分數(帶戳章圖示)、發票證據一行一句、一顆主 CTA。
-       分項與算式已移除(Robert 0727 拍板:一頁不給太多資訊) -->
+  <!-- v3 主頁:推薦卡片牆(0729 改版)。分數降級成一行小字——重點是「推你去哪」。
+       卡片可左右滑;每張都要說得出「為什麼推薦你」,而且理由來自發票軌跡。 -->
   <div id="v3" style="display:none">
     <div class="uk-trend" id="trend" style="display:none"></div>
-    <div class="card" style="text-align:center">
-      <div class="couch" id="couch"><span class="sofa">🛋️</span><span class="blob" id="blob">🫠</span></div>
-      <div class="big-score"><b id="scoreN">&mdash;</b><span>/100</span></div>
-      <div class="stampT" id="stampT"></div>
-      <div class="skipnote" id="skipnote" style="display:none">你沒回答，這是純發票版</div>
-      <div class="radl">生活半徑 <b id="radN">&mdash;</b> · <span id="radTxt"></span></div>
-      <!-- 0729:分數要接上行動誘因,不然使用者不知道 93 分能幹嘛 -->
-      <div class="cause" id="cause"></div>
+    <div class="tracebar" id="traceBar"></div>
+    <div class="deck rdeck" id="deck">
+      <div class="dcard rcard" id="dcard">
+        <span class="kdot" id="kdot"></span>
+        <span class="re" id="rEmoji">🗺️</span>
+        <b id="rName">—</b>
+        <div class="rmeta"><span class="tag" id="rCat">—</span><span id="rKm">—</span></div>
+        <div class="rwhy" id="rWhy">—</div>
+        <span class="dhint">👈 下一張　·　收藏 👉</span>
+      </div>
+      <div class="dstamp left"  id="dsL">下一張</div>
+      <div class="dstamp right" id="dsR">收藏</div>
     </div>
-    <div class="card">
-      <b class="evh" id="evh">&mdash;</b>
-      <div id="ev"></div>
+    <div class="dbtns">
+      <button class="dbtn no"  onclick="swipeCard(-1)" aria-label="下一張">👈 下一張</button>
+      <button class="dbtn yes" onclick="swipeCard(1)"  aria-label="收藏">收藏 👉</button>
     </div>
-    <button class="btn p" id="rxCta" onclick="showRx()">你終於要出門了？</button>
-    <div class="sec"><button onclick="shareNow()" id="shareLink">曬我的分數</button></div>
+    <button class="btn p" id="rxCta" onclick="openPoiNow()">查看地點</button>
+    <div class="sec"><button onclick="showRx()">我的收藏 <b id="favN">0</b></button>
+      <button onclick="shareNow()" id="shareLink">分享</button></div>
+    <div class="scoreline" id="scoreLine"></div>
   </div>
 
   <!-- v4 好去處:三個模式共用一頁(精選／我的清單／全部),篩選條釘在標題列下面。
@@ -476,14 +512,15 @@ function entryRender() {
     box.innerHTML = UK.state.lastBox({ label:'上次' + NAME.metric, n:ST.n, unit:'/100', at:ST.mat, prev:ST.prev, onclick:"showResult()" })
       /* 回訪才有的一行。新用戶的入口仍然只有臉＋一句＋一顆鈕(0724 定調) */
       /* 只講事實(發票沒多),不替他下結論——「不明說」比「說你沒去」更刺,也不會講得比資料多 */
-      + (ns ? '<div class="busted">上次你說要衝「' + ns.name + '」。發票一張都沒多。</div>' : '');
-    cta.textContent = ns ? '那再測一次好了' : '看我的結果';
-    cta.setAttribute('onclick', ns ? 'retest()' : 'showResult()');
+      /* 回訪:收藏過但發票沒多 → 提醒他還沒去,但語氣是「還在等你」不是罵人 */
+      + (ns ? '<div class="busted">「' + ns.name + '」還在你的收藏裡，發票還沒出現在那附近。</div>' : '');
+    cta.textContent = '看今天的推薦';
+    cta.setAttribute('onclick', 'showResult()');
     re.style.display = ''; hero.classList.add('mini');
-    document.querySelector('#retest button').textContent = ns ? '看上次的結果' : '重新驗一次';
-    document.querySelector('#retest button').setAttribute('onclick', ns ? 'showResult()' : 'retest()');
+    document.querySelector('#retest button').textContent = '調一下口味';
+    document.querySelector('#retest button').setAttribute('onclick', 'enter()');
   } else {
-    box.innerHTML = ''; cta.textContent = '我敢測'; cta.setAttribute('onclick', 'enter()');
+    box.innerHTML = ''; cta.textContent = '看我的懂你地圖'; cta.setAttribute('onclick', 'enter()');
     re.style.display = 'none'; hero.classList.remove('mini');
   }
 }
@@ -503,8 +540,6 @@ var RETEST = [
 ];
 function retest() {
   ST.retests = (ST.retests || 0) + 1; ST = UK.state.save(KEY, ST);
-  UK.toast(ST.retests <= 1 ? '你的發票這 30 天沒有新增，數字不會變'
-                           : (RETEST[Math.min(ST.retests - 2, RETEST.length - 1)]));
   resetAns(); nav.show('v1'); UK.track('bored_retest', { times: ST.retests });
 }
 /* 灌發票要蓋掉 ?inv=（不然證據行還在用 2 張算,說「已灌入」就是騙人） */
@@ -542,75 +577,79 @@ function shareMeta() {
                  + (EVH[COPY.evh] || EVH[0])(s) };
 }
 
-/* ══ 訪談:滑卡二選一(0729)═══════════════════════════════════════
-   為什麼改:表單式選項讓人覺得在被套個資,而且四個選項並排像問卷。
-   改成一句話一張卡、像我往右、不像往左 —— 使用者是在描述自己,不是在填欄位。
-   答案值(home/alley/... 與 deliver/conv/...)完全沒變,所以計分模型、
-   「發票對答案」那兩行、以及 ST.ans 的存檔都不用動。
-   全部滑完但沒有一張說「像我」的那一題 → 當成沒答(不編一個預設值出來)。 */
-var CARDS = [
-  { q:'q1', tag:'週末', v:'home',     t:'週末我大多在家，出門是意外' },
-  { q:'q1', tag:'週末', v:'alley',    t:'我活動範圍就巷口那一圈' },
-  { q:'q1', tag:'週末', v:'district', t:'我固定在同一個商圈打轉' },
-  { q:'q1', tag:'週末', v:'roam',     t:'我每週都去不一樣的地方' },
-  { q:'q2', tag:'晚餐', v:'deliver',  t:'晚餐通常是外送送到我面前' },
-  { q:'q2', tag:'晚餐', v:'conv',     t:'晚餐常常是超商加熱一下' },
-  { q:'q2', tag:'晚餐', v:'same',     t:'晚餐幾乎都巷口那一家' },
-  { q:'q2', tag:'晚餐', v:'vary',     t:'晚餐我到處吃，或自己煮' }
-];
-var _di = 0;                        /* 目前第幾張 */
-var _drag = null;                   /* 拖曳狀態 */
+/* ══ 推薦卡片牆(0729 懂你地圖)═════════════════════════════════
+   一次一張,左滑=下一張、右滑=收藏。理由來自發票軌跡,不是問卷。
+   牌組由 recommend() 產生:A 深化同溫層 / B 避開人潮 / C 備選,依傾向排序。 */
+var RECO = [];                       /* 目前的牌組 */
+var _di = 0;                         /* 第幾張 */
+var _drag = null;
 
-function resetAns() {
-  ANS = {}; _di = 0;
-  paintCard();
-  gate();
-}
+function buildReco() { RECO = recommend(); _di = 0; }
+function curReco() { return RECO[_di] || null; }
+
 function paintCard() {
-  var c = document.getElementById('dcard'), done = _di >= CARDS.length;
-  var prog = document.getElementById('dprog');
-  prog.innerHTML = CARDS.map(function (x, i) {
-    return '<i class="' + (i < _di ? 'on' : (i === _di ? 'now' : '')) + '"></i>';
-  }).join('');
-  if (done) {
+  var r = curReco(), c = document.getElementById('dcard');
+  if (!c) return;
+  document.getElementById('favN').textContent = Object.keys(ST.picks || {}).length;
+  if (!r) {                          /* 滑完了:不留空白,給出路 */
     c.style.display = 'none';
-    document.querySelector('.dbtns').style.display = 'none';
-    document.getElementById('qLead').querySelector('small').textContent =
-      Object.keys(ANS).length === 2 ? '好了，兩題都有答案' : '滑完了。沒說像我的那題就不算，發票自己會說';
+    document.querySelector('#v3 .dbtns').style.display = 'none';
+    document.getElementById('rxCta').textContent = '看我收藏的地方';
+    document.getElementById('rxCta').setAttribute('onclick', 'showRx()');
     return;
   }
-  c.style.display = ''; document.querySelector('.dbtns').style.display = '';
-  var card = CARDS[_di];
-  /* 已經答出來的那一題,剩下的卡直接跳過——不要問已經知道答案的事 */
-  if (ANS[card.q]) { _di++; return paintCard(); }
-  document.getElementById('dtag').textContent = card.tag;
-  document.getElementById('dtxt').textContent = card.t;
+  c.style.display = ''; document.querySelector('#v3 .dbtns').style.display = '';
+  document.getElementById('rxCta').textContent = '查看地點';
+  document.getElementById('rxCta').setAttribute('onclick', 'openPoiNow()');
+  document.getElementById('rEmoji').textContent = r.p.emoji;
+  document.getElementById('rName').textContent = r.p.name;
+  document.getElementById('rCat').textContent = CATS[r.p.cat] || '走走';
+  document.getElementById('rKm').textContent = r.p.km + ' 公里';
+  document.getElementById('rWhy').textContent = r.why;
+  document.getElementById('kdot').className = 'kdot ' + (r.kind === 'A' ? 'a' : (r.kind === 'B' ? 'b' : ''));
   c.style.transform = ''; c.style.opacity = '';
   setStamp(0);
 }
 function setStamp(dx) {
-  document.getElementById('dsR').style.opacity = dx > 24 ? Math.min(1, (dx - 24) / 60) : 0;
-  document.getElementById('dsL').style.opacity = dx < -24 ? Math.min(1, (-dx - 24) / 60) : 0;
+  var R = document.getElementById('dsR'), L = document.getElementById('dsL');
+  if (!R) return;
+  R.style.opacity = dx > 24 ? Math.min(1, (dx - 24) / 60) : 0;
+  L.style.opacity = dx < -24 ? Math.min(1, (-dx - 24) / 60) : 0;
 }
-/* dir: 1=像我(記下這個答案) / -1=不像我(換下一張) */
+/* dir: 1=收藏 / -1=下一張 */
 function swipeCard(dir) {
-  if (_di >= CARDS.length) return;
-  var card = CARDS[_di], c = document.getElementById('dcard');
-  if (dir > 0) ANS[card.q] = card.v;
+  var r = curReco(); if (!r) return;
+  var c = document.getElementById('dcard');
+  if (dir > 0) {
+    var picks = ST.picks || {}; picks[r.p.k] = 1;
+    ST.picks = picks; ST.pickAt = Date.now(); ST.pickInv = invN();
+    ST = UK.state.save(KEY, ST);
+    UK.track('bored_save_click', { poi:r.p.k, src:r.p.src || '', km:r.p.km || 0,
+                                   kind:r.kind, total:Object.keys(picks).length });
+    UK.toast('收藏了——「我的收藏」裡看得到');
+  }
+  UK.track('bored_card_swipe', { poi:r.p.k, kind:r.kind, save:dir > 0 });
   c.classList.remove('snap');
   c.style.transform = 'translateX(' + (dir * 420) + 'px) rotate(' + (dir * 14) + 'deg)';
   c.style.opacity = '0';
-  UK.track('bored_card_swipe', { q:card.q, v:card.v, yes:dir > 0 });
-  setTimeout(function () { _di++; paintCard(); gate(); }, 200);
+  setTimeout(function () { _di++; paintCard(); }, 200);
 }
-/* 拖曳(手機用手指、桌機用滑鼠;pointer 事件一套搞定) */
+function openPoiNow() {
+  var r = curReco(); if (!r) return;
+  POI[r.p.k].why = r.why;
+  POI[r.p.k].info = '距離 ' + r.p.km + ' 公里　·　' + (CATS[r.p.cat] || '走走');
+  var row = document.createElement('div');
+  row.setAttribute('data-poi', r.p.k);
+  UK.poi.open(row, POI);
+  UK.track('bored_poi_open', { poi:r.p.k, kind:r.kind });
+}
+/* 拖曳(手指與滑鼠同一套) */
 (function bindDrag() {
   var c = document.getElementById('dcard');
   if (!c) return;
   c.addEventListener('pointerdown', function (e) {
-    if (_di >= CARDS.length) return;
-    _drag = { x:e.clientX, id:e.pointerId };
-    c.classList.add('snap');
+    if (!curReco()) return;
+    _drag = { x:e.clientX }; c.classList.add('snap');
     try { c.setPointerCapture(e.pointerId); } catch (err) {}
   });
   c.addEventListener('pointermove', function (e) {
@@ -619,22 +658,36 @@ function swipeCard(dir) {
     c.style.transform = 'translateX(' + dx + 'px) rotate(' + (dx / 22) + 'deg)';
     setStamp(dx);
   });
-  function up(e) {
+  c.addEventListener('pointerup', function (e) {
     if (!_drag) return;
     var dx = e.clientX - _drag.x; _drag = null;
-    if (Math.abs(dx) > 70) { swipeCard(dx > 0 ? 1 : -1); }
-    else { c.style.transform = ''; setStamp(0); }   /* 沒滑夠 → 彈回去 */
-  }
-  c.addEventListener('pointerup', up);
+    if (Math.abs(dx) > 70) swipeCard(dx > 0 ? 1 : -1);
+    else { c.style.transform = ''; setStamp(0); }
+  });
   c.addEventListener('pointercancel', function () { _drag = null; c.style.transform = ''; setStamp(0); });
 })();
-function gate() {
-  var need = 2 - Object.keys(ANS).length, b = document.getElementById('goScan');
-  var done = _di >= CARDS.length;
-  b.disabled = !done && need > 0;
-  b.textContent = need === 0 ? '好了，驗我的發票'
-                : done       ? '就這樣，驗我的發票'
-                :              '先滑完上面的卡';
+
+/* 傾向設定:滑桿不是二選一,兩種口味都會出現,只是比重不同 */
+function prefLabel(v) {
+  return v <= 20 ? '幾乎都給你懂的那一類'
+       : v <= 40 ? '同溫層多一點'
+       : v <= 60 ? '兩種一半一半'
+       : v <= 80 ? '沒被洗版的多一點'
+       :           '幾乎都給沒被洗版的';
+}
+function onPref(v) {
+  ST.pref = +v; ST = UK.state.save(KEY, ST);
+  document.getElementById('prefNow').textContent = prefLabel(+v);
+  UK.track('bored_pref_change', { pref:+v });
+}
+function onCrowd(on) {
+  ST.noCrowd = !!on; ST = UK.state.save(KEY, ST);
+  UK.track('bored_pref_crowd', { on:!!on });
+}
+function resetAns() {
+  var p = document.getElementById('pref'), c = document.getElementById('noCrowd');
+  if (p) { p.value = prefBias(); document.getElementById('prefNow').textContent = prefLabel(prefBias()); }
+  if (c) c.checked = noCrowd();
 }
 UK.chips.bind(document, { onPick: function (k, v, cleared) {
   /* 篩選條跟訪談共用 kit 的 chips,要先攔下來——不然它會被當成第三個答案,把門檻算壞 */
@@ -653,13 +706,13 @@ function markMode(v) {
     c.classList.toggle('on', c.getAttribute('data-v') === v);
   });
 }
-function skip() { ANS = {}; ST.ans = {}; ST.ansN = 0; scanRun(true); }
+function skip() { scanRun(true); }   /* 沒有問卷了,skip = 直接看推薦 */
 
 /* -- 掃描過場(可跳過;timer 會清掉,不會晚一步又跳) -- */
 var _t = [];
 /* 滑完卡但沒說「像我」的題目 = 沒答案,那一項會退回純發票推的。
    要記下答了幾題,結果頁才講得出實話(不能讓人以為那兩題有算進去)。 */
-function scan() { ST.ansN = Object.keys(ANS).length; scanRun(false); }
+function scan() { scanRun(false); }
 function scanRun(skipped) {
   nav.show('v2');
   var steps = SCAN[SCAN_SET] || SCAN[0], i = 0;
@@ -698,50 +751,28 @@ function finish(skipped) {
 }
 
 function showResult() {
-  var s = applyDims(), live = UK.data.composite(), ans = curAns();
-  /* 發票變了(?inv= / 灌發票)就以新算的為準,並把舊值留成趨勢——不要讓兩頁的數字打架 */
+  var s = applyDims(), live = UK.data.composite();
+  /* 發票變了(?inv= / 灌發票)就以新算的為準,並把舊值留成趨勢 */
   if (typeof ST.n === 'number' && ST.n !== live) {
     ST.prev = ST.n; ST.n = live; ST.inv = invN(); ST = UK.state.save(KEY, ST); entryRender();
   }
   score = live;
-  document.getElementById('scoreN').textContent = score;
   var t = document.getElementById('trend'), html = UK.state.trendHTML(score, ST.prev);
   t.innerHTML = html; t.style.display = html ? '' : 'none';
-  /* 分數旁邊那顆圖示 + 一個戳章詞:越無聊越像家具 */
-  var tier = score >= 85 ? { i:'🛋️', t:'和沙發長在一起' }
-           : score >= 70 ? { i:'😶', t:'可預測' }
-           : score >= 50 ? { i:'🙃', t:'有點悶' }
-                         : { i:'🚶', t:'還有救' };
-  document.getElementById('stampT').textContent = tier.i + ' ' + tier.t;
-  /* 沙發上那一坨:分數越高融得越快、越扁 */
-  var couch = document.getElementById('couch');
-  couch.className = 'couch ' + (score >= 85 ? 'deep' : (score >= 70 ? '' : 'light'));
-  document.getElementById('blob').textContent = score >= 85 ? '🫠' : (score >= 50 ? '😪' : '🙂');
-  /* 沒答的題目要說出來:全沒答=純發票版,答一題=那一項是推的。不能讓人以為都算進去了 */
-  var sn = document.getElementById('skipnote');
-  var nAns = (typeof ST.ansN === 'number') ? ST.ansN : Object.keys(curAns()).length;
-  sn.style.display = nAns >= 2 ? 'none' : '';
-  sn.textContent = nAns === 0 ? '你沒回答，這是純發票版'
-                              : '有一題沒說「像我」，那一項是用發票推的';
-  /* 0729:講清楚這個數字能幹嘛 —— 出門一趟、發票進來,分項就會動,數字自己會掉。
-     不承諾具體掉幾分(那要真發票回來才算得出來),只講因果方向。 */
-  document.getElementById('cause').textContent = '出門刷一次載具，這個數字就會往下掉';
 
-  /* 生活半徑(併在分數卡裡,一行講完) */
-  document.getElementById('radN').textContent = radTxt(s.radius);
-  document.getElementById('radTxt').textContent = radLine(s);
-  document.getElementById('rxCta').textContent = push();
+  /* 軌跡摘要:推薦的依據就長在這裡。講事實(去了幾次、多久以前),不講「我們看到你」 */
+  document.getElementById('traceBar').innerHTML = TRACE.slice()
+    .sort(function (x, y) { return y.n - x.n; })
+    .map(function (x) { return '<span>' + x.label + ' <b>' + x.n + '</b> 次</span>'; }).join('');
 
-  /* 標題:被抓到說謊換另一組,其餘用刺人那句(數字都在句子裡) */
-  document.getElementById('evh').textContent = (!ST.skipped && mismatch(s, ans))
-    ? (EVH_LIAR[COPY.liar] || EVH_LIAR[0])(s)
-    : (EVH[COPY.evh] || EVH[0])(s);
+  /* 分數降級成一行小字(0729:分數值不重要了,重點是推你去哪) */
+  document.getElementById('scoreLine').textContent =
+    NAME.metric + ' ' + score + '／100 · 生活半徑 ' + radTxt(s.radius) + '（越低表示你走得越開）';
 
-  /* 證據:一行一句,不再帶灰色小字(一句話罵完) */
-  document.getElementById('ev').innerHTML = evidence(s, ans).map(function (l) {
-    return '<div class="ev"><span class="e">' + l.e + '</span><div><b>' + l.t + '</b></div></div>';
-  }).join('');
+  buildReco();
+  paintCard();
   nav.show('v3');
+  UK.track('bored_reco_view', { n:RECO.length, pref:prefBias(), noCrowd:noCrowd(), score:score });
 }
 /* 分項與算式頁已移除(Robert 0727 拍板)。分數本身還是 UK.data.composite() 算出來的,
    要復原的話:v6 一頁 + 一顆文字連結,算式取 UK.data.formula() 的 total/max/avg。 */
@@ -819,11 +850,66 @@ var SPOTS = [
     why:function(s){ return '展多、人也多,捷運就到'; } },
   { k:'maokong',  src:'gov',   cat:'nature',  emoji:'🍃', name:'貓空',                 km:16.0, q:'貓空纜車', hot:true,
     why:function(s){ return '纜車上去就有茶園,週末要排隊'; } },
-  { k:'tamsui',   src:'gov',   emoji:'⛵', name:'淡水漁人碼頭',         km:24.0, q:'淡水漁人碼頭',
-    why:function(s){ return '24 公里。你這個月的移動總量還不到它的一半'; } },
-  { k:'wulai',    src:'gov',   emoji:'🚞', name:'烏來台車',             km:28.0, q:'烏來台車',
-    why:function(s){ return '你的紀錄是 ' + radTxt(s.radius) + '。28 公里,一次作廢'; } }
+  { k:'tamsui',   src:'gov',   cat:'nature',  emoji:'⛵', name:'淡水漁人碼頭',         km:24.0, q:'淡水漁人碼頭', hot:true,
+    why:function(s){ return '夕陽很好,人也很多'; } },
+  { k:'wulai',    src:'gov',   cat:'nature',  emoji:'🚞', name:'烏來台車',             km:28.0, q:'烏來台車',
+    why:function(s){ return '台車＋老街,離台北一小時'; } }
 ];
+
+/* ══ 推薦引擎:兩條邏輯平行並存(0729)═══════════════════════════
+   A 深化同溫層:軌跡裡同類型 ≥3 次 → 推同類型「還沒去過」的地方
+   B 避開人潮  :把 IG／Threads 洗版中的濾掉 → 推同類型沒被拍爛的替代點
+   兩條都跑,再依「傾向」把比重混起來(不是二選一)。
+   刻意只用發票軌跡與類別,不用問卷、不用興趣標籤——這是這一版的定位。
+   文案一律講「因為你去過什麼」,不講「我們看到你」,不要有被監控的感覺。 */
+function prefBias() {                          /* 0 = 全同溫層 · 100 = 全避開人潮 */
+  var v = (ST.pref === undefined) ? 40 : ST.pref;
+  return Math.max(0, Math.min(100, v));
+}
+function noCrowd() { return !!ST.noCrowd; }     /* 設定頁主動勾「不想人擠人」 */
+function recommend() {
+  var visited = {};                             /* 軌跡裡去過的類型 */
+  TRACE.forEach(function (t) { visited[t.cat] = t.n; });
+  var seen = {}, out = [];
+  /* A:深化同溫層 */
+  traceTop().forEach(function (t) {
+    SPOTS.filter(function (p) { return p.cat === t.cat && !p.hot; }).forEach(function (p) {
+      if (seen[p.k]) return; seen[p.k] = 1;
+      out.push({ p:p, kind:'A', t:t,
+        why:'你這三個月去了 ' + t.n + ' 次' + t.label + '（最近一次 ' + t.last + '）。'
+          + '這間你可能還沒發現' });
+    });
+  });
+  /* B:避開人潮 —— 每個洗版點找一個同類型的替代 */
+  SPOTS.filter(function (p) { return p.hot; }).forEach(function (h) {
+    var alt = SPOTS.filter(function (p) {
+      return p.cat === h.cat && !p.hot && !seen[p.k];
+    })[0];
+    if (!alt) return;
+    seen[alt.k] = 1;
+    out.push({ p:alt, kind:'B', instead:h,
+      why:'這個週末「' + h.name + '」大概要排隊。同樣是' + (CATS[h.cat] || '這一類')
+        + '，這裡還沒被洗版' });
+  });
+  /* 剩下的當備選。洗版中的地方照樣可以出現——除非他自己勾了「不想人擠人」,
+     那才整批拿掉。這樣那個勾選框才真的有作用,不是裝飾。 */
+  SPOTS.forEach(function (p) {
+    if (seen[p.k]) return;
+    if (p.hot && noCrowd()) return;
+    seen[p.k] = 1;
+    out.push({ p:p, kind:'C',
+      why:p.hot ? (CATS[p.cat] || '走走') + '，正在被洗版——假日大概要排隊'
+                : (CATS[p.cat] || '走走') + '，離你 ' + p.km + ' 公里' });
+  });
+  /* 依傾向排序。bias 高 → 先給「沒被洗版的」(B);低 → 先給「你懂的那一類」(A)。
+     兩條永遠都在牌組裡,只是誰先出現 —— 所以它是比重,不是二選一。 */
+  var order = prefBias() >= 50 ? { B:0, A:1, C:2 } : { A:0, B:1, C:2 };
+  out.sort(function (x, y) {
+    if (order[x.kind] !== order[y.kind]) return order[x.kind] - order[y.kind];
+    return x.p.km - y.p.km;
+  });
+  return out;
+}
 
 /* 傳給 UK.poi 的字典(kit 的 bind 介面不動,只在 init 呼叫一次) */
 var POI = {};
@@ -976,7 +1062,7 @@ function planHTML(s) {
     + '</div>'
     + '<button class="btn p" onclick="openRoute()">🧭 Google map 帶你去</button>'
     /* 反諷版:不講功能(降低無聊值),講他不做的後果——沒刷就等於沒去過 */
-    + '<div class="sec"><button onclick="planCarrier()">刷載具，不然誰知道你去過？</button></div>';
+    + '<div class="sec"><button onclick="planCarrier()">刷載具，這一趟才算進你的足跡</button></div>';
 }
 
 function renderRx(s) {
