@@ -6,8 +6,8 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>無聊快篩｜發票載具</title>
-<script src="qrcode.min.js?v=601153b9"></script>
-<script src="unit-kit.js?v=601153b9"></script>
+<script src="qrcode.min.js?v=73bdbc97"></script>
+<script src="unit-kit.js?v=73bdbc97"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--mut:#7A8494;--line:#F0E0E1;--bg:#FFF6F5}
@@ -143,7 +143,7 @@
   <button onclick="nav.back()" aria-label="返回">&lsaquo;</button>
   <button class="ttl" onclick="goTop()" aria-label="回到第一頁">😶 無聊快篩</button>
   <span class="off">官方自營</span>
-  <button onclick="UK.menu.open(shareLink(), shareMeta())" aria-label="更多：分享／複製連結">&ctdot;</button>
+  <button onclick="shareNow()" aria-label="分享">&ctdot;</button>
 </div>
 <div class="wrap">
 
@@ -452,7 +452,16 @@ function goTop() {
 }
 /* 分享出去的連結不帶 ?inv= / ?demo= 這些開發參數 */
 function shareLink() { return location.origin + location.pathname; }
-/* ⋯ 選單的原生分享要帶我們的文案,不然面板上顯示的是 document.title */
+/* ⋯ = 直接分享,不走選單。
+   為什麼不用 UK.menu:它的「📤 分享」是純文字連結分享(navigator.share 的 title/text/url),
+   在不支援的環境會靜默掉回「複製連結」——使用者按了分享卻只拿到一段網址。
+   這顆單元有更好的東西:UK.share 的 4:5 圖卡(圖內有 QR),share 失敗會退成下載圖檔,
+   兩條路都是「真的分享出去」。測過還沒測的都不會變成複製連結。 */
+function shareNow() {
+  if (typeof score !== 'number') { UK.toast('先測一次,才有東西可以曬'); return; }
+  UK.share.open(card);
+}
+/* 原生分享面板的文字(UK.share.send 會用 card().text,這支留給需要純文字時用) */
 function shareMeta() {
   var s = stats();
   return { title: '無聊快篩',
