@@ -6,8 +6,8 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title id="pageTitle">舒適圈雷達｜發票載具</title>
-<script src="qrcode.min.js?v=a8715052"></script>
-<script src="unit-kit.js?v=a8715052"></script>
+<script src="qrcode.min.js?v=b9db2631"></script>
+<script src="unit-kit.js?v=b9db2631"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--mut:#7A8494;--line:#F0E0E1;--bg:#FFF6F5}
@@ -309,7 +309,29 @@ var COPY = { push: 0, evh: 0, liar: 0 };
      · 分數方向不用反轉:高＝還在圈內＝該出門(反轉要動五個分項與所有文案,不是兩天的事)
    要換成別的:改下面兩個字串就好,track 事件名(bored_*)與 theme 不要動,那是契約。
    舊名保留在註解裡:app='無聊快篩' metric='無聊值' */
-var NAME = { app: '舒適圈雷達', metric: '舒適圈指數' };
+var NAME = { app: '懂你地圖', metric: '足跡分數' };
+
+/* ══ 消費軌跡(示範資料;正式版來自中台 /invoices + 商家類別)═══════════
+   0729 定位:推薦的依據是「發票軌跡」,不是問卷、不是興趣標籤。
+   類別欄位對得上真實 API:Seller 的 distributorCategory / industryName
+   (已實測:全家→便利商店、蝦皮→電子購物業、寶雅→美妝藥局零售業…),
+   所以正式版換成真資料時,這裡的形狀不用改。 */
+var TRACE = [
+  { cat:'book',    label:'獨立書店',   n:3, last:'6 天前' },
+  { cat:'exhibit', label:'展覽・文創', n:2, last:'2 週前' },
+  { cat:'coffee',  label:'咖啡',       n:5, last:'昨天' },
+  { cat:'conv',    label:'便利商店',   n:13, last:'今天' },
+  { cat:'market',  label:'超市量販',   n:4, last:'4 天前' }
+];
+var DEEP_MIN = 3;                       /* 近 3 個月同類型 ≥3 次 → 進「深化同溫層」 */
+function traceTop() {                   /* 挑出可深化的類型(排除日常補貨型) */
+  var daily = { conv:1, market:1 };
+  return TRACE.filter(function (t) { return t.n >= DEEP_MIN && !daily[t.cat]; })
+              .sort(function (a, b) { return b.n - a.n; });
+}
+function traceOf(cat) {
+  return TRACE.filter(function (t) { return t.cat === cat; })[0] || null;
+}
 
 /* -- 兩題的答案:每一個選項都真的改分數(不是裝飾) -- */
 var Q1 = {                                   /* 週末人在哪 → 生活半徑 */
@@ -771,22 +793,32 @@ var SOURCES = {
   local: { tag:'💬 在地推薦',  name:'在地與社群分享的去處',       by:'示範資料',
            note:'正式版接社群熱度與縣市觀光局清單', url:'', at:'' }
 };
-/* 距離是從板橋府中一帶抓的直線距離,示範用。正式版用中台給的座標算。 */
+/* 類別:對得上發票商家類別(Seller.distributorCategory / industryName) */
+var CATS = { book:'獨立書店', exhibit:'展覽・文創', coffee:'咖啡', nature:'走走' };
+/* hot:true = IG／Threads 洗版中(示範標記;正式版接社群熱度榜)。
+   邏輯 B 會把 hot 的濾掉,改推同類型沒被拍爛的替代點。
+   距離是從板橋府中一帶抓的直線距離,示範用。正式版用中台座標算。 */
 var SPOTS = [
-  { k:'linpark',  src:'local', emoji:'🌳', name:'府中商圈 · 林本源園邸', km:1.3, q:'林本源園邸',
-    why:function(s){ return '1.3 公里，比你週末的 ' + radTxt(s.radius) + '多一點——今天先破這個'; } },
-  { k:'nancun',   src:'local', emoji:'🏘️', name:'四四南村',             km:7.6, q:'四四南村',
-    why:function(s){ return '走完等於你這個月的移動總量'; } },
-  { k:'ntcart',   src:'gov',   emoji:'🖼️', name:'新北市美術館（鶯歌）', km:8.0, q:'新北市美術館',
-    why:function(s){ return '新店嘗試 ' + s.newShops + ' 家。這裡連館都是新的'; } },
-  { k:'dadaocheng',src:'gov',  emoji:'🏮', name:'大稻埕',               km:8.5, q:'大稻埕',
-    why:function(s){ return '官方票選出來的地方,你 90 天內一張發票都沒留在那'; } },
-  { k:'hushan',   src:'local', emoji:'⛰️', name:'虎山親山步道',         km:9.5, q:'虎山親山步道',
-    why:function(s){ return '外送員這個月見你 ' + s.deliv + ' 次，山一次都沒見過你'; } },
-  { k:'songshan', src:'gov',   emoji:'🎨', name:'松山文創園區',         km:12.0, q:'松山文創園區',
-    why:function(s){ return '你的圓是 ' + radTxt(s.radius) + '，這裡 12 公里。捷運就到'; } },
-  { k:'maokong',  src:'gov',   emoji:'🍃', name:'貓空',                 km:16.0, q:'貓空纜車',
-    why:function(s){ return '纜車上去,連走路都不用——你連這樣都不去?'; } },
+  { k:'bookalley', src:'local', cat:'book',    emoji:'📚', name:'巷弄選書店（板橋）', km:1.8, q:'板橋 獨立書店',
+    why:function(s){ return '走進去不用買,店員也不會盯著你'; } },
+  { k:'bookriver', src:'local', cat:'book',    emoji:'📖', name:'河邊的二手書店',     km:6.2, q:'新北 二手書店',
+    why:function(s){ return '二手區的價錢比你一杯咖啡便宜'; } },
+  { k:'coffeelane',src:'local', cat:'coffee',  emoji:'☕', name:'單品咖啡・小巷店面', km:2.4, q:'板橋 單品咖啡',
+    why:function(s){ return '你的咖啡都在超商買的,這裡是現磨的'; } },
+  { k:'linpark',  src:'local', cat:'exhibit', emoji:'🌳', name:'府中商圈 · 林本源園邸', km:1.3, q:'林本源園邸',
+    why:function(s){ return '古蹟就在你每天經過的那條路上,你沒進去過'; } },
+  { k:'nancun',   src:'local', cat:'exhibit', emoji:'🏘️', name:'四四南村',             km:7.6, q:'四四南村',
+    why:function(s){ return '老眷村改的文創聚落,平日下午幾乎沒人'; } },
+  { k:'ntcart',   src:'gov',   cat:'exhibit', emoji:'🖼️', name:'新北市美術館（鶯歌）', km:8.0, q:'新北市美術館',
+    why:function(s){ return '新開的館,還沒被拍爛'; } },
+  { k:'dadaocheng',src:'gov',  cat:'exhibit', emoji:'🏮', name:'大稻埕',               km:8.5, q:'大稻埕', hot:true,
+    why:function(s){ return '官方票選的地方,假日人很多'; } },
+  { k:'hushan',   src:'local', cat:'nature',  emoji:'⛰️', name:'虎山親山步道',         km:9.5, q:'虎山親山步道',
+    why:function(s){ return '離市區最近的一段山路,走一小時就到頂'; } },
+  { k:'songshan', src:'gov',   cat:'exhibit', emoji:'🎨', name:'松山文創園區',         km:12.0, q:'松山文創園區', hot:true,
+    why:function(s){ return '展多、人也多,捷運就到'; } },
+  { k:'maokong',  src:'gov',   cat:'nature',  emoji:'🍃', name:'貓空',                 km:16.0, q:'貓空纜車', hot:true,
+    why:function(s){ return '纜車上去就有茶園,週末要排隊'; } },
   { k:'tamsui',   src:'gov',   emoji:'⛵', name:'淡水漁人碼頭',         km:24.0, q:'淡水漁人碼頭',
     why:function(s){ return '24 公里。你這個月的移動總量還不到它的一半'; } },
   { k:'wulai',    src:'gov',   emoji:'🚞', name:'烏來台車',             km:28.0, q:'烏來台車',

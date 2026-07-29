@@ -9,8 +9,8 @@
 <title>財神開示｜發票載具</title>
 <!-- vendored / 共用層:不改。unit-kit 這裡只用到 UK.selfCheck()(唯讀機械自檢),
      nav/state/share 依 0726 決策維持本單元手寫版本。 -->
-<script src="qrcode.min.js?v=a8715052"></script>
-<script src="unit-kit.js?v=a8715052"></script>
+<script src="qrcode.min.js?v=b9db2631"></script>
+<script src="unit-kit.js?v=b9db2631"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--red-deep:#A50011;--gold:#FFD34D;--teal:#0E7C7B;--mut:#7A8494;--bg:#FFF6F5;--line:#F0E0E1}
@@ -60,6 +60,23 @@
   .ritual{font-size:13.5px;font-weight:900;color:#A9720B;background:#FFF9E9;border:1.5px dashed #F0DFAE;
           border-radius:12px;padding:10px 12px;text-align:center;line-height:1.7}
   .ritual span{display:block;font-size:10.5px;font-weight:700;color:#8A7A5E;margin-top:3px}
+  /* ── 抽籤流程(0729 v2:一次一支,取代問卷)── */
+  .tube{font-size:52px;line-height:1;animation:tubeSway 3.2s ease-in-out infinite}
+  @keyframes tubeSway{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+  .drawProg{display:flex;gap:6px;justify-content:center;margin-top:8px}
+  .drawProg i{width:7px;height:7px;border-radius:99px;background:#EADFC2;display:block}
+  .drawProg i.on{background:var(--gold)}
+  .drawProg i.now{background:#A9720B;transform:scale(1.35)}
+  .drawTtl{font-size:11px;font-weight:900;color:#A9720B;letter-spacing:1px;margin-top:10px}
+  .drawAsk{font-size:17px;font-weight:900;color:var(--ink);line-height:1.5;margin:6px 0 14px}
+  /* 大塊、整行、堆疊——一屏只做一個決定,點了就走 */
+  .dopt{display:block;width:100%;min-height:52px;padding:14px 16px;margin-top:8px;
+        font-size:15px;font-weight:800;color:#5A4548;text-align:center;
+        background:#fff;border:2px solid #E8D5D6;border-radius:14px;transition:transform .1s}
+  .dopt:active{transform:scale(.97)}
+  .dopt.on{border-color:var(--gold);background:#FFF9E9;color:#8A6210}
+  .drawBack{margin-top:12px}
+  .drawBack button{font-size:12px;font-weight:800;color:var(--mut);padding:10px;min-height:44px}
   .two{display:flex;gap:10px;margin-top:12px}
   .two .btn{margin-top:0;font-size:14px;padding:12px 10px}
   .two .btn small{display:block;font-weight:600;font-size:10.5px;opacity:.88;margin-top:3px}
@@ -172,33 +189,32 @@
        ⚠️ 只包裝題幹,選項一律保持事實清楚(3–5 萬就寫 3–5 萬)。
           把選項也神祕化的話使用者答不準,後面的試算就變垃圾。
        四題仍然真的驅動試算:Q1→月收入、Q2→儲蓄率、Q3→收入成長率、Q4→起算年齡。 -->
+  <!-- 0729 v2:問卷形式整個拿掉,改成「一次一支籤」的抽籤流程。
+       為什麼:問卷式(四題攤在一頁 + 送出鈕)看起來就是表單,使用者要先讀完
+       才知道要填什麼。改成一屏一支籤、點完自動翻下一支、沒有送出鈕——
+       全程只要一直點,不用讀完整頁也不用決定「填到哪裡算完」。
+       ⚠️ 底層資料完全沒變(仍是月收入/儲蓄率/成長率/年齡),只換互動形式;
+          選項文字照舊保持事實清楚,不神祕化,否則答不準、試算就變垃圾。 -->
   <div id="v1" style="display:none">
-    <div class="card">
-      <div class="ritual">🥠 擲筊問四事<span>財神只問財庫,不問姓名、不問身分證、不問帳號</span></div>
-      <div class="q">第一問 · 你的財庫每月進多少活水?</div>
-      <div class="chips" data-q="income">
-        <button class="chip" data-action="pick" data-v="40000">3–5 萬</button>
-        <button class="chip" data-action="pick" data-v="65000">5–8 萬</button>
-        <button class="chip" data-action="pick" data-v="100000">8 萬以上</button>
-        <button class="chip" data-action="pick" data-v="50000" data-est="1">不便明說 🤐</button></div>
-      <div class="q">第二問 · 進來的活水,留得住幾分?</div>
-      <div class="chips" data-q="save">
-        <button class="chip" data-action="pick" data-v="0.2">留兩成以上</button><button class="chip" data-action="pick" data-v="0.08">留一點</button><button class="chip" data-action="pick" data-v="0">過路財神 💸</button></div>
-      <!-- 0729 立場反轉:不問「最想砍什麼」(那是省錢視角),問「哪一項供品捨得」。
-           花錢不是罪;選「學習」的人收入成長率加成,這題因此真的影響數字。 -->
-      <div class="q">第三問 · 哪一項供品,你花得心甘情願?</div>
-      <div class="chips" data-q="grow">
-        <button class="chip" data-action="pick" data-v="0" data-k="drink">手搖/咖啡</button><button class="chip" data-action="pick" data-v="0" data-k="deliv">外送</button><button class="chip" data-action="pick" data-v="0.01" data-k="learn">學習/訂閱</button><button class="chip" data-action="pick" data-v="0">樣樣都值 🙏</button></div>
-      <!-- 年齡:用「財神要對生辰」包裝,比赤裸的「你幾歲」自然。型態不動(自由填寫) -->
-      <div class="q">第四問 · 你的虛歲(財神要對生辰)</div>
-      <div class="a0" style="justify-content:flex-start">
-        <input id="a0In" class="a0-in" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="請填"
-               autocomplete="off" aria-label="你的虛歲(18 到 99)" oninput="a0Input()">
-        <span class="a0-unit">歲</span></div>
-      <div class="a0-err" id="a0Err" style="display:none;text-align:left"></div>
-      <div class="hint" style="margin-top:10px">再擲一次可以改。財庫與生辰沒答,財神不會幫你掰——「不便明說」也是一個答案。</div>
+    <div class="card" style="text-align:center">
+      <div class="tube" id="tube" aria-hidden="true">🎋</div>
+      <div class="drawProg" id="drawProg"></div>
+      <div class="drawTtl" id="drawTtl"></div>
+      <div class="drawAsk" id="drawAsk"></div>
+      <div id="drawOpts"></div>
+      <!-- 生辰是唯一要打字的一支(年齡型態依 0729 規格凍結為自由填寫,不改成區間) -->
+      <div id="drawAge" style="display:none">
+        <div class="a0" style="justify-content:center">
+          <input id="a0In" class="a0-in" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="請填"
+                 autocomplete="off" aria-label="你的虛歲(18 到 99)" oninput="a0Input()">
+          <span class="a0-unit">歲</span></div>
+        <div class="a0-err" id="a0Err" style="display:none"></div>
+      </div>
+      <div class="drawBack" id="drawBack" style="display:none"><button onclick="drawPrev()">‹ 回上一支</button></div>
+      <div class="hint" style="margin-top:12px">財神只問財庫,不問姓名、不問身分證、不問帳號</div>
     </div>
-    <button class="btn p" id="goScan" onclick="scan()" disabled>還差財庫與生辰</button>
+    <!-- 只在最後一支(生辰)出現。前三支點完自動翻頁,沒有送出鈕 -->
+    <button class="btn p" id="goScan" onclick="scan()" style="display:none" disabled>還差生辰</button>
   </div>
 
   <div id="v2" style="display:none">
@@ -438,43 +454,76 @@ function enter(){
 }
 function demoFill(){ INV=47; toast('(示範)已灌入近 90 天發票'); resetAns(); show('v1'); }
 
-/* ── 三題:再點一次可取消並回中性值;Q1 沒選不放行(落差不靠預設值製造) ── */
+/* ══ 抽籤流程(0729 v2)══
+   一屏一支籤,點完自動翻下一支,前三支沒有送出鈕。
+   底層資料與舊問卷完全相同——只是不再一次攤四題給使用者讀。
+   選項文字保持事實清楚(3–5 萬就寫 3–5 萬),不神祕化:答不準的話試算就沒意義。 */
+var DRAWS=[
+  {q:'income', ttl:'籤 一 · 財 庫', ask:'你的財庫每月進多少活水?', opts:[
+    {t:'3–5 萬', v:40000},{t:'5–8 萬', v:65000},{t:'8 萬以上', v:100000},
+    {t:'不便明說 🤐', v:50000, est:true}]},
+  {q:'save',   ttl:'籤 二 · 守 財', ask:'進來的活水,留得住幾分?', opts:[
+    {t:'留兩成以上', v:0.2},{t:'留一點', v:0.08},{t:'過路財神 💸', v:0}]},
+  /* 立場反轉:不問「最想砍什麼」(省錢視角),問「哪一項供品捨得」。
+     選學習的人收入成長率加成,這支籤因此真的影響數字。 */
+  {q:'grow',   ttl:'籤 三 · 供 品', ask:'哪一項供品,你花得心甘情願?', opts:[
+    {t:'🧋 手搖 / 咖啡', v:0, k:'drink'},{t:'🛵 外送', v:0, k:'deliv'},
+    {t:'📚 學習 / 訂閱', v:0.01, k:'learn'},{t:'🙏 樣樣都值', v:0}]},
+  {q:'age0',   ttl:'籤 四 · 生 辰', ask:'最後一支——你的虛歲', input:true}
+];
+var DI=0;
 function resetAns(){
-  ANS={income:null, goal:0, cut:0, cutK:null, age0:null};
-  document.querySelectorAll('#v1 .chip').forEach(function(c){ c.classList.remove('on'); });
+  ANS={income:null, save:0, grow:0, growK:null, incomeEst:false, age0:null};
+  DI=0;
   /* 回訪時把上次填的年齡帶回來,不用重打;沒填過就留空 */
-  var el=document.getElementById('a0In'), err=document.getElementById('a0Err');
+  var el=document.getElementById('a0In');
   if(typeof ST.age0==='number'){ el.value=String(ST.age0); ANS.age0=ST.age0; } else { el.value=''; }
-  el.classList.remove('bad'); err.style.display='none';
+  el.classList.remove('bad'); document.getElementById('a0Err').style.display='none';
+  drawRender();
+}
+function drawRender(){
+  var d=DRAWS[DI];
+  document.getElementById('drawProg').innerHTML=DRAWS.map(function(x,i){
+    return '<i class="'+(i<DI?'on':(i===DI?'now':''))+'"></i>'; }).join('');
+  document.getElementById('drawTtl').textContent=d.ttl;
+  document.getElementById('drawAsk').textContent=d.ask;
+  var optBox=document.getElementById('drawOpts'), ageBox=document.getElementById('drawAge');
+  if(d.input){
+    optBox.innerHTML=''; ageBox.style.display='';
+    document.getElementById('a0In').focus();
+  } else {
+    ageBox.style.display='none';
+    var cur=ANS[d.q], curK=ANS.growK;
+    optBox.innerHTML=d.opts.map(function(o,i){
+      /* 已選過的那支要標出來(回上一支時看得到自己抽了什麼)。
+         同 v 值的選項用 k 再分辨,不然「樣樣都值」會跟「手搖」一起亮 */
+      var on = (typeof cur==='number' && cur===o.v && (!d.opts.some(function(x){return x.k;}) || (o.k||null)===(curK||null)));
+      return '<button class="dopt'+(on?' on':'')+'" onclick="drawPick('+i+')">'+o.t+'</button>';
+    }).join('');
+  }
+  document.getElementById('drawBack').style.display = DI>0 ? '' : 'none';
+  /* 送出鈕只在最後一支露臉;前三支點完自動翻頁 */
+  document.getElementById('goScan').style.display = d.input ? '' : 'none';
   gate();
 }
+function drawPick(i){
+  var d=DRAWS[DI], o=d.opts[i];
+  ANS[d.q]=o.v;
+  if(d.q==='income') ANS.incomeEst=!!o.est;   /* 「不便明說」用中位數,結果頁要標明 */
+  if(d.q==='grow') ANS.growK=o.k||null;
+  track('wc_pick',{q:d.q});
+  if(DI<DRAWS.length-1){ DI++; drawRender(); }   /* 自動翻下一支——無腦一路點 */
+  else drawRender();
+}
+function drawPrev(){ if(DI>0){ DI--; drawRender(); } }
 /* 收入與年齡都要有才放行:兩個都是結果頁上會被印出來的依據,不能靠預設值製造 */
 function gate(){
   var b=document.getElementById('goScan');
   var hasInc=(typeof ANS.income==='number'), hasAge=(typeof ANS.age0==='number');
   b.disabled=!(hasInc&&hasAge);
   b.textContent = (hasInc&&hasAge) ? '擲筊,請財神開示 🥠'
-                : !hasInc && !hasAge ? '還差財庫與生辰'
                 : !hasInc ? '還差財庫' : '還差生辰';
 }
-/* data-v 現在放的是浮點財務參數(收入/儲蓄率/成長率),不能用 parseInt */
-document.querySelectorAll('#v1 .chips').forEach(function(g){
-  g.addEventListener('click', function(e){
-    var b=e.target.closest('.chip'); if(!b) return;
-    var q=g.getAttribute('data-q'), off=b.classList.contains('on');
-    g.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('on'); });
-    if(off){                                     /* 再點一次 = 取消,回中性值 */
-      if(q==='income'){ ANS.income=null; ANS.incomeEst=false; }
-      else { ANS[q]=0; if(q==='grow') ANS.growK=null; }
-    } else {
-      b.classList.add('on');
-      ANS[q]=parseFloat(b.dataset.v);
-      if(q==='income') ANS.incomeEst=b.dataset.est==='1';   /* 「不方便說」是用中位數,結果頁要標明 */
-      if(q==='grow') ANS.growK=b.dataset.k||null;
-    }
-    gate(); track('wc_pick',{q:q, cleared:off});
-  });
-});
 
 /* ── 掃描過場:可跳過,timer 會清掉不會晚一步又跳 ── */
 var _t=null;
