@@ -9,8 +9,8 @@
 <title>幾歲破產|發票載具</title>
 <!-- vendored / 共用層:不改。unit-kit 這裡只用到 UK.selfCheck()(唯讀機械自檢),
      nav/state/share 依 0726 決策維持本單元手寫版本。 -->
-<script src="qrcode.min.js?v=49baa561"></script>
-<script src="unit-kit.js?v=49baa561"></script>
+<script src="qrcode.min.js?v=a1637026"></script>
+<script src="unit-kit.js?v=a1637026"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--red-deep:#A50011;--gold:#FFD34D;--teal:#0E7C7B;--mut:#7A8494;--bg:#FFF6F5;--line:#F0E0E1}
@@ -111,6 +111,23 @@
   .sec{display:flex;align-items:center;justify-content:center;margin-top:10px}
   .sec button{font-size:12.5px;font-weight:800;color:#8A5A5E;text-decoration:underline;text-underline-offset:3px;padding:12px 8px;min-height:44px}
   .allin{background:#EAF5F1;border:1.5px solid #B9DACD;border-radius:12px;padding:11px 13px;margin-top:10px;font-size:12.5px;font-weight:800;color:#0B5D5C;text-align:center;line-height:1.7}
+  /* 財富小秘密鈕(0729):抖動+發光+金光閃閃——這顆的工作就是被注意到。
+     四層:金光掃過(::after 斜切亮帶)、金光呼吸(box-shadow)、每輪尾端抖一下(rotate)、
+     四顆 ✨💰🪙 粒子輪流閃。三組 keyframes 共用 2.6s 週期,節奏才不會打架。
+     全域 reduced-motion 規則(*{animation:none!important})會把全部關掉,剩靜態金色鈕。 */
+  #secretBn{position:relative;overflow:hidden;
+    animation:coinGlow 2.6s ease-in-out infinite, coinShake 2.6s ease-in-out infinite}
+  #secretBn::after{content:'';position:absolute;top:0;left:0;width:46%;height:100%;pointer-events:none;
+    background:linear-gradient(105deg,transparent 8%,rgba(255,255,255,.55) 50%,transparent 92%);
+    transform:translateX(-130%);animation:coinShine 2.6s ease-in-out infinite}
+  @keyframes coinShine{0%,52%{transform:translateX(-130%)}74%,100%{transform:translateX(330%)}}
+  @keyframes coinGlow{0%,100%{box-shadow:0 4px 14px rgba(184,145,47,.35)}
+    50%{box-shadow:0 4px 24px rgba(255,196,60,.85),0 0 42px rgba(255,210,90,.4)}}
+  @keyframes coinShake{0%,84%,96%,100%{transform:rotate(0)}86%{transform:rotate(-1.8deg)}
+    88%{transform:rotate(1.8deg)}90%{transform:rotate(-1.4deg)}93%{transform:rotate(1deg)}}
+  #secretBn .spark{position:absolute;font-size:13px;line-height:1;pointer-events:none;
+    animation:twinkle 2.6s ease-in-out infinite}
+  @keyframes twinkle{0%,100%{opacity:.2;transform:scale(.75)}50%{opacity:1;transform:scale(1.2)}}
   .lesson{font-size:12.5px;font-weight:700;color:#5A4548;line-height:1.9;padding:7px 0;border-bottom:1px dashed var(--line)}
   .lesson:last-child{border-bottom:none}
   .lesson b{color:#8A6210}
@@ -214,7 +231,7 @@
          好笑但用語是真的:術語(複利/本金/資產配置/長期持有)是通識教育不是建議,
          法遵那行照留;籌碼K線連結接回來放在牌底(0728 口頭指示)。 -->
     <div class="card" id="secretCard">
-      <button class="btn g" id="secretBn" onclick="secretOpen()">想知道財富小秘密嗎 🤫<small>點進來按看看 👀</small></button>
+      <button class="btn g" id="secretBn" onclick="secretOpen()">想知道財富小秘密嗎 🤫<small>點進來按看看 👀</small><span class="spark" aria-hidden="true" style="top:7px;left:14px">✨</span><span class="spark" aria-hidden="true" style="top:10px;right:16px;animation-delay:-.9s">💰</span><span class="spark" aria-hidden="true" style="bottom:7px;left:20%;animation-delay:-1.7s">✨</span><span class="spark" aria-hidden="true" style="bottom:9px;right:26%;animation-delay:-2.1s">🪙</span></button>
       <div id="secretBox" style="display:none">
         <b style="font-size:13.5px;color:#5A0E14">省下的錢不會自己變大——想讓它長大,你該:</b>
         <div id="lessons"></div>
