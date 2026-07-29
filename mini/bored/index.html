@@ -6,8 +6,8 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>無聊快篩｜發票載具</title>
-<script src="qrcode.min.js?v=11bab41d"></script>
-<script src="unit-kit.js?v=11bab41d"></script>
+<script src="qrcode.min.js?v=49baa561"></script>
+<script src="unit-kit.js?v=49baa561"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--mut:#7A8494;--line:#F0E0E1;--bg:#FFF6F5}
@@ -741,7 +741,8 @@ function planHTML(s) {
     + '<br>這就是我們要的那條鏈:出門 → 消費 → 發票 → 再被戳一次。</div>'
     + '</div>'
     + '<button class="btn p" onclick="openRoute()">🧭 Google map 帶你去</button>'
-    + '<div class="sec"><button onclick="planCarrier()">刷載具，降低無聊值</button></div>';
+    /* 反諷版:不講功能(降低無聊值),講他不做的後果——沒刷就等於沒去過 */
+    + '<div class="sec"><button onclick="planCarrier()">刷載具，不然誰知道你去過？</button></div>';
 }
 
 function renderRx(s) {
