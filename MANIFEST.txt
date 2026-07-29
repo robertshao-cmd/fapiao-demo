@@ -1,0 +1,13 @@
+fapiao-demo 商家端 codex 快照
+source: https://github.com/robertshao-cmd/fapiao-demo @ 7d9103eb21cc
+packed: 2026-07-29
+
+2fd9de00bfe6386233256bb6bfd9e56e8908d59275d0bc17ef17848b16697c5b  START-HERE.md
+9b8385bd4ca8863b7d79ed36394c7475209aeae8834a74e1fce503bb71860892  AGENTS.md
+7cb0070e88097d9a15177e230b2a37054992925fd0d3b6dcb9fae339d1abcfa4  docs/HANDOFF.md
+10c70b3e2c77498725f0e8d31e9560cb03e86752374c980eac6493c0dafc5c96  checks/verify-demo.py
+202e8f9a650810f84dade47eaf46ba8730ef71a4a877f726c23ba82ef84a28ac  merchant.html
+489e5c29da1fce8d1772df679084f71493c01b22d9b4ec198f43e8d95c3c4d0e  merchant-app.html
+ddc172b151541d4d608c22dd64e4571018d85f79d6ac264be37d9bb8ba0d7640  merchant-analytics.html
+4a10c68352eb1ff278c97ac0df4babf8b9a252f2a09ece5aa48a70f56bcf94c8  user.html
+f0a3ccfce1b187fbb20c7337b1d753698ca506c9f013fc12e512a60b256766ff  index.html

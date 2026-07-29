@@ -9,8 +9,8 @@
 <title>幾歲破產|發票載具</title>
 <!-- vendored / 共用層:不改。unit-kit 這裡只用到 UK.selfCheck()(唯讀機械自檢),
      nav/state/share 依 0726 決策維持本單元手寫版本。 -->
-<script src="qrcode.min.js?v=73bdbc97"></script>
-<script src="unit-kit.js?v=73bdbc97"></script>
+<script src="qrcode.min.js?v=11bab41d"></script>
+<script src="unit-kit.js?v=11bab41d"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--red-deep:#A50011;--gold:#FFD34D;--teal:#0E7C7B;--mut:#7A8494;--bg:#FFF6F5;--line:#F0E0E1}
@@ -209,16 +209,17 @@
     <div class="card"><b style="font-size:13.5px;color:var(--teal)">省錢處方</b>
       <div id="rx"></div>
       <div class="allin" id="allin"></div></div>
-    <!-- 0728:App 直達鈕移除,改成投資識讀文案——好笑,但用語是真的。
-         每句都拿他自己的漏財點開玩笑(手搖/訂閱),術語(複利/本金/資產配置/長期持有)
-         是通識教育不是建議,法遵那行照留。 -->
-    <div class="card">
-      <!-- 0728 UI 減量:原本這裡有黃框把「一年 $36,324」又講兩次(同數字同屏三次)、
-           加上兩個連續標題。砍成一行:數字只留綠框那一次,鉤子與轉折併在同一句。 -->
-      <b style="font-size:13.5px;color:#5A0E14">省下的錢不會自己變大——想讓它長大,你該:</b>
-      <div class="lesson">認識「<b>複利</b>」:世界第八大奇蹟,前提是你得先有本金。</div>
-      <div class="lesson">理解「<b>資產配置</b>」:手搖飲不是一種資產類別。</div>
-      <div class="lesson">練習「<b>長期持有</b>」:對資產,不是對 30 天沒開的訂閱。</div></div>
+    <!-- 0728 v3:識讀區塊收進「好奇鈕」——預設只有一顆挑釁的按鈕,點開才亮牌。
+         內容資料化(SECRETS/APPS 兩個陣列),之後要加秘密或加 App 都是加一列的事。
+         好笑但用語是真的:術語(複利/本金/資產配置/長期持有)是通識教育不是建議,
+         法遵那行照留;籌碼K線連結接回來放在牌底(0728 口頭指示)。 -->
+    <div class="card" id="secretCard">
+      <button class="btn g" id="secretBn" onclick="secretOpen()">想知道財富小秘密嗎 🤫<small>點進來按看看 👀</small></button>
+      <div id="secretBox" style="display:none">
+        <b style="font-size:13.5px;color:#5A0E14">省下的錢不會自己變大——想讓它長大,你該:</b>
+        <div id="lessons"></div>
+        <button class="btn g" style="margin-top:12px" onclick="goApp('chips')">📊 打開籌碼K線,看主力的錢往哪跑</button>
+      </div></div>
     <!-- 法遵:兩段併一句,鐵律要求的字眼一個都沒少 -->
     <div class="note">情境試算、非財務預測;非投資建議,實際報酬隨市場變動。</div>
     <button class="btn l" onclick="goBack()">← 返回</button>
@@ -486,12 +487,55 @@ function rxRender(){
      也跟 detox 修掉的「按一下就降毒」是同一類問題。 */
   document.getElementById('allin').innerHTML='三個都堵的話,一年可以省 '+nt(planTotal()*12)
     +'<br><span style="font-weight:600;font-size:11px">你剛剛看到的那個歲數,是一個都沒堵的版本</span>';
+  secretReset();
 }
 
-/* 0728:籌碼K線 App 直達鈕移除(v3/v4 兩處都拿掉),投資導流改成 v4 的識讀文案。
-   platform()/APPS/goApp 那組隨之整段刪除——商店連結(Play + App Store)與
-   平台分流邏輯在 git 歷史 c2f7909、9f42320,要接回來從那裡撿。
-   同日 UI 減量:黃框 idle(把年度總額又講兩次)也刪了,數字只留綠框那一次。 */
+/* ── 財富小秘密(0728 v3):識讀內容收進好奇鈕,點開才亮牌 ──
+   資料化:要加一句秘密就在 SECRETS 加一列,要加 App 就在 APPS 加一列。
+   籌碼K線連結是從 git 歷史 c2f7909/9f42320 撿回來的(0728 上午刪過一輪,
+   當時指示是拿掉獨立按鈕;這次改成藏在秘密牌底,不再是硬插的廣告位)。 */
+var SECRETS=[
+  {v:'認識', t:'複利',     w:'世界第八大奇蹟,前提是你得先有本金。'},
+  {v:'理解', t:'資產配置', w:'手搖飲不是一種資產類別。'},
+  {v:'練習', t:'長期持有', w:'對資產,不是對 30 天沒開的訂閱。'}
+];
+function secretOpen(){
+  document.getElementById('lessons').innerHTML=SECRETS.map(function(s){
+    return '<div class="lesson">'+s.v+'「<b>'+s.t+'</b>」:'+s.w+'</div>';
+  }).join('');
+  document.getElementById('secretBn').style.display='none';
+  document.getElementById('secretBox').style.display='';
+  track('wc_secret_open');
+}
+/* 進 v4 時一律收回牌:好奇鈕是這張卡的鉤子,回訪也要從鉤子開始 */
+function secretReset(){
+  var bn=document.getElementById('secretBn'), box=document.getElementById('secretBox');
+  if(bn){ bn.style.display=''; box.style.display='none'; }
+}
+/* 平台分流:iOS 給 App Store,Android 給 Play。iPadOS 13+ 的 UA 偽裝成 Mac,
+   用 maxTouchPoints 補判斷。桌機 fallback android(桌機開只是開發預覽)。 */
+function platform(){
+  var ua=navigator.userAgent||'';
+  if(/iPhone|iPad|iPod/.test(ua)) return 'ios';
+  if(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1) return 'ios';
+  if(/Android/.test(ua)) return 'android';
+  return 'android';
+}
+var APPS=[
+  {k:'chips', nm:'籌碼K線',
+   android:'https://play.google.com/store/apps/details?id=com.cmoney.chipk&hl=zh_TW',
+   ios:'https://apps.apple.com/tw/app/%E8%82%A1%E5%B8%82%E7%B1%8C%E7%A2%BCk%E7%B7%9A-%E5%BF%AB%E9%80%9F%E6%89%BE%E5%87%BA%E4%B8%BB%E5%8A%9B%E7%B1%8C%E7%A2%BC%E9%A3%86%E8%82%A1/id981360113'}
+];
+function appUrl(a){ return platform()==='ios' ? (a.ios||a.android) : (a.android||a.ios); }
+function goApp(k){
+  var a=APPS.filter(function(x){ return x.k===k; })[0]; if(!a) return;
+  var url=appUrl(a);
+  track('wc_go_app',{app:a.k, platform:platform()});
+  /* window.open(_blank) 不是 location.href:嵌在載具 App 的 webview 裡,
+     location.href 會把整個小程序導航掉,從商店返回時分數與訪談結果全部消失 */
+  if(url){ window.open(url, '_blank'); return; }
+  UK.toast(a.nm+'入口整合中,連結確認後開放');
+}
 
 /* ── ⋯ 選單:極簡分享=複製連結 ── */
 /* ⋯ 選單改走 UK.menu(0728):三支共用同一組(分享／複製連結／重新載入)。
