@@ -470,7 +470,9 @@ button:focus-visible,a:focus-visible{outline:3px solid #7FD1CC;outline-offset:2p
 .coupon .r{width:78px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-left:1px dashed #DFC98B;color:#8A6A1B;font-size:11px;font-weight:700;gap:2px;flex-shrink:0}
 .coupon .r b{font-size:16px}
 .coupon.used{opacity:.5}
-.cpshow{display:block;margin-top:6px;font-size:10px;font-weight:800;color:#fff;background:#0E7C7B;border:none;border-radius:8px;padding:6px 9px;cursor:pointer}
+/* 券卡右側主行動鈕:對照微信卡券「去使用」——藥丸形、品牌色填滿、最小觸控 32px */
+.cpshow{display:block;margin-top:7px;font-size:10.5px;font-weight:800;color:#fff;background:var(--app);border:none;border-radius:99px;padding:7px 11px;min-height:32px;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.12)}
+.cpshow:active{transform:scale(.96)}
 .coupon.newin{animation:pop .4s ease}
 @keyframes pop{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
 
@@ -1945,13 +1947,17 @@ function openBrandCoupons(){
     if (c.store !== st) continue;
     rows += '<div class="bs-row"><span class="bs-tag' + (c.used ? ' gray' : '') + '">' + c.tag + '</span>'
       + '<div class="bs-main"><b>' + c.title + '</b><small>' + c.sub + '</small></div>'
-      + '<span class="bs-tag ' + (c.used ? 'gray">已使用' : 'teal">可使用') + '</span></div>';
+      + (c.used ? '<span class="bs-tag gray">已使用</span>'
+                : '<button class="bs-btn" onclick="presentCoupon(\'' + c.id + '\')">到店出示</button>') + '</div>';
   }
   if (!rows) rows = '<div class="bs-row"><div class="bs-main"><small>目前沒有本店的券</small></div></div>';
-  var w = welOf(st);
-  rows += '<div class="bs-row"><span class="bs-tag">-' + w.amt + '</span>'
-    + '<div class="bs-main"><b>新客見面禮｜折 NT$' + w.amt + '</b><small>單筆滿 ' + fmtN(w.min) + ' 可用 · 效期 7 天 · 入會即可領</small></div>'
-    + (claimedWel[st] ? '<span class="bs-tag gray">已領取</span>' : '<button class="bs-btn" onclick="claimWel(\'' + st + '\')">領取</button>') + '</div>';
+  /* 見面禮未領才顯示這一列;領了之後它已經是上面清單裡的一張券,不要重複列 */
+  if (!claimedWel[st]){
+    var w = welOf(st);
+    rows += '<div class="bs-row"><span class="bs-tag">-' + w.amt + '</span>'
+      + '<div class="bs-main"><b>新客見面禮｜折 NT$' + w.amt + '</b><small>單筆滿 ' + fmtN(w.min) + ' 可用 · 效期 7 天 · 入會即可領</small></div>'
+      + '<button class="bs-btn" onclick="claimWel(\'' + st + '\')">領取</button></div>';
+  }
   sheetWrap("🎟️ " + b.n + " · 我的折扣券", rows + '<div style="font-size:10.5px;color:#98A3B0;margin-top:10px;line-height:1.7">結帳時符合門檻的券會自動套用；商家發券也會即時進到這裡。</div>');
 }
 var WEL = { el:{ amt:200, min:1500 }, dtf:{ amt:50, min:300 } };
@@ -2811,6 +2817,8 @@ function markRedeemed(id){
     toast("✅ 券已核銷，感謝光臨");
     if (curScene === "coupons") renderCoupons();
     if (BRAND[curScene]) renderBrandHome(curScene);
+    /* 折扣券浮層開著就同步重繪,不然客人會看到已核銷的券還顯示「到店出示」 */
+    if ($("sheet-mask").classList.contains("show") && BRAND[miniStore()]) openBrandCoupons();
     return;
   }
 }
