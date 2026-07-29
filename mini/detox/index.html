@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#E4001A">
 <title>解毒吧｜發票載具</title>
-<script src="qrcode.min.js?v=62fe5ba0"></script>
-<script src="unit-kit.js?v=62fe5ba0"></script>
+<script src="qrcode.min.js?v=a7700661"></script>
+<script src="unit-kit.js?v=a7700661"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F1B2E;--red:#E4001A;--deep:#A50011;--gold:#B8912F;--teal:#177A4C;
@@ -413,7 +413,9 @@
    共用層一律走 UK.*(unit-kit.js)。不改 unit-kit.js,不複製它的功能。
    ══════════════════════════════════════════════════════════════ */
 var UK_SLUG = 'detox';      /* 給 UK.exitToHome 的 postMessage 帶身分,殼才知道是誰要回首頁 */
-var KEY = 'detox_state';
+/* 真資料模式用另一個 state key:示範值算出來的舊分數(ST.n)如果沿用到真資料上,
+   雷達跟大數字會對不起來,自己都看得出來假。兩邊各存各的。 */
+var KEY = personalMode() ? 'detox_state_p' : 'detox_state';
 var ST = UK.state.load(KEY);
 var guess = null, guessed = false;
 var score = null;
@@ -605,7 +607,9 @@ function finish() {
   var next = UK.data.composite();
   var prev = (typeof ST.n === 'number' && ST.n !== next) ? ST.n : ST.prev;
   score = next;
-  ST = UK.state.save(KEY, { n:score, prev:prev, guess:guess, sub:ST.sub, fam:ST.fam });
+  /* visits 一定要一起帶回去存——它是「回訪」這個成功訊號的唯一來源,
+     漏掉的話每驗一次就被歸零,回訪率永遠是 0(而且看起來很合理)。 */
+  ST = UK.state.save(KEY, { n:score, prev:prev, guess:guess, sub:ST.sub, fam:ST.fam, visits:ST.visits });
   verified = {};
   renderStations();
   entryRender(); showResult();
@@ -622,8 +626,10 @@ function showResult() {
   t.innerHTML = html; t.style.display = html ? '' : 'none';
 
   renderRadar();
-  document.getElementById('srcNote').textContent =
-    UK.dmText('兇手三名：全糖手搖 ×12 · 鹽酥雞 ×5 · 超商甜點 ×7　（都是你自己刷的，發票有寫）');
+  /* 真資料模式下換成你自己的兇手三名(不加「示範數據」尾註——它本來就是真的) */
+  document.getElementById('srcNote').textContent = PERSONAL_EVIDENCE
+    ? PERSONAL_EVIDENCE + '　（都是你自己刷的，發票有寫）'
+    : UK.dmText('兇手三名：全糖手搖 ×12 · 鹽酥雞 ×5 · 超商甜點 ×7　（都是你自己刷的，發票有寫）');
   renderResultAvatar();
   paintFam();                /* 複驗過就顯示完成態,不要重整後又問一次 */
   nav.show('v3');
@@ -792,7 +798,7 @@ function applyDetox(key) {
   if (score === null) score = (typeof ST.n === 'number') ? ST.n : UK.data.composite();
   verified[key] = true;
   var old = score; score = Math.max(40, score - 7);
-  ST = UK.state.save(KEY, { n:score, prev:ST.prev, guess:guess, sub:ST.sub, fam:ST.fam });
+  ST = UK.state.save(KEY, { n:score, prev:ST.prev, guess:guess, sub:ST.sub, fam:ST.fam, visits:ST.visits });
   document.getElementById('sc2').textContent = score;
   document.getElementById('scNote').innerHTML =
     '🎉 這張發票進你的載具了：綜合中毒 ' + old + ' → <b style="color:var(--teal)">' + score
@@ -858,7 +864,46 @@ function guardCard() {
   };
 }
 
-/* ── init ── */
+/* ── 個人化真資料模式(0729):?personal=1 ──
+   把示範值換成「你自己 90 天真發票算出來的五毒」。
+   資料由 nest-integration/personal-poison.py 離線產生(內部 API 只能離線打),
+   寫成同目錄的 personal.json;這裡只是讀一個靜態檔,前端不碰任何內部 API。
+
+   ⚠️ personal.json 已在 .gitignore——那是真實消費紀錄,不進版控、不上公開 demo。
+   沒有這個檔或沒帶參數時,一切照舊走示範值,demo 不受影響。 */
+function personalMode() {
+  try { return new URLSearchParams(location.search).get('personal') === '1'; }
+  catch (e) { return false; }
+}
+function loadPersonal(done) {
+  if (!personalMode() || !window.fetch) { done(); return; }
+  fetch('personal.json', { cache: 'no-store' })
+    .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function (j) {
+      if (j.poison && j.poison.length) UK.data.POISON = j.poison;
+      if (j.invoices) UK.data.INV = j.invoices;
+      UK.data.source = 'personal';
+      if (j.evidence) PERSONAL_EVIDENCE = j.evidence;
+      /* 真資料就不該再掛「示範數據」標記——這一行等同 ?demo=0。
+         init 裡的 applyDemoMode 在這個 callback 之後才跑,所以來得及。 */
+      UK.DEMO = false;
+      var d = new Date(j.generatedAt * 1000);
+      UK.toast('真資料模式:' + j.barcode + ' 近 ' + j.windowDays + ' 天(' +
+               (d.getMonth() + 1) + '/' + d.getDate() + ' 產生)');
+    })
+    .catch(function (e) {
+      UK.toast('personal.json 讀不到,沿用示範值');
+      if (window.console) console.warn('[detox] personal.json:', e.message);
+    })
+    .then(done, done);
+}
+var PERSONAL_EVIDENCE = null;
+
+/* ── init ──
+   包在 loadPersonal 的 callback 裡:五毒值會影響 entryRender/雷達/分身,
+   所以要先確定資料源(示範值 or 真資料)再畫,不然會先畫錯再跳一下。
+   沒帶 ?personal=1 時 loadPersonal 會同步直接 done(),行為跟以前一樣。 */
+loadPersonal(function () {
 UK.poi.bind(POI, '.st[data-poi]');
 if (typeof ST.n === 'number') score = ST.n;
 renderStations();
@@ -883,8 +928,10 @@ UK.track('dx_view', {
   visits: ST.visits,
   returning: ST.visits > 1,
   days_since_last: _daysSince,
-  has_result: typeof ST.n === 'number'
+  has_result: typeof ST.n === 'number',
+  data_source: UK.data.source || 'demo'
 });
+});   /* ← loadPersonal callback 結束 */
 /* 開發時 console 打 UK.selfCheck() 做機械自檢 */
 </script>
 </body>
