@@ -180,9 +180,14 @@
           mark(v); render(v);
         },
         back: function () {
-          /* 浮層開著時:返回=關浮層,不動頁面 */
+          /* 0730 Melon:返回鈕也是「可被點擊的地方」,要埋。
+             from 帶當前畫面,sheet 標記這一下是關浮層還是真的退頁——
+             兩者混在一起算,退出率會看起來比實際嚴重。 */
           var open = sheets();
-          for (var i = 0; i < open.length; i++) { if (open[i]()) return; }
+          for (var i = 0; i < open.length; i++) {
+            if (open[i]()) { UK.track('nav_back', { from: cur || '', sheet: 1 }); return; }
+          }
+          UK.track('nav_back', { from: cur || '', sheet: 0, depth: stack.length });
           var top = stack[stack.length - 1];
           if (cur !== top) { if (top) paint(top); else goHome(); return; }
           stack.pop();
@@ -279,9 +284,122 @@
     }
   };
 
-  /* ═══════════════ 6. TRACK ═══════════════ */
+  /* ═══════════════ 6. TRACK ═══════════════
+     一個事件同時走三條路,彼此獨立、互不擋:
+       ① console  —— 開發時看得到,永遠都有
+       ② 中台 /track —— 只在 UK.apiBase 有設(部署到 ailab-*)時
+       ③ GA4      —— 只在 UK.ga.init() 呼叫過之後
+
+     為什麼 GA4 放在共用層:三顆單元共用同一套事件命名與參數形狀,
+     報表才拼得起來(靠 unit 參數分單元)。各單元自己接 gtag 一定會長歪。 */
   UK.apiBase = null;
+
+  /* GA4 ── 0730 Melon 要求:每個可被點擊的地方都要埋。
+     ⚠️ GA4 的硬限制(踩到就是資料默默不見,不會報錯):
+       · 事件名 ≤40 字元,只能 a-z/0-9/_,而且要字母開頭
+       · 參數名 ≤40 字元、參數值 ≤100 字元
+       · 一個事件最多 25 個自訂參數
+       · **自訂參數要在 GA4 後台註冊成「自訂維度」才看得到**,
+         沒註冊的話事件收得到、但參數在報表裡是空的(見 docs/analytics-events.md)
+     所以下面 send() 會先過濾與截斷,不合法的直接丟掉而不是送壞資料上去。 */
+  UK.ga = {
+    id: null,
+    ready: false,
+    /* 呼叫方式:UK.ga.init('G-XXXXXXXXXX', 'bored')
+       unit 會自動掛進每一個事件,GA4 報表就能用它切分三顆單元。 */
+    init: function (id, unit) {
+      if (!id || this.ready) return;
+      if (!/^G-[A-Z0-9]+$/i.test(id)) {
+        if (global.console) console.warn('[unit-kit] GA4 ID 格式不像 G-XXXXXXXXXX,不載入:', id);
+        return;
+      }
+      this.id = id; this.unit = unit || global.UK_SLUG || '';
+      try {
+        global.dataLayer = global.dataLayer || [];
+        global.gtag = function () { global.dataLayer.push(arguments); };
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(id);
+        document.head.appendChild(s);
+        global.gtag('js', new Date());
+        /* 單元是獨立頁面,page_view 就讓 GA4 自己送(不像 SPA 要自己補);
+           但把 unit 設成全域參數,之後每個事件都自動帶上。 */
+        global.gtag('config', id, { unit: this.unit });
+        this.ready = true;
+      } catch (e) {
+        if (global.console) console.warn('[unit-kit] GA4 載入失敗(不影響其他埋點):', e && e.message);
+      }
+    },
+    /* 事件名合法化:小寫、非法字元換 _、開頭補 e_、截到 40 */
+    evName: function (ev) {
+      var n = String(ev || '').toLowerCase().replace(/[^a-z0-9_]/g, '_');
+      if (!/^[a-z]/.test(n)) n = 'e_' + n;
+      return n.slice(0, 40);
+    },
+    /* 參數清洗:名字截 40、字串值截 100、物件/陣列丟掉(GA4 不吃)、最多 24 個
+       (留一格給自動掛上的 unit)。null/undefined 直接省略,不要送空字串汙染報表。 */
+    params: function (extra) {
+      var out = {}, n = 0;
+      for (var k in (extra || {})) {
+        if (!Object.prototype.hasOwnProperty.call(extra, k)) continue;
+        if (n >= 24) break;
+        var v = extra[k];
+        if (v === null || v === undefined) continue;
+        if (typeof v === 'object') continue;
+        if (typeof v === 'boolean') v = v ? 1 : 0;
+        if (typeof v === 'string' && v.length > 100) v = v.slice(0, 100);
+        out[String(k).slice(0, 40)] = v;
+        n++;
+      }
+      return out;
+    },
+    send: function (ev, extra) {
+      if (!this.ready || !global.gtag) return false;
+      var p = this.params(extra);
+      if (this.unit && p.unit === undefined) p.unit = this.unit;
+      global.gtag('event', this.evName(ev), p);
+      return true;
+    }
+  };
+
+  /* ?debug=1 → 畫面右下角開一個即時事件記錄,用來人工確認
+     「每一個可點的地方是不是都真的有埋」。只看得到自己這一頁的事件。 */
+  UK._dbg = null;
+  UK.debugOn = function () {
+    try { return new URLSearchParams(location.search).get('debug') === '1'; }
+    catch (e) { return false; }
+  };
+  UK.debugLog = function (ev, extra, sent) {
+    if (!UK.debugOn()) return;
+    var box = UK._dbg;
+    if (!box) {
+      box = UK._dbg = document.createElement('div');
+      box.id = 'uk-dbg';
+      box.style.cssText = 'position:fixed;right:8px;bottom:8px;z-index:99999;width:250px;max-height:44vh;'
+        + 'overflow:auto;background:rgba(17,20,26,.94);color:#D7E2EE;font:11px/1.55 Menlo,monospace;'
+        + 'border-radius:10px;padding:8px 10px;box-shadow:0 4px 18px rgba(0,0,0,.4)';
+      box.innerHTML = '<b style="color:#7FD1CC">埋點即時記錄</b>'
+        + '<span style="float:right;cursor:pointer;padding:0 4px" onclick="this.parentNode.remove();UK._dbg=null">✕</span>'
+        + '<div id="uk-dbg-n" style="color:#8C9BAB"></div>';
+      document.body.appendChild(box);
+      UK._dbgCount = 0;
+    }
+    UK._dbgCount++;
+    var line = document.createElement('div');
+    line.style.cssText = 'border-top:1px solid rgba(255,255,255,.12);padding-top:4px;margin-top:4px;word-break:break-all';
+    var keys = Object.keys(extra || {});
+    line.innerHTML = '<span style="color:' + (sent ? '#8FD98A' : '#E8A33D') + '">'
+      + (sent ? '▲GA4' : '○local') + '</span> <b>' + ev + '</b>'
+      + (keys.length ? '<br><span style="color:#8C9BAB">' + keys.map(function (k) {
+          return k + '=' + extra[k]; }).join(' · ') + '</span>' : '');
+    box.appendChild(line);
+    var n = document.getElementById('uk-dbg-n');
+    if (n) n.textContent = '共 ' + UK._dbgCount + ' 筆 · GA4 ' + (UK.ga.ready ? '已接' : '未接');
+    box.scrollTop = box.scrollHeight;
+  };
+
   UK.track = function (ev, extra) {
+    var sent = false;
     try {
       if (global.console) console.log('[track]', ev, extra || {});
       if (UK.apiBase && global.fetch) {
@@ -291,7 +409,9 @@
           body: JSON.stringify({ event: ev, props: extra || {} })
         }).catch(function () {});
       }
+      sent = UK.ga.send(ev, extra);
     } catch (e) {}
+    try { UK.debugLog(ev, extra, sent); } catch (e) {}
   };
 
   /* ═══════════════ 7. POI — 地點卡 bottom sheet ═══════════════
@@ -345,7 +465,16 @@
       m.classList.add('on');
       try { history.pushState({ uk: 1 }, ''); } catch (e) {}
     },
-    close: function () { if (this._el) { this._el.classList.remove('on'); return true; } return false; },
+    close: function () {
+      /* 0730 Melon:浮層的關閉/取消也是可點擊的地方,要埋。
+         一個 sheet_close 事件 + sheet 參數分辨是哪一張,不要開四個事件名 —— 
+         GA4 的事件清單越短越好看,要分就用參數分。 */
+      if (this._el && this._el.classList.contains('on')) {
+        this._el.classList.remove('on'); UK.track('sheet_close', { sheet: 'poi' }); return true;
+      }
+      if (this._el) { this._el.classList.remove('on'); return true; }
+      return false;
+    },
     isOpen: function () { return !!(this._el && this._el.classList.contains('on')); },
     /* 委派:整列可點,但按鈕區不觸發 sheet */
     bind: function (dict, selector) {
@@ -412,7 +541,9 @@
     },
     close: function () {
       var m = document.getElementById('uk-share');
-      if (m && m.classList.contains('on')) { m.classList.remove('on'); return true; }
+      if (m && m.classList.contains('on')) {
+        m.classList.remove('on'); UK.track('sheet_close', { sheet: 'share' }); return true;
+      }
       return false;
     },
     isOpen: function () { var m = document.getElementById('uk-share'); return !!(m && m.classList.contains('on')); },
@@ -694,7 +825,9 @@
     },
     close: function () {
       var m = document.getElementById('uk-menu');
-      if (m && m.classList.contains('on')) { m.classList.remove('on'); return true; }
+      if (m && m.classList.contains('on')) {
+        m.classList.remove('on'); UK.track('sheet_close', { sheet: 'menu' }); return true;
+      }
       return false;
     },
     isOpen: function () { var m = document.getElementById('uk-menu'); return !!(m && m.classList.contains('on')); }
@@ -798,7 +931,9 @@
     },
     close: function () {
       var m = document.getElementById('uk-carrier');
-      if (m && m.classList.contains('on')) { m.classList.remove('on'); return true; }
+      if (m && m.classList.contains('on')) {
+        m.classList.remove('on'); UK.track('sheet_close', { sheet: 'carrier' }); return true;
+      }
       return false;
     },
     isOpen: function () { var m = document.getElementById('uk-carrier'); return !!(m && m.classList.contains('on')); }

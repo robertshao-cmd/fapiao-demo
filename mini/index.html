@@ -126,6 +126,51 @@ var UNITS = [
 var SRC = 'local';
 var SEEN_KEY = 'shell_seen';
 
+/* ══ 埋點(0730 Melon:每個可被點擊的地方都要埋)══════════════════
+   這個殼刻意不載入 unit-kit.js(kit 一載入就 injectCSS,會蓋掉殼自己的樣式),
+   所以這裡自己接一份最小的 gtag —— 事件命名與參數形狀跟 kit 的 UK.track 對齊,
+   GA4 報表才拼得起來(靠 unit 參數分來源)。
+
+   ⚠️ 這一層的 shelf_open 才是 Robert 要的「點進去幾個人」:
+      使用者是從載具首頁的貨架點進單元的,單元自己的 bored_view 只看得到
+      「已經進來的人」。兩個一起看才有轉換率:shelf_open → bored_view。
+
+   GA4_ID 填了才會真的送;沒填就只有 console(本機開發不會亂送資料上去)。 */
+var GA4_ID = '';        /* ← 貼上發票載具 property 的 G-XXXXXXXXXX */
+var GA_ON = false;
+(function initGA(){
+  if (!GA4_ID || !/^G-[A-Z0-9]+$/i.test(GA4_ID)) return;
+  try {
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function(){ window.dataLayer.push(arguments); };
+    var s = document.createElement('script');
+    s.async = true; s.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(GA4_ID);
+    document.head.appendChild(s);
+    gtag('js', new Date());
+    gtag('config', GA4_ID, { unit: 'shell' });
+    GA_ON = true;
+  } catch(e){}
+})();
+var CUR_SLUG = '', CUR_AT = 0;   /* 目前開著哪顆單元、什麼時候開的(給 shelf_close 用) */
+function track(ev, extra){
+  try {
+    console.log('[track]', ev, extra || {});
+    if (GA_ON && window.gtag) {
+      var p = {}, n = 0;
+      for (var k in (extra||{})) {
+        if (!Object.prototype.hasOwnProperty.call(extra,k) || n>=24) continue;
+        var v = extra[k];
+        if (v === null || v === undefined || typeof v === 'object') continue;
+        if (typeof v === 'boolean') v = v ? 1 : 0;
+        if (typeof v === 'string' && v.length > 100) v = v.slice(0,100);
+        p[String(k).slice(0,40)] = v; n++;
+      }
+      p.unit = 'shell';
+      gtag('event', String(ev).toLowerCase().replace(/[^a-z0-9_]/g,'_').slice(0,40), p);
+    }
+  } catch(e){}
+}
+
 function seen(){ try{ return JSON.parse(localStorage.getItem(SEEN_KEY)||'{}')||{}; }catch(e){ return {}; } }
 function markSeen(s){ try{ var m=seen(); if(!m[s]){ m[s]=1; localStorage.setItem(SEEN_KEY, JSON.stringify(m)); } }catch(e){} paint(); }
 
@@ -135,7 +180,7 @@ function urlOf(u){
   /* 用 location.hostname,不要寫死 localhost。
      手機從 LAN IP 開這個殼時,localhost 指的是「手機自己」→ 一定連線被拒。
      跟著殼被開啟的位址走:localhost 開就是 localhost,192.168.x.x 開就是同一台。 */
-  if (SRC === 'local') return './' + u.slug + '/?v=c015bb42';   /* 靜態發佈版:同層資料夾 + 破快取 */
+  if (SRC === 'local') return './' + u.slug + '/?v=1d59747a';   /* 靜態發佈版:同層資料夾 + 破快取 */
   return 'https://ailab-dev.cmoney.tw/' + (u.devSlug || u.slug);
 }
 
@@ -208,16 +253,23 @@ function animate(){
 
 function openUnit(slug){
   var u = UNITS.filter(function(x){ return x.slug===slug; })[0]; if(!u) return;
+  var wasSeen = !!seen()[slug];      /* 一定要在 markSeen 之前抓,不然永遠都是「看過」 */
   markSeen(slug);
   /* 誠實的空狀態:跟 kit 的 UK.shops.open 同一個原則 —— shopId 沒填就不假裝可點餐,
      也不用裸網域(店家首頁)冒充直達 */
   if (u.ext && !u.shopId){
+    /* 被擋下來也要記:這是「有人想點但我們還沒開通」的需求證據 */
+    track('shelf_blocked', { slug: slug, reason: 'no_shopid' });
     alert('店家連結待填：掃店內桌卡 QR 或到商家後台複製顧客點餐連結，\n'
         + '先跑 nest-integration/verify-shop.py <UUID> 驗過，\n'
         + '再填 _kit/unit-kit.js 的 REGISTRY.nnw.shopId 與本檔 UNITS 的 nnw.shopId。');
     return;
   }
   var url = urlOf(u);
+  /* ⭐ 主轉換事件:從貨架點進單元。GA4 後台建議把這顆標成「關鍵事件」。
+     first_open 分辨「第一次點」與「回訪再點」——NEW 標記的效果就看這個。 */
+  track('shelf_open', { slug: slug, name: u.name, src: SRC, first_open: wasSeen ? 0 : 1 });
+  CUR_SLUG = slug; CUR_AT = Date.now();
   document.getElementById('vTitle').textContent = u.emoji + ' ' + u.name;
   document.getElementById('vUrl').textContent = url.replace(/^https?:\/\//,'');
   document.getElementById('frame').src = url;
@@ -227,15 +279,24 @@ function openUnit(slug){
 function closeView(){
   var v = document.getElementById('view');
   if (!v.classList.contains('on')) return false;
+  /* 關閉單元 = 回貨架。slug 直接記在 CUR_SLUG,不從 iframe src 反解 ——
+     本機 dev 的網址是 localhost:5182/(用 port 分單元),裡面根本沒有 slug,
+     反解只在靜態發佈版(./bored/?v=)成立,兩種環境會有一種永遠是空的。
+     sec 帶停留秒數:跟 shelf_open 配對就知道「點進去之後有沒有真的看」。 */
+  track('shelf_close', { slug: CUR_SLUG || '',
+                         sec: CUR_AT ? Math.round((Date.now() - CUR_AT) / 1000) : 0 });
+  CUR_SLUG = ''; CUR_AT = 0;
   v.classList.remove('on');
   document.getElementById('frame').src = 'about:blank';
   return true;
 }
 function reload(){
+  track('shelf_reload', { slug: CUR_SLUG || '' });
   var f = document.getElementById('frame'), s = f.src;
   f.src = 'about:blank'; setTimeout(function(){ f.src = s; }, 60);
 }
 function setSrc(s){
+  track('shelf_src_switch', { src: s });     /* 本機 dev ↔ ailab-dev 切換(開發用,不是使用者行為) */
   SRC = s;
   document.getElementById('srcLocal').classList.toggle('on', s==='local');
   document.getElementById('srcDev').classList.toggle('on', s==='dev');
@@ -280,6 +341,9 @@ function loadChanges(){
 
 render();
 /* loadChanges() 靜態版沒有 */
+/* 貨架被看到(分母)。GA4 自己的 page_view 也會有,但這一顆帶了貨架上有幾顆單元,
+   之後加減單元時能解釋轉換率為什麼變。 */
+track('shelf_view', { tiles: UNITS.length, src: SRC });
 </script>
 </body>
 </html>

@@ -6,8 +6,8 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>無聊快篩｜發票載具</title>
-<script src="qrcode.min.js?v=c015bb42"></script>
-<script src="unit-kit.js?v=c015bb42"></script>
+<script src="qrcode.min.js?v=1d59747a"></script>
+<script src="unit-kit.js?v=1d59747a"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--mut:#7A8494;--line:#F0E0E1;--bg:#FFF6F5}
@@ -276,6 +276,15 @@ UK.apiBase = platformApiBase();
    來不及也不阻塞畫面——沒接上就是 UK.data 內建的示範值,使用者不會看到空白或轉圈。 */
 if (UK.apiBase) UK.data.load(UK.apiBase);
 
+/* ══ GA4 埋點(0730 Melon:每個可被點擊的地方都要埋)═══════════════
+   填了 GA4_ID 才會真的送;沒填就只有 console(本機開發不會亂送測試資料上去)。
+   三顆單元共用 unit-kit.js 的 UK.track,所以事件命名與參數形狀一致,
+   GA4 報表用 unit 參數就能切分單元。
+   驗收方式:網址加 ?debug=1,右下角會出現即時事件記錄,把每個可點的東西
+   點一遍,確認沒有漏埋的(見 docs/analytics-events.md)。 */
+var GA4_ID = '';        /* ← 貼上發票載具 property 的 G-XXXXXXXXXX */
+UK.ga.init(GA4_ID, 'bored');
+
 /* ══ 文案挑選盤 ══════════════════════════════════════════════
    挑文案只改這三個數字,不用在檔案裡翻。每組的備選都在下面的陣列裡,
    索引超出範圍會自動退回第 0 句(不會空白)。
@@ -462,6 +471,7 @@ function retest() {
 }
 /* 灌發票要蓋掉 ?inv=（不然證據行還在用 2 張算,說「已灌入」就是騙人） */
 function demoFill() {
+  UK.track('bored_demo_fill');                       /* 空狀態的示範出路被按了 */
   UK.data.INV.d30.n = 47; _forceInv = 47;
   UK.toast('（示範）已灌入發票'); resetAns(); nav.show('v1');
 }
@@ -518,6 +528,9 @@ UK.chips.bind(document, { onPick: function (k, v, cleared) {
     return;
   }
   if (cleared) delete ANS[k]; else ANS[k] = v;
+  /* 0730 Melon:每個可點的地方都要埋。訪談 chip 也是點擊,而且它回答的是
+     「兩題到底有沒有人真的答」——跳過率是這條漏斗最重要的分母之一。 */
+  UK.track('bored_answer', { q:k, v:v, cleared:!!cleared, answered:Object.keys(ANS).length });
   gate();
 } });
 /* 篩選條的選中態:離開「我的清單」時要把亮起來的那顆收回 */
@@ -526,11 +539,17 @@ function markMode(v) {
     c.classList.toggle('on', c.getAttribute('data-v') === v);
   });
 }
-function skip() { ANS = {}; ST.ans = {}; scanRun(true); }
+function skip() {
+  UK.track('bored_skip_quiz', { answered:Object.keys(ANS).length });   /* 懶得選,直接看結果 */
+  ANS = {}; ST.ans = {}; scanRun(true);
+}
 
 /* -- 掃描過場(可跳過;timer 會清掉,不會晚一步又跳) -- */
 var _t = [];
-function scan() { scanRun(false); }
+function scan() {
+  UK.track('bored_quiz_submit', { answered:Object.keys(ANS).length });  /* 兩題答完,按下驗發票 */
+  scanRun(false);
+}
 function scanRun(skipped) {
   nav.show('v2');
   var steps = SCAN[SCAN_SET] || SCAN[0], i = 0;
@@ -554,7 +573,10 @@ function scanRun(skipped) {
   _skipped = skipped;
 }
 var _skipped = false;
-function skipScan() { _t.forEach(function (f) { f(); }); _t = []; finish(_skipped); }
+function skipScan() {
+  UK.track('bored_skip_scan');                       /* 跳過掃描動畫:過場太長的訊號 */
+  _t.forEach(function (f) { f(); }); _t = []; finish(_skipped);
+}
 
 function finish(skipped) {
   applyDims();
