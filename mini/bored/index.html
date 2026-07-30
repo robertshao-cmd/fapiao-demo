@@ -6,8 +6,8 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title id="pageTitle">懂你地圖｜發票載具</title>
-<script src="qrcode.min.js?v=f2b903f4"></script>
-<script src="unit-kit.js?v=f2b903f4"></script>
+<script src="qrcode.min.js?v=8aebba3e"></script>
+<script src="unit-kit.js?v=8aebba3e"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--mut:#7A8494;--line:#F0E0E1;--bg:#FFF6F5}
@@ -86,13 +86,38 @@
                  border-radius:99px;padding:6px 11px;color:#5A6472}
   .tracebar span b{color:#A50011}
   /* 推薦卡 */
-  .rdeck{height:236px}
-  .rcard{padding:22px 18px}
-  .rcard .re{font-size:36px;line-height:1}
-  .rcard b{font-size:19px;font-weight:900;margin-top:6px}
+  /* 兩個 class 一起寫:.deck 的通用高度在後面,單寫 .rdeck 會被它蓋掉 */
+  .deck.rdeck{height:292px}
+  /* 地圖要滿版貼齊卡片上緣,所以這張卡不留內距、內容靠上 */
+  .dcard.rcard{padding:0 0 11px;align-items:stretch;justify-content:flex-start}
+  .rcard b{font-size:19px;font-weight:900;margin-top:0}
   .rmeta{display:flex;gap:8px;align-items:center;justify-content:center;margin-top:7px;
          font-size:11.5px;font-weight:800;color:#7A8494}
-  .rwhy{font-size:13px;font-weight:800;line-height:1.7;color:#8A5A00;margin-top:11px}
+  .rwhy{font-size:13px;font-weight:800;line-height:1.6;color:#8A5A00;margin-top:9px;
+        /* 卡上理由最多兩行:超過就不是「一眼看懂」了,完整版在地點卡 */
+        display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  /* 地圖預覽(0730):先給「長什麼樣」,再給文字理由。
+     用 Google 的 output=embed(不需要 key)。卡上這張刻意 pointer-events:none
+     —— 讓手勢留給滑卡;要互動的地圖在「查看地點」那張浮層裡。 */
+  .rmap{position:relative;height:130px;flex:none;overflow:hidden;background:#E8ECF2;
+        border-radius:18px 18px 0 0}
+  .rmap iframe{position:absolute;inset:0;width:100%;height:100%;border:0;
+        pointer-events:none;filter:saturate(.92)}
+  .rmap .fb{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+        font-size:13px;font-weight:800;color:#93A0B0;gap:6px}
+  .rmap .em{position:absolute;left:10px;bottom:9px;width:30px;height:30px;border-radius:9px;
+        background:#fff;display:flex;align-items:center;justify-content:center;font-size:17px;
+        box-shadow:0 2px 7px rgba(31,36,48,.2)}
+  .rmap .km{position:absolute;right:10px;bottom:9px;padding:4px 9px;border-radius:8px;
+        background:rgba(255,255,255,.94);font-size:11.5px;font-weight:900;color:#3A4453;
+        box-shadow:0 2px 7px rgba(31,36,48,.18)}
+  .rbody{padding:13px 18px 0;text-align:center}
+  /* 地點卡浮層裡的地圖:這張要能拖能放大 */
+  .poimap{position:relative;height:190px;margin:12px 0 0;border-radius:14px;overflow:hidden;
+        background:#E8ECF2}
+  .poimap iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+  .poimap .fb{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+        font-size:13px;font-weight:800;color:#93A0B0}
   /* 兩條邏輯用色塊區分,不寫「你被分到哪一類」 */
   .kdot{position:absolute;top:14px;left:14px;width:9px;height:9px;border-radius:99px;background:#D8DEE6}
   .kdot.a{background:#A50011}
@@ -211,6 +236,8 @@
         用這些找「同一類但你還沒去過」的地方。</p>
       <p>不讀你買了什麼品項來評價你，不把你的紀錄給商家，也不會拿它推銷。
         推薦不準就往下滑，我們只會越推越準，不會越推越多。</p>
+      <p>卡片上的地圖是向 Google 地圖取的，所以那個<b>地點名稱</b>會傳到 Google。
+        你的發票、你去過哪裡，一筆都不會傳出去。</p>
     </div>
     <button class="btn p" onclick="scan()">看我的推薦</button>
     <div class="sec"><button onclick="skip()">先看推薦，設定等一下再說</button></div>
@@ -237,10 +264,18 @@
     <div class="deck rdeck" id="deck">
       <div class="dcard rcard" id="dcard">
         <span class="kdot" id="kdot"></span>
-        <span class="re" id="rEmoji">🗺️</span>
-        <b id="rName">—</b>
-        <div class="rmeta"><span class="tag" id="rCat">—</span><span id="rKm">—</span></div>
-        <div class="rwhy" id="rWhy">—</div>
+        <!-- 地圖預覽:iframe 由 paintMap() 掛上來(換張卡才換 src,同一個地點不重載) -->
+        <div class="rmap" id="rMap">
+          <span class="fb">🗺️ 地圖載入中…</span>
+          <span class="em" id="rEmoji">🗺️</span>
+          <span class="km" id="rKm">—</span>
+        </div>
+        <div class="rbody">
+          <b id="rName">—</b>
+          <!-- 距離只寫在地圖角落那顆膠囊上,不在這裡再講一次 -->
+          <div class="rmeta"><span class="tag" id="rCat">—</span></div>
+          <div class="rwhy" id="rWhy">—</div>
+        </div>
         <span class="dhint">👈 下一張　·　收藏 👉</span>
       </div>
       <div class="dstamp left"  id="dsL">下一張</div>
@@ -540,6 +575,65 @@ var _drag = null;
 function buildReco() { RECO = recommend(); _di = 0; }
 function curReco() { return RECO[_di] || null; }
 
+/* ══ 地圖預覽(0730)════════════════════════════════════════════
+   用 Google 的 `output=embed`,不需要 API key —— 所以 demo 現在就跑得起來。
+   查詢字串用 SPOTS 的 `q`(跟導航共用同一個欄位,不會出現「卡上一個地方、
+   導航去另一個地方」),沒有 q 就退回店名。
+
+   ⚠️ 兩件正式版要換的事,不要照抄:
+     1. `output=embed` 不是有文件的介面,而且每張卡都會載入完整的地圖前端
+        (慢、流量大)。正式版該用 **Maps Static API**(一張 ~30KB 的圖,秒出)
+        或 Maps Embed API,都要 key,key 要鎖 referrer。
+     2. 這是**對 Google 發的第三方請求**:會帶出地點查詢字串與使用者 IP。
+        不會帶出任何發票資料,但 v1 那張隱私卡要講清楚(已補一行)。 */
+function mapURL(p, z) {
+  return 'https://maps.google.com/maps?q=' + encodeURIComponent(p.q || p.name)
+       + '&z=' + (z || 15) + '&output=embed';
+}
+/* 卡上那張:純視覺(pointer-events 在 CSS 關掉了),手勢留給滑卡 */
+function paintMap(p) {
+  var host = document.getElementById('rMap');
+  if (!host || host.getAttribute('data-k') === p.k) return;   /* 同一個地點不重載 */
+  host.setAttribute('data-k', p.k);
+  var fb = host.querySelector('.fb');
+  if (fb) fb.style.display = '';        /* 換一張卡:先把「載入中」蓋回去 */
+  var f = host.querySelector('iframe');
+  if (!f) {
+    f = document.createElement('iframe');
+    /* 不用 loading="lazy":卡片就是畫面焦點,lazy 會讓它卡在 about:blank
+       (實測過——插入時 v3 還是 display:none,lazy 就不觸發了) */
+    f.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
+    f.setAttribute('aria-hidden', 'true');   /* 裝飾用;可互動的那張在地點卡裡 */
+    f.tabIndex = -1;
+    host.insertBefore(f, host.firstChild);
+  }
+  /* 「載入中」那行在 DOM 裡排在 iframe 後面(所以蓋在它上面),載完才收掉。
+     載不到就留著 —— 使用者看到的是一句話,不是一塊白。 */
+  f.onload = function () { if (fb) fb.style.display = 'none'; };
+  f.src = mapURL(p, 15);
+}
+/* 地點卡浮層裡那張:可以拖、可以放大。kit 的 sheet 沒有 HTML 插槽,
+   所以在 UK.poi.open() 之後把節點補進它建好的 DOM —— 只加不改,
+   kit 的 markup 變了也只是這張圖不出現,不會壞掉。 */
+function poiMap(p) {
+  var sheet = document.querySelector('#uk-poi .uk-poi-sheet');
+  if (!sheet) return;
+  var old = sheet.querySelector('.poimap');
+  if (old) old.parentNode.removeChild(old);
+  var box = document.createElement('div');
+  box.className = 'poimap';
+  box.innerHTML = '<span class="fb">🗺️ 地圖載入中…</span>';
+  var f = document.createElement('iframe');
+  f.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
+  f.setAttribute('title', p.name + ' 的地圖');
+  f.onload = function () { var fb = box.querySelector('.fb'); if (fb) fb.style.display = 'none'; };
+  f.src = mapURL(p, 16);
+  box.insertBefore(f, box.firstChild);
+  var why = sheet.querySelector('.uk-poi-why');
+  if (why && why.parentNode) why.parentNode.insertBefore(box, why);   /* 圖在理由上面 */
+  else sheet.appendChild(box);
+}
+
 function paintCard() {
   var r = curReco(), c = document.getElementById('dcard');
   if (!c) return;
@@ -559,6 +653,7 @@ function paintCard() {
   document.getElementById('rCat').textContent = CATS[r.p.cat] || '走走';
   document.getElementById('rKm').textContent = r.p.km + ' 公里';
   document.getElementById('rWhy').textContent = r.why;
+  paintMap(r.p);
   document.getElementById('kdot').className = 'kdot ' + (r.kind === 'A' ? 'a' : (r.kind === 'B' ? 'b' : ''));
   c.style.transform = ''; c.style.opacity = '';
   setStamp(0);
@@ -594,6 +689,7 @@ function openPoiNow() {
   var row = document.createElement('div');
   row.setAttribute('data-poi', r.p.k);
   UK.poi.open(row, POI);
+  poiMap(r.p);                       /* 浮層裡補一張可互動的地圖 */
   UK.track('bored_poi_open', { poi:r.p.k, kind:r.kind });
 }
 /* 拖曳(手指與滑鼠同一套) */
@@ -1053,7 +1149,19 @@ document.addEventListener('keydown', function (e) {   /* 列是 role=button,鍵�
   if (e.key !== 'Enter' && e.key !== ' ') return;
   var row = e.target.closest && e.target.closest('[data-poi]');
   if (!row || e.target.tagName === 'BUTTON') return;
-  e.preventDefault(); UK.poi.open(row, POI);
+  e.preventDefault(); UK.poi.open(row, POI); poiMapByKey(row.getAttribute('data-poi'));
+});
+/* v4 清單那邊「整列可點 → 地點卡」是 kit 的 UK.poi.bind 自己接的,我拿不到那個
+   hook。所以在它之後再掛一個同條件的監聽器,浮層開起來以後把地圖補進去。
+   順序有保證:同一階段的 listener 依註冊順序跑,bind 在 init 時就註冊了。 */
+function poiMapByKey(k) {
+  var p = SPOTS.filter(function (s) { return s.k === k; })[0];
+  if (p) poiMap(p);
+}
+document.addEventListener('click', function (e) {
+  var row = e.target.closest && e.target.closest('[data-poi]');
+  if (!row || e.target.tagName === 'BUTTON') return;
+  poiMapByKey(row.getAttribute('data-poi'));
 });
 /* 篩選條要黏在標題列正下方。標題列有 safe-area,高度會變,所以量出來寫進 --topH;
    轉向或字級變化時重量一次。 */

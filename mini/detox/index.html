@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#E4001A">
 <title>解毒吧｜發票載具</title>
-<script src="qrcode.min.js?v=f2b903f4"></script>
-<script src="unit-kit.js?v=f2b903f4"></script>
+<script src="qrcode.min.js?v=8aebba3e"></script>
+<script src="unit-kit.js?v=8aebba3e"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F1B2E;--red:#E4001A;--deep:#A50011;--gold:#B8912F;--teal:#177A4C;
@@ -496,8 +496,11 @@ function toEntry() {
 
 /* ── 入口:回訪態 + 空狀態門檻 ── */
 function entryRender() {
+  /* 這一行每次 entryRender 都重寫,所以不能靠 relabelWindow(它只掃一次靜態文字)。
+     真資料模式下窗是 WIN_DAYS(預設 90),張數也要拿同一個窗的,否則標籤跟數字不同源。 */
+  var wn = UK.data.INV[WIN_DAYS === 30 ? 'd30' : 'd90'] || UK.data.INV.d30;
   document.getElementById('windowNote').textContent =
-    UK.dmText('近 30 天 ' + UK.data.INV.d30.n + ' 張發票 · 只算你自己（示範數據）');
+    UK.dmText('近 ' + WIN_DAYS + ' 天 ' + wn.n + ' 張發票 · 只算你自己（示範數據）');
   var box = document.getElementById('lastBox'), cta = document.getElementById('cta'),
       re = document.getElementById('actRetest'), hero = document.getElementById('hero');
   if (typeof ST.n === 'number') {
@@ -887,6 +890,7 @@ function loadPersonal(done) {
       /* 真資料就不該再掛「示範數據」標記——這一行等同 ?demo=0。
          init 裡的 applyDemoMode 在這個 callback 之後才跑,所以來得及。 */
       UK.DEMO = false;
+      relabelWindow(j.windowDays);
       var d = new Date(j.generatedAt * 1000);
       UK.toast('真資料模式:' + j.barcode + ' 近 ' + j.windowDays + ' 天(' +
                (d.getMonth() + 1) + '/' + d.getDate() + ' 產生)');
@@ -898,6 +902,21 @@ function loadPersonal(done) {
     .then(done, done);
 }
 var PERSONAL_EVIDENCE = null;
+
+/* 畫面上寫死「近 30 天」的地方,在真資料模式要改成實際視窗(預設 90 天)。
+   雷達是用 --days 那個窗算的;標籤留 30 天就是「數字真的、標籤錯的」,
+   被問一句就破 —— 這比看起來土氣嚴重得多,所以寧可改字。
+   只換「近 30 天」;本來就寫「近 90 天」的句子(家人複驗、公告比對)不動。 */
+var WIN_DAYS = 30;            /* 示範值就是 30 天;真資料模式由 personal.json 覆蓋 */
+function relabelWindow(days) {
+  if (!days || days === 30) return;
+  WIN_DAYS = days;
+  var from = '近 30 天', to = '近 ' + days + ' 天';
+  var w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false), t;
+  while ((t = w.nextNode())) {
+    if (t.nodeValue.indexOf(from) >= 0) t.nodeValue = t.nodeValue.split(from).join(to);
+  }
+}
 
 /* ── init ──
    包在 loadPersonal 的 callback 裡:五毒值會影響 entryRender/雷達/分身,
