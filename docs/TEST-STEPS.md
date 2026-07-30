@@ -238,12 +238,15 @@ build 每個字串替換都有錨點斷言,來源改過而腳本沒跟上會**�
 
 ```bash
 python verify-shop.py <shop-UUID>          # 驗店 + 檢查 enableInvoice
-python invoice-api.py invoices --carrier /NJRSPN5   # 拉真發票
-python carrier-join.py --shop <UUID> --carrier /NJRSPN5 --invoices invoices.json   # 六環對接
+python invoice-api.py invoices --carrier <你的載具號>   # 拉真發票
+python carrier-join.py --shop <UUID> --carrier <你的載具號> --invoices invoices.json   # 六環對接
 ```
 
 仍卡:shopId 要到店掃桌碼才拿得到(順帶請老闆開電子發票、下一單真單)。
 `INTEGRATION_API_KEY` 只從環境變數讀,不寫檔、不 echo。
+
+⚠️ **這個 repo 是公開的。載具號一律用 `<你的載具號>` 佔位,不要寫真值。**
+內部發票 API 的唯一參數就是載具號 —— 真值寫在公開檔裡,等於把整份消費紀錄的查詢鍵留在網路上。
 
 ## 6. 交付閘門
 
