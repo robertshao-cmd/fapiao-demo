@@ -6,8 +6,8 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>無聊快篩｜發票載具</title>
-<script src="qrcode.min.js?v=721ad951"></script>
-<script src="unit-kit.js?v=721ad951"></script>
+<script src="qrcode.min.js?v=6b08bdea"></script>
+<script src="unit-kit.js?v=6b08bdea"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--mut:#7A8494;--line:#F0E0E1;--bg:#FFF6F5}
@@ -433,21 +433,38 @@ var nav = UK.nav.create({
   sheets: function () { return [function () { return UK.closeTopSheet(); }]; }
 });
 
+/* 回訪者直接看上次的結果(沒有重新測)。
+   0730 埋點稽核抓到的漏洞:這條路原本完全沒有埋點——回訪者點進來看結果,
+   在資料上是完全隱形的。三個入口都會走到這裡:回訪盒的「看上次結果」、
+   回訪態的主 CTA、以及「沒去偵測」時次要鈕的「看上次的結果」。
+
+   為什麼不直接在 showResult() 裡埋:finish()(測完那條路)也會呼叫
+   showResult(),然後自己送 bored_result。在 showResult() 裡加埋點會讓
+   「測完」被算兩次,把完成率灌水。所以獨立一個事件,語意也才對——
+   「回來看上次的」跟「剛測完」是兩種不同行為。 */
+function openLastResult() {
+  UK.track('bored_result_revisit', {
+    score: (typeof ST.n === 'number') ? ST.n : null,
+    days:  ST.mat ? Math.round((Date.now() - ST.mat) / 86400000) : null
+  });
+  showResult();
+}
+
 /* -- 入口:回訪態 + 空狀態門檻 -- */
 function entryRender() {
   var box = document.getElementById('lastBox'), cta = document.getElementById('cta'),
       re = document.getElementById('retest'), hero = document.querySelector('#v0 .hero');
   if (typeof ST.n === 'number') {
     var ns = noShow();
-    box.innerHTML = UK.state.lastBox({ label:'上次無聊值', n:ST.n, unit:'/100', at:ST.mat, prev:ST.prev, onclick:"showResult()" })
+    box.innerHTML = UK.state.lastBox({ label:'上次無聊值', n:ST.n, unit:'/100', at:ST.mat, prev:ST.prev, onclick:"openLastResult()" })
       /* 回訪才有的一行。新用戶的入口仍然只有臉＋一句＋一顆鈕(0724 定調) */
       /* 只講事實(發票沒多),不替他下結論——「不明說」比「說你沒去」更刺,也不會講得比資料多 */
       + (ns ? '<div class="busted">上次你說要衝「' + ns.name + '」。發票一張都沒多。</div>' : '');
     cta.textContent = ns ? '那再測一次好了' : '看我的結果';
-    cta.setAttribute('onclick', ns ? 'retest()' : 'showResult()');
+    cta.setAttribute('onclick', ns ? 'retest()' : 'openLastResult()');
     re.style.display = ''; hero.classList.add('mini');
     document.querySelector('#retest button').textContent = ns ? '看上次的結果' : '重新驗一次';
-    document.querySelector('#retest button').setAttribute('onclick', ns ? 'showResult()' : 'retest()');
+    document.querySelector('#retest button').setAttribute('onclick', ns ? 'openLastResult()' : 'retest()');
   } else {
     box.innerHTML = ''; cta.textContent = '我敢測'; cta.setAttribute('onclick', 'enter()');
     re.style.display = 'none'; hero.classList.remove('mini');
@@ -497,7 +514,12 @@ function shareLink() { return location.origin + location.pathname; }
    這顆單元有更好的東西:UK.share 的 4:5 圖卡(圖內有 QR),share 失敗會退成下載圖檔,
    兩條路都是「真的分享出去」。測過還沒測的都不會變成複製連結。 */
 function shareNow() {
-  if (typeof score !== 'number') { UK.toast('先測一次,才有東西可以曬'); return; }
+  if (typeof score !== 'number') {
+    /* 0730 稽核補:按了分享卻還沒有結果可分享。這是真實的點擊行為,
+       原本只彈 toast 就 return、什麼都不記——看不到有多少人想分享卻被擋。 */
+    UK.track('bored_share_blocked', { from: nav.current() });
+    UK.toast('先測一次,才有東西可以曬'); return;
+  }
   UK.track('bored_share_click', { score:score, radius:stats().radius, from:nav.current() });
   UK.share.open(card);
 }
