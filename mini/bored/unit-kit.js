@@ -363,7 +363,9 @@
      回鏈長在圖裡(QR)——圖被轉傳時文字與連結會被剝掉,QR 活著。
      入口極簡:右上 ⋯ → 複製連結。 */
   /* 發票載具 App 真實 icon(0730,取代原本的 🌱 emoji)。
-     來源:invoicemanager_screens_assets/app_icon_no_text.webp,480→160 縮圖。
+     來源:invoicemanager_screens_assets/app_icon_no_text.webp,480→160 縮圖
+     (真實 UI/UX 素材站:invoicemanager-screens-dev-557076811903.asia-east1.run.app,
+      0730 起以後任何真實素材都從這裡拉,不要再各自去找官方 iOS 素材站或憑印象畫)。
      ⚠️ 一定要內嵌 data URI,不能抓遠端圖:跨源圖片畫上 canvas 會讓它 tainted,
         toBlob() 會拋 SecurityError,分享與下載會整組壞掉。data URI 視為同源,安全。
      載入前(理論上極短)先用 emoji 墊著,載完若分享卡開著就自動重畫一次。 */
@@ -542,10 +544,14 @@
       }
       ctx.fillStyle = T.sub2; ctx.font = '800 25px ' + FONT;
       ctx.fillText('發票載具', BX + BW / 2, BY + 156);
-      ctx.textAlign = 'left';
-      /* 中欄文字上限跟著徽章左緣走,不再撞到右書擋 */
-      ctx.fillStyle = T.ink; fit(d.qrHint || '掃碼，開啟發票載具', '800', 30, BX - TX - 24);
-      ctx.fillText(d.qrHint || '掃碼，開啟發票載具', TX, by + 34);
+      /* 0730:中欄(文案 + 搜尋框)要在 TX~BX 這段正中間,不能貼左——
+         原本兩個都用 ctx.textAlign='left' 從 TX 起畫,結果左邊 QR、右邊徽章
+         都是「置中的方塊」,中間這欄卻整段偏左貼著 QR,三欄看起來不平衡。
+         改成算出這段的中心點 midCx,文字與搜尋框膠囊都繞著它置中。 */
+      var midL = TX, midR = BX - 24, midCx = (midL + midR) / 2;
+      ctx.textAlign = 'center';
+      ctx.fillStyle = T.ink; fit(d.qrHint || '掃碼，開啟發票載具', '800', 30, midR - midL);
+      ctx.fillText(d.qrHint || '掃碼，開啟發票載具', midCx, by + 34);
       /* 搜尋框寬度「跟著字走」,不要撐滿剩餘寬度。
          0728:原本 pw = 剩下的全部(約 714px),但裡面只有「🔍 發票載具」約 170px,
          看起來就是一條又長又空的膠囊。改成量完字再加內距。 */
@@ -553,13 +559,14 @@
       var padL = 26, iconW = 34, gap = 16, padR = 34;
       ctx.font = '900 34px ' + FONT;
       var textW = ctx.measureText(SEARCH).width;
-      var pw = Math.min(padL + iconW + gap + textW + padR, BX - TX - 24);
-      var ph = 72, py = by + 58;
-      ctx.strokeStyle = T.ink; ctx.lineWidth = 4; rr(TX, py, pw, ph, 36); ctx.stroke();
+      var pw = Math.min(padL + iconW + gap + textW + padR, midR - midL);
+      var ph = 72, py = by + 58, px = midCx - pw / 2;
+      ctx.strokeStyle = T.ink; ctx.lineWidth = 4; rr(px, py, pw, ph, 36); ctx.stroke();
+      ctx.textAlign = 'left';
       ctx.fillStyle = T.ink; ctx.font = '700 30px ' + FONT;
-      ctx.fillText('🔍', TX + padL, py + 48);
+      ctx.fillText('🔍', px + padL, py + 48);
       ctx.fillStyle = T.ink; ctx.font = '900 34px ' + FONT;
-      ctx.fillText(SEARCH, TX + padL + iconW + gap, py + 49);
+      ctx.fillText(SEARCH, px + padL + iconW + gap, py + 49);
       ctx.textAlign = 'center';
       ctx.fillStyle = T.brand; ctx.font = '700 22px ' + FONT;
       ctx.fillText(UK.dmText('發票載具 × 官方自營（示範）'), cx, p.h - 26);
@@ -571,9 +578,12 @@
         var file = new File([blob], 'fapiao-card.png', { type: 'image/png' });
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           navigator.share({ files: [file], text: d.text }).catch(function () {});
-        } else if (navigator.share) {
-          navigator.share({ title: d.title, text: d.text, url: d.url }).catch(function () {});
         } else {
+          /* 0730:系統分享面板支援文字但不支援檔案(webview/舊瀏覽器很常見)時,
+             navigator.share({title,text,url}) 會顯示「分享成功」但圖卡整個消失、
+             沒有任何提示——使用者以為分享出去一張圖,結果朋友只收到一段連結。
+             寧可兩種「分享不了檔案」的情況都當同一種處理:把圖存起來,
+             老實告訴他自己去貼,不要用看起來成功、實際上偷樑換柱的路徑。 */
           UK.toast('已下載圖卡——貼到社群，QR 就是回程票'); UK.share.download();
         }
         UK.track('share_send', { title: d.title });

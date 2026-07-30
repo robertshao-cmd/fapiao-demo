@@ -364,7 +364,8 @@
      入口極簡:右上 ⋯ → 複製連結。 */
   /* 發票載具 App 真實 icon(0730,取代原本的 🌱 emoji)。
      來源:invoicemanager_screens_assets/app_icon_no_text.webp,480→160 縮圖
-     (真實 UI/UX 素材站:invoicemanager-screens-dev-557076811903.asia-east1.run.app)。
+     (真實 UI/UX 素材站:invoicemanager-screens-dev-557076811903.asia-east1.run.app,
+      0730 起以後任何真實素材都從這裡拉,不要再各自去找官方 iOS 素材站或憑印象畫)。
      ⚠️ 一定要內嵌 data URI,不能抓遠端圖:跨源圖片畫上 canvas 會讓它 tainted,
         toBlob() 會拋 SecurityError,分享與下載會整組壞掉。data URI 視為同源,安全。
      載入前(理論上極短)先用 emoji 墊著,載完若分享卡開著就自動重畫一次。 */
@@ -530,7 +531,7 @@
       /* ⑦ 右側:發票載具 App 圖示徽章(0728)。
             CTA 區原本 QR 在左、文字在中,右半整塊是空的——版面重心歪一邊。
             跟 QR 同尺寸同框,像左右書擋:左邊是「怎麼來」(QR),右邊是「來了長什麼樣」
-            (App 的臉:🌱+名字)。也順便回答搜尋框搜完會看到哪顆 icon。 */
+            (App 的臉:真實 app icon + 名字)。也順便回答搜尋框搜完會看到哪顆 icon。 */
       var BW = qs + pad * 2 || 180, BX = p.w - 74 - BW, BY = by - 10;
       ctx.fillStyle = '#FFF'; rr(BX, BY, BW, BW, 14); ctx.fill();
       ctx.strokeStyle = T.line; ctx.lineWidth = 2; ctx.stroke();
@@ -543,15 +544,17 @@
       }
       ctx.fillStyle = T.sub2; ctx.font = '800 25px ' + FONT;
       ctx.fillText('發票載具', BX + BW / 2, BY + 156);
-      /* 中欄:文案與搜尋框在 TX~BX 之間置中(原本兩個都貼左,跟左右兩個
-         置中的方塊——QR／徽章——對不齊,看起來偏一邊)。 */
+      /* 0730:中欄(文案 + 搜尋框)要在 TX~BX 這段正中間,不能貼左——
+         原本兩個都用 ctx.textAlign='left' 從 TX 起畫,結果左邊 QR、右邊徽章
+         都是「置中的方塊」,中間這欄卻整段偏左貼著 QR,三欄看起來不平衡。
+         改成算出這段的中心點 midCx,文字與搜尋框膠囊都繞著它置中。 */
       var midL = TX, midR = BX - 24, midCx = (midL + midR) / 2;
+      ctx.textAlign = 'center';
       ctx.fillStyle = T.ink; fit(d.qrHint || '掃碼，開啟發票載具', '800', 30, midR - midL);
       ctx.fillText(d.qrHint || '掃碼，開啟發票載具', midCx, by + 34);
       /* 搜尋框寬度「跟著字走」,不要撐滿剩餘寬度。
          0728:原本 pw = 剩下的全部(約 714px),但裡面只有「🔍 發票載具」約 170px,
          看起來就是一條又長又空的膠囊。改成量完字再加內距。 */
-      ctx.textAlign = 'left';
       var SEARCH = '發票載具';                 /* 固定字——搜這個名字才搜得到東西 */
       var padL = 26, iconW = 34, gap = 16, padR = 34;
       ctx.font = '900 34px ' + FONT;
@@ -559,6 +562,7 @@
       var pw = Math.min(padL + iconW + gap + textW + padR, midR - midL);
       var ph = 72, py = by + 58, px = midCx - pw / 2;
       ctx.strokeStyle = T.ink; ctx.lineWidth = 4; rr(px, py, pw, ph, 36); ctx.stroke();
+      ctx.textAlign = 'left';
       ctx.fillStyle = T.ink; ctx.font = '700 30px ' + FONT;
       ctx.fillText('🔍', px + padL, py + 48);
       ctx.fillStyle = T.ink; ctx.font = '900 34px ' + FONT;
@@ -575,10 +579,11 @@
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           navigator.share({ files: [file], text: d.text }).catch(function () {});
         } else {
-          /* 系統分享面板支援文字但不支援檔案(webview/舊瀏覽器很常見)時,
-             navigator.share({title,text,url}) 會「分享成功」但圖卡整個消失、
-             沒有任何提示——使用者以為在分享圖,結果只分享到連結。
-             寧可兩種情況都當同一種失敗處理:把圖存起來,老實告訴他自己去貼。 */
+          /* 0730:系統分享面板支援文字但不支援檔案(webview/舊瀏覽器很常見)時,
+             navigator.share({title,text,url}) 會顯示「分享成功」但圖卡整個消失、
+             沒有任何提示——使用者以為分享出去一張圖,結果朋友只收到一段連結。
+             寧可兩種「分享不了檔案」的情況都當同一種處理:把圖存起來,
+             老實告訴他自己去貼,不要用看起來成功、實際上偷樑換柱的路徑。 */
           UK.toast('已下載圖卡——貼到社群，QR 就是回程票'); UK.share.download();
         }
         UK.track('share_send', { title: d.title });
