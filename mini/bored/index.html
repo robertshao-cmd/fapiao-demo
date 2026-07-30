@@ -6,8 +6,8 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>無聊快篩｜發票載具</title>
-<script src="qrcode.min.js?v=ba971a08"></script>
-<script src="unit-kit.js?v=ba971a08"></script>
+<script src="qrcode.min.js?v=de99ccb6"></script>
+<script src="unit-kit.js?v=de99ccb6"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--mut:#7A8494;--line:#F0E0E1;--bg:#FFF6F5}
@@ -255,6 +255,26 @@ var KEY = 'bored_state';
 var ST  = UK.state.load(KEY);
 var ANS = {};
 var score = null;
+
+/* ══ 中台連線(0730)══════════════════════════════════════════════
+   單元不可以直連 InvoiceStore.Api(那支是內部 admin API,前端不該碰得到)——
+   已經跟 Robert 對過,正式路徑是中台的 GET /features/summary,由中台去打
+   InvoiceStore.Api 做聚合再吐給我們,單元只認中台。
+   只在部署到 ailab-dev/ailab-prod 時才有 apiBase;本機開發與公開 GitHub Pages
+   demo 一律維持 UK.data 內建的示範值,不會發任何請求出去(load() 的第一行就擋掉了)。
+   ⚠️ 實測 /features/summary 需要先有 session(在真的小樹 hub 裡開才建得起來),
+   本機 curl 這支只會拿到 401 NO_SESSION——那不是壞掉,是本機沒有登入態,正常。
+   同一個 apiBase 也是 UK.track() 判斷要不要真的 POST /track 的開關,設一次兩邊生效。 */
+function platformApiBase() {
+  var h = location.hostname;
+  if (h === 'ailab-dev.cmoney.tw')  return 'https://ailab-dev.cmoney.tw/platform-api/api/v1';
+  if (h === 'ailab-prod.cmoney.tw') return 'https://ailab-prod.cmoney.tw/platform-api/api/v1';
+  return null;   /* localhost / GitHub Pages demo:UK.apiBase 留 null,行為跟現在完全一樣 */
+}
+UK.apiBase = platformApiBase();
+/* 不 await:v2 掃描過場本來就有 ~2 秒的緩衝,真資料通常來得及在 showResult() 之前到位;
+   來不及也不阻塞畫面——沒接上就是 UK.data 內建的示範值,使用者不會看到空白或轉圈。 */
+if (UK.apiBase) UK.data.load(UK.apiBase);
 
 /* ══ 文案挑選盤 ══════════════════════════════════════════════
    挑文案只改這三個數字,不用在檔案裡翻。每組的備選都在下面的陣列裡,
