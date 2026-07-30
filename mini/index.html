@@ -136,7 +136,10 @@ var SEEN_KEY = 'shell_seen';
       「已經進來的人」。兩個一起看才有轉換率:shelf_open → bored_view。
 
    GA4_ID 填了才會真的送;沒填就只有 console(本機開發不會亂送資料上去)。 */
-var GA4_ID = '';        /* ← 貼上發票載具 property 的 G-XXXXXXXXXX */
+/* 0730 已接上:InvoiceManager property 的「官方自營小程序（H5）」網站串流。
+   貨架與三顆單元共用同一個 ID —— 這樣 shelf_open → bored_view 的轉換率
+   才算得出來(跨 ID 就接不起來了)。 */
+var GA4_ID = 'G-MTZ5H145TC';
 var GA_ON = false;
 (function initGA(){
   if (!GA4_ID || !/^G-[A-Z0-9]+$/i.test(GA4_ID)) return;
@@ -180,7 +183,7 @@ function urlOf(u){
   /* 用 location.hostname,不要寫死 localhost。
      手機從 LAN IP 開這個殼時,localhost 指的是「手機自己」→ 一定連線被拒。
      跟著殼被開啟的位址走:localhost 開就是 localhost,192.168.x.x 開就是同一台。 */
-  if (SRC === 'local') return './' + u.slug + '/?v=1d59747a';   /* 靜態發佈版:同層資料夾 + 破快取 */
+  if (SRC === 'local') return './' + u.slug + '/?v=721ad951';   /* 靜態發佈版:同層資料夾 + 破快取 */
   return 'https://ailab-dev.cmoney.tw/' + (u.devSlug || u.slug);
 }
 

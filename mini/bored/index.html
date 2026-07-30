@@ -6,8 +6,8 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>無聊快篩｜發票載具</title>
-<script src="qrcode.min.js?v=1d59747a"></script>
-<script src="unit-kit.js?v=1d59747a"></script>
+<script src="qrcode.min.js?v=721ad951"></script>
+<script src="unit-kit.js?v=721ad951"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--mut:#7A8494;--line:#F0E0E1;--bg:#FFF6F5}
@@ -282,7 +282,11 @@ if (UK.apiBase) UK.data.load(UK.apiBase);
    GA4 報表用 unit 參數就能切分單元。
    驗收方式:網址加 ?debug=1,右下角會出現即時事件記錄,把每個可點的東西
    點一遍,確認沒有漏埋的(見 docs/analytics-events.md)。 */
-var GA4_ID = '';        /* ← 貼上發票載具 property 的 G-XXXXXXXXXX */
+/* 0730 已接上:InvoiceManager property(帳戶 CWInvoice 發票相關類)的
+   「官方自營小程序（H5）」網站串流,串流 ID 15352956337。
+   同一個 property 底下還有 iOS/Android 兩條 App 串流,所以報表裡要用
+   「平台」維度或 hostname 把我們的 H5 流量跟 App 原生流量分開看。 */
+var GA4_ID = 'G-MTZ5H145TC';
 UK.ga.init(GA4_ID, 'bored');
 
 /* ══ 文案挑選盤 ══════════════════════════════════════════════
