@@ -106,7 +106,7 @@
 var UNITS = [
   { slug:'detox',  name:'解毒吧',     emoji:'🧪', bg:'#FDECEC', port:5181, isNew:true },
   { slug:'bored',  name:'無聊快篩',   emoji:'😶', bg:'#EAF1FF', port:5182, isNew:true },
-  { slug:'wealth', name:'財神開示',   emoji:'🧧', bg:'#FDEDED', port:5183, isNew:true,
+  { slug:'wealth', name:'幾歲破產',   emoji:'💸', bg:'#FDEDED', port:5183, isNew:true,
     devSlug:'wealth-check' },   /* 已部署的那顆叫 wealth-check */
   /* 暖暖窩是「點到」的店,不是我們的單元 → 開它的店家頁 https://dotdao-eat.cmoney.tw/<shopId>/order
      shopId 的單一資料源是 _kit/unit-kit.js 的 UK.shops.REGISTRY.nnw;這個殼刻意不載入 kit
@@ -130,7 +130,7 @@ function urlOf(u){
   /* 用 location.hostname,不要寫死 localhost。
      手機從 LAN IP 開這個殼時,localhost 指的是「手機自己」→ 一定連線被拒。
      跟著殼被開啟的位址走:localhost 開就是 localhost,192.168.x.x 開就是同一台。 */
-  if (SRC === 'local') return './' + u.slug + '/?v=f4512a42';   /* 靜態發佈版:同層資料夾 + 破快取 */
+  if (SRC === 'local') return './' + u.slug + '/?v=ba971a08';   /* 靜態發佈版:同層資料夾 + 破快取 */
   return 'https://ailab-dev.cmoney.tw/' + (u.devSlug || u.slug);
 }
 

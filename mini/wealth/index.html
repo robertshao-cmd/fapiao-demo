@@ -6,11 +6,11 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#E4001A">
-<title>財神開示｜發票載具</title>
+<title>幾歲破產|發票載具</title>
 <!-- vendored / 共用層:不改。unit-kit 這裡只用到 UK.selfCheck()(唯讀機械自檢),
      nav/state/share 依 0726 決策維持本單元手寫版本。 -->
-<script src="qrcode.min.js?v=f4512a42"></script>
-<script src="unit-kit.js?v=f4512a42"></script>
+<script src="qrcode.min.js?v=ba971a08"></script>
+<script src="unit-kit.js?v=ba971a08"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--red-deep:#A50011;--gold:#FFD34D;--teal:#0E7C7B;--mut:#7A8494;--bg:#FFF6F5;--line:#F0E0E1}
@@ -52,31 +52,6 @@
   .leak b{color:var(--red)}
   .leak .nm{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
   .tag{font-size:10px;font-weight:800;color:var(--red-deep);background:#FDEDED;border:1px solid #F3C9CB;border-radius:99px;padding:2px 7px;white-space:nowrap}
-  /* 自我投資的正向標籤:綠的,跟紅色的「事實」標籤區隔開(0729 立場反轉) */
-  .tag.ok{color:#0B5D5C;background:#EAF5F1;border-color:#B9DACD}
-  /* 限制說明:看得到但不搶戲(0729 口徑風險) */
-  .limit{font-size:10px;color:var(--mut);line-height:1.75;margin-top:10px;padding-top:9px;border-top:1px dashed var(--line);text-align:left}
-  /* 問卜開場:先講「不問什麼」,降低填表戒心(0729 個資觀感) */
-  .ritual{font-size:13.5px;font-weight:900;color:#A9720B;background:#FFF9E9;border:1.5px dashed #F0DFAE;
-          border-radius:12px;padding:10px 12px;text-align:center;line-height:1.7}
-  .ritual span{display:block;font-size:10.5px;font-weight:700;color:#8A7A5E;margin-top:3px}
-  /* ── 抽籤流程(0729 v2:一次一支,取代問卷)── */
-  .tube{font-size:52px;line-height:1;animation:tubeSway 3.2s ease-in-out infinite}
-  @keyframes tubeSway{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
-  .drawProg{display:flex;gap:6px;justify-content:center;margin-top:8px}
-  .drawProg i{width:7px;height:7px;border-radius:99px;background:#EADFC2;display:block}
-  .drawProg i.on{background:var(--gold)}
-  .drawProg i.now{background:#A9720B;transform:scale(1.35)}
-  .drawTtl{font-size:11px;font-weight:900;color:#A9720B;letter-spacing:1px;margin-top:10px}
-  .drawAsk{font-size:17px;font-weight:900;color:var(--ink);line-height:1.5;margin:6px 0 14px}
-  /* 大塊、整行、堆疊——一屏只做一個決定,點了就走 */
-  .dopt{display:block;width:100%;min-height:52px;padding:14px 16px;margin-top:8px;
-        font-size:15px;font-weight:800;color:#5A4548;text-align:center;
-        background:#fff;border:2px solid #E8D5D6;border-radius:14px;transition:transform .1s}
-  .dopt:active{transform:scale(.97)}
-  .dopt.on{border-color:var(--gold);background:#FFF9E9;color:#8A6210}
-  .drawBack{margin-top:12px}
-  .drawBack button{font-size:12px;font-weight:800;color:var(--mut);padding:10px;min-height:44px}
   .two{display:flex;gap:10px;margin-top:12px}
   .two .btn{margin-top:0;font-size:14px;padding:12px 10px}
   .two .btn small{display:block;font-weight:600;font-size:10.5px;opacity:.88;margin-top:3px}
@@ -93,21 +68,16 @@
   /* 扣款畫面(0728 改版):錢包在底、鈔票從錢包被抽走、翻著飛遠、消失。
      跟舊的「噴泉」差在敘事主詞——噴泉只是錢在動,這版有一個被扣款的錢包當受害者。
      ease-in = 越飛越快,是「被抽走」不是「飄走」。 */
-  /* 過場:搖籤筒 → 金光與紅包灑出來(0729 對齊財神開示的紅包金光語彙)。
-     跟入口的 .tube 同一支 🎋、跟秘密鈕同一組金色,整支 app 的動畫語言一致。
-     ease-out = 灑出後散開變慢,是「賜下」不是「被抽走」——方向與舊的扣款動畫相反。 */
-  .bless{position:relative;height:64px;margin-bottom:2px}
-  .bless .shaker{position:absolute;left:50%;bottom:0;transform:translateX(-50%);font-size:30px;line-height:1;
-                 animation:shake 1.9s ease-in-out infinite}
-  @keyframes shake{0%,100%{transform:translateX(-50%) rotate(-9deg)}
-    26%{transform:translateX(-50%) rotate(9deg)}52%{transform:translateX(-50%) rotate(-7deg)}
-    74%{transform:translateX(-50%) rotate(5deg)}}
-  .ray{position:absolute;left:50%;bottom:16px;font-size:18px;line-height:1;opacity:0;
-       animation:bless 1.9s ease-out infinite;will-change:transform,opacity}
-  @keyframes bless{
-    0%{transform:translate(-50%,6px) scale(.4);opacity:0}
-    18%{opacity:1}
-    100%{transform:translate(calc(-50% + var(--rd)),-56px) scale(1.1);opacity:0}
+  .drain{position:relative;height:64px;margin-bottom:2px}
+  .drain .wallet{position:absolute;left:50%;bottom:0;transform:translateX(-50%);font-size:27px;line-height:1;
+                 animation:wince 1.9s ease-in-out infinite}
+  @keyframes wince{0%,100%{transform:translateX(-50%) rotate(0)}52%{transform:translateX(-50%) rotate(-7deg)}60%{transform:translateX(-50%) rotate(5deg)}68%{transform:translateX(-50%) rotate(0)}}
+  .bill{position:absolute;left:50%;bottom:14px;font-size:19px;line-height:1;opacity:0;
+        animation:flyaway 1.9s ease-in infinite;will-change:transform,opacity}
+  @keyframes flyaway{
+    0%{transform:translate(-50%,4px) rotate(0deg) scale(.5);opacity:0}
+    14%{opacity:1}
+    100%{transform:translate(calc(-50% + var(--dx)),-74px) rotate(var(--rt)) scale(1.05);opacity:0}
   }
   .sting{margin-top:8px;font-size:13px;font-weight:800;color:var(--red-deep);min-height:18px}
   .sting b{font-size:14.5px}
@@ -174,60 +144,56 @@
 <!-- 頂部列:‹ 和 標題/icon 都是「回第一頁」,沒有例外。
      離開單元(回發票載具首頁)移到 ⋯ 選單,不佔用這條列——
      否則在第一頁按 ‹ 會把整個單元收掉,那不叫返回。 -->
-<div class="top"><button class="tbtn" onclick="goTop()" aria-label="回第一頁">‹</button><button class="ttl" onclick="goTop()" aria-label="回第一頁">🧧 財神開示</button><span class="top-r"><span class="off">官方自營</span><button class="tbtn" onclick="menuOpen()" aria-label="更多選項">⋯</button></span></div>
+<div class="top"><button class="tbtn" onclick="goTop()" aria-label="回第一頁">‹</button><button class="ttl" onclick="goTop()" aria-label="回第一頁">💸 幾歲破產</button><span class="top-r"><span class="off">官方自營</span><button class="tbtn" onclick="menuOpen()" aria-label="更多選項">⋯</button></span></div>
 <div class="wrap">
 
-  <!-- 0729 立場反轉:入口不再用「你不敢看」恐嚇。花錢不是罪,問題是這些錢
-       有沒有把你往前推。主詞從「你會破產」換成「你能走多遠」。 -->
   <div id="v0">
-    <div class="hero"><div class="big">🧧</div>
-      <h1>財神看過你的發票了,<br>要不要聽祂 <em>開示</em>?</h1>
-      <p>擲四筊、問四事——祂只看財庫,不看身分證</p></div>
+    <div class="hero"><div class="big">⏳</div>
+      <h1>照這個月的花法,<br>你的錢撐到 <em>幾歲</em>?</h1>
+      <p>你的發票已經算好了,只是你不敢看</p></div>
     <div id="lastBox" style="display:none"></div>
-    <button class="btn p" id="cta" onclick="enter()">求一支財籤 🥠</button>
-    <div class="note">娛樂性質・情境試算、非財務預測(示範數據)</div>
+    <button class="btn p" id="cta" onclick="enter()">我敢看</button>
+    <div class="note">情境試算、非財務預測(示範數據)</div>
   </div>
 
-  <!-- 0729 問卷改成「問卜」框架(規避兩件事):
-       (a) 投資意見觀感 —— 財神開示是娛樂占卜語彙,不是理財顧問問診
-       (b) 個資表單觀感 —— 用「擲筊問四事」的口吻,不是欄位表格
-       ⚠️ 只包裝題幹,選項一律保持事實清楚(3–5 萬就寫 3–5 萬)。
-          把選項也神祕化的話使用者答不準,後面的試算就變垃圾。
-       四題仍然真的驅動試算:Q1→月收入、Q2→儲蓄率、Q3→收入成長率、Q4→起算年齡。 -->
-  <!-- 0729 v2:問卷形式整個拿掉,改成「一次一支籤」的抽籤流程。
-       為什麼:問卷式(四題攤在一頁 + 送出鈕)看起來就是表單,使用者要先讀完
-       才知道要填什麼。改成一屏一支籤、點完自動翻下一支、沒有送出鈕——
-       全程只要一直點,不用讀完整頁也不用決定「填到哪裡算完」。
-       ⚠️ 底層資料完全沒變(仍是月收入/儲蓄率/成長率/年齡),只換互動形式;
-          選項文字照舊保持事實清楚,不神祕化,否則答不準、試算就變垃圾。 -->
+  <!-- 三題都真的驅動結果:Q1 進歲數基準、Q2 調整、Q3 同時調整歲數並重排漏財點與處方順序 -->
   <div id="v1" style="display:none">
-    <div class="card" style="text-align:center">
-      <div class="tube" id="tube" aria-hidden="true">🎋</div>
-      <div class="drawProg" id="drawProg"></div>
-      <div class="drawTtl" id="drawTtl"></div>
-      <div class="drawAsk" id="drawAsk"></div>
-      <div id="drawOpts"></div>
-      <div class="drawBack" id="drawBack" style="display:none"><button onclick="drawPrev()">‹ 回上一支</button></div>
-      <!-- 0729 v3:年齡與收入都不問了(見 commit)。這行是真的成立的承諾,不是話術 -->
-      <div class="hint" style="margin-top:12px">不問年齡、不問收入、不問姓名——財神只看你的發票</div>
+    <div class="card">
+      <div class="q">Q1 · 你的月收入大概落在?</div>
+      <div class="chips" data-q="income">
+        <button class="chip" data-action="pick" data-age="41">3–5 萬</button>
+        <button class="chip" data-action="pick" data-age="45">5–8 萬</button>
+        <button class="chip" data-action="pick" data-age="52">8 萬以上</button>
+        <button class="chip" data-action="pick" data-age="43">不方便說</button></div>
+      <div class="q">Q2 · 有存錢目標嗎?</div>
+      <div class="chips" data-q="goal">
+        <button class="chip" data-action="pick" data-d="4">有,存頭期款</button><button class="chip" data-action="pick" data-d="0">隨緣存</button><button class="chip" data-action="pick" data-d="-5">月光,別問</button></div>
+      <div class="q">Q3 · 最想砍哪類花費?</div>
+      <div class="chips" data-q="cut">
+        <button class="chip" data-action="pick" data-d="2" data-k="drink">手搖/咖啡</button><button class="chip" data-action="pick" data-d="2" data-k="deliv">外送</button><button class="chip" data-action="pick" data-d="1" data-k="sub">訂閱</button><button class="chip" data-action="pick" data-d="-3">都不想砍</button></div>
+      <!-- 年齡從結果頁搬到這裡:先問再算,「以 N 歲起算」才不會變成事後補問 -->
+      <div class="q">Q4 · 你現在幾歲?</div>
+      <div class="a0" style="justify-content:flex-start">
+        <input id="a0In" class="a0-in" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="請填"
+               autocomplete="off" aria-label="你現在幾歲(18 到 99)" oninput="a0Input()">
+        <span class="a0-unit">歲</span></div>
+      <div class="a0-err" id="a0Err" style="display:none;text-align:left"></div>
+      <div class="hint" style="margin-top:10px">再點一次可以取消。收入與年齡沒填不會幫你猜——「不方便說」也是一個答案。</div>
     </div>
-    <!-- 只在最後一支(生辰)出現。前三支點完自動翻頁,沒有送出鈕 -->
-    <button class="btn p" id="goScan" onclick="scan()" style="display:none" disabled>還差生辰</button>
+    <button class="btn p" id="goScan" onclick="scan()" disabled>先填收入與年齡</button>
   </div>
 
   <div id="v2" style="display:none">
     <div class="card scan">
-      <!-- 0729:過場動畫從「錢包被扣款、鈔票飛走」改成「搖籤筒、金光灑出」。
-           舊的是幾歲破產時代的恐嚇語彙(錢在離開你),跟財神開示的紅包金光對不上。
-           純裝飾,螢幕閱讀器跳過。 -->
-      <div class="bless" aria-hidden="true">
-        <span class="ray" style="--rd:-70px;animation-delay:-.1s">✨</span>
-        <span class="ray" style="--rd:-42px;animation-delay:-.7s">🪙</span>
-        <span class="ray" style="--rd:-16px;animation-delay:-1.3s">🧧</span>
-        <span class="ray" style="--rd:16px;animation-delay:-.4s">🪙</span>
-        <span class="ray" style="--rd:42px;animation-delay:-1.0s">✨</span>
-        <span class="ray" style="--rd:70px;animation-delay:-1.6s">🧧</span>
-        <span class="shaker">🎋</span>
+      <!-- 純裝飾:錢包被扣款、鈔票飛走,不是可互動元件,螢幕閱讀器跳過 -->
+      <div class="drain" aria-hidden="true">
+        <span class="bill" style="--dx:-64px;--rt:-38deg;animation-delay:-.15s">💸</span>
+        <span class="bill" style="--dx:-36px;--rt:-22deg;animation-delay:-.75s">💵</span>
+        <span class="bill" style="--dx:-12px;--rt:-9deg;animation-delay:-1.35s">💸</span>
+        <span class="bill" style="--dx:14px;--rt:12deg;animation-delay:-.45s">💵</span>
+        <span class="bill" style="--dx:40px;--rt:24deg;animation-delay:-1.05s">💸</span>
+        <span class="bill" style="--dx:66px;--rt:40deg;animation-delay:-1.65s">💵</span>
+        <span class="wallet">👛</span>
       </div>
       <div id="scanTxt">吸入近 90 天發票…</div>
       <!-- 機車但不明說:讓真實金額自己噴出來刺人,不寫「你很浪費」這種說明書句子 -->
@@ -239,32 +205,25 @@
   <div id="v3" style="display:none">
     <div class="card" style="text-align:center">
       <div style="font-size:11px;font-weight:800;color:#B8912F">情境試算 · 非財務預測(示範)</div>
-      <div class="age"><b id="ageN">—</b><span id="ageUnit">年</span></div>
+      <div class="age"><b id="ageN">43</b><span>歲那年,存款歸零</span></div>
       <div style="font-size:12px;color:var(--mut)" id="yrsLine"></div>
-      <div class="basis" id="basisLine"></div>
-      <!-- 收入是「可跳過的選填」:預設用支出反推,想更準的人才自己點開(0729 決策) -->
-      <div class="sec" id="incFix"><button onclick="incToggle()">不是這個收入?自己設定 ›</button></div>
-      <div id="incBox" style="display:none">
-        <div class="chips" id="incOpts" style="justify-content:center"></div>
-      </div>
-      <!-- 【3】限制說明:明確但不喧賓奪主。使用者看不到限制,數字就會被當成承諾 -->
-      <div class="limit" id="limitLine"></div>
+      <!-- 年齡已在 Q4 問過,這裡只是把依據寫出來,不再事後補問 -->
+      <div class="basis">以你填的 <b id="a0N">26</b> 歲起算</div>
     </div>
-    <div class="card"><b style="font-size:13.5px;color:#5A0E14">這個月,錢流去哪</b>
-      <div id="leaks"></div>
-      <div class="hint" id="spendNote" style="margin-top:8px"></div></div>
-    <!-- 0729 立場反轉:主 CTA 從「把漏洞堵起來」改成成長導向 -->
-    <button class="btn t" onclick="goGrow()">怎麼讓這個數字往後推<small>把收入做大,比戒咖啡有效</small></button>
-    <button class="btn l" onclick="share()">📤 曬我的財神籤</button>
+    <div class="card"><b style="font-size:13.5px;color:#5A0E14">💧 三大漏財點(來自發票)</b>
+      <div id="leaks"></div></div>
+    <!-- 0727:結果頁只留一條主路(省錢處方)。原本並列的「讓錢長大」已移除。 -->
+    <button class="btn t" onclick="show('v4');rxRender();track('wc_path_save')">把漏洞堵起來<small>看能往後拖幾年</small></button>
+    <!-- 次要出口:放在兩條主路之下,不跟結果數字與主 CTA 搶第一屏 -->
+    <!-- 0728:籌碼K線出口從結果頁移除(兩處只留一處會重複;投資導流集中在 v4 文案),
+         次要動作只留分享 -->
+    <button class="btn l" onclick="share()">💸 曬破產倒數,看誰撐得久</button>
   </div>
 
-  <!-- 0729 立場反轉(Rebecca 走查):這頁原本叫「省錢處方」,三項都是叫人少花。
-       Rebecca 指出恐嚇式說服力有限,且與 CMoney 使用者輪廓(願意消費、投資自己)
-       不符;單純引導省錢本身不是成功的驗證結果。
-       改成成長導向:同一組發票分項,但講的是「這筆錢有沒有把你往前推」,
-       出口是把收入做大,不是把生活砍掉。 -->
+  <!-- 0727:拿掉「啟用」三顆假開關(按了不會真的發生任何事)。
+       這頁改成「看得懂的處方 + 直達 CMoney 理財 App」,不再有站內假試算。 -->
   <div id="v4" style="display:none">
-    <div class="card"><b style="font-size:13.5px;color:var(--teal)">把數字往後推的三個方向</b>
+    <div class="card"><b style="font-size:13.5px;color:var(--teal)">省錢處方</b>
       <div id="rx"></div>
       <div class="allin" id="allin"></div></div>
     <!-- 0728 v3:識讀區塊收進「好奇鈕」——預設只有一顆挑釁的按鈕,點開才亮牌。
@@ -274,7 +233,7 @@
     <div class="card" id="secretCard">
       <button class="btn g" id="secretBn" onclick="secretOpen()">想知道財富小秘密嗎 🤫<small>點進來按看看 👀</small><span class="spark" aria-hidden="true" style="top:7px;left:14px">✨</span><span class="spark" aria-hidden="true" style="top:10px;right:16px;animation-delay:-.9s">💰</span><span class="spark" aria-hidden="true" style="bottom:7px;left:20%;animation-delay:-1.7s">✨</span><span class="spark" aria-hidden="true" style="bottom:9px;right:26%;animation-delay:-2.1s">🪙</span></button>
       <div id="secretBox" style="display:none">
-        <b style="font-size:13.5px;color:#5A0E14">錢不會自己變大——想讓它長大,你該:</b>
+        <b style="font-size:13.5px;color:#5A0E14">省下的錢不會自己變大——想讓它長大,你該:</b>
         <div id="lessons"></div>
         <button class="btn g" style="margin-top:12px" onclick="goApp('chips')">📊 打開籌碼K線,看主力的錢往哪跑</button>
       </div></div>
@@ -304,29 +263,28 @@
 </div>
 <div class="toast" id="tst"></div>
 <script>
-/* 財神開示 standalone(小樹中台單元)— 0729 Rebecca 走查改版
-   立場:肯定合理消費,出口是「怎麼賺更多」而不是「怎麼少花」(不用恐嚇式語氣)
+/* 幾歲破產 standalone(小樹中台單元)— v3 移植 pass 0726
    production 判準:沒有死路 / 沒有死按鈕 / 有空狀態 / 狀態記得住 / 返回可預期 / 數字對得起來
    中台整合點:session/invoices/features/track 見註解。
    法遵:全程「情境試算、非財務預測」;投資段落「示範情境、非投資建議」;不提供個人化投資建議。 */
 
-/* 支出分項是單一資料源:結果頁與成長頁的數字都從這裡長出來,不會兩處各寫死一組。
-   正式版:由中台 /features/summary 的支出分項回填。
-   0729 立場反轉(Rebecca):kind 決定語氣——
-     life   = 生活支出,事實陳述,不貼「浪費」標籤(CMoney 使用者願意消費)
-     invest = 自我投資,正向肯定,而且它是唯一會回到收入上的支出 */
-var SPEND=[
-  {k:'drink', ic:'🧋', nm:'手搖+咖啡',    amt:2840, kind:'life',   note:'上班日的燃料費'},
-  {k:'deliv', ic:'🛵', nm:'外送費+服務費', amt:1920, kind:'life',   note:'你買回來的是時間'},
-  {k:'learn', ic:'📚', nm:'學習+訂閱',     amt:647,  kind:'invest', note:'這筆會長回你的收入上'}
+/* 漏財點是單一資料源:結果頁的漏財點、省錢處方、讓錢長大的金額全部從這裡長出來,
+   所以三者的數字一定對得起來(舊版是三處各寫死一組)。
+   正式版:leak 由中台 /features/summary 的支出分項回填,save 由處方規則算。 */
+var LEAKS=[
+  {k:'drink', ic:'🧋', nm:'手搖+咖啡',    leak:2840, save:1420, rx:'第 3 杯的時候攔你', why:'沒叫你戒,只算少喝一半'},
+  {k:'deliv', ic:'🛵', nm:'外送費+服務費', leak:1920, save:960,  rx:'改自取,省的是運費', why:'飯錢照付,運費不用'},
+  {k:'sub',   ic:'📺', nm:'沒在看的訂閱',  leak:647,  save:647,  rx:'30 天沒開的列給你', why:'退了就整筆不再扣'}
 ];
 var UK_SLUG = 'wealth';                  /* 給 UK.exitToHome 的 postMessage 帶身分,殼才知道是誰要回首頁 */
-/* ⚠️ 0729 決策(與 0729 規格【1】相衝,已知情):年齡整組不問了。
-   原規格要求「年齡放到第一頁」,但後續指示是「不要問任何敏感資訊」,
-   兩者無法並存 —— 選擇後者,輸出改成「撐幾年」而不是「撐到幾歲」。
-   這需要與 Rebecca / Melon 重新對齊,見 commit 說明。
-   要接回年齡版:git 歷史 7a0346c(含自由填寫輸入、18–99 驗證、A0_BANDS 區間對照)。 */
-var age=0, ANS={income:null, save:null, grow:null, growK:null};
+/* 起算年齡。0727 Melon 定調:改「自由填寫」,不用區間——部分使用者對區間敏感。
+   ⚠️ 排序待對齊:7/24 的說法是改區間、7/27 的說法是自由填寫,已排回問 Melon。
+      要換回區間版,只改這一處:把 A0_BANDS 打開、v3 的 <input> 換回 chip 迴圈。
+   var A0_BANDS=[{label:'20+',v:25},{label:'30+',v:35},{label:'40+',v:45},{label:'50+',v:55}];
+   (同一個區間敏感度風險也在 Q1「月收入」的 3-5萬/5-8萬/8萬以上,這版先不動,等回覆一起處理) */
+/* 下限 18:發票載具是成年人的理財工具,原本 12 會算出「12 歲起算、54 歲破產、距今 42 年」這種鬼結果 */
+var A0_DEFAULT=26, A0_MIN=18, A0_MAX=99;
+var age=43, ANS={income:null, goal:0, cut:0, cutK:null, age0:null};
 var MIN_INV=5;
 /* ?inv=abc → 0;?inv=-5 → 0(負數不該印在畫面上) */
 var INV=(function(){ try{ var q=new URLSearchParams(location.search).get('inv'); return q===null?47:Math.max(0,+q||0); }catch(e){ return 47; } })();
@@ -335,60 +293,20 @@ delete ST.on; delete ST.inv;   /* 0727 移除「啟用」與「投資留位」�
 function save(){ try{ ST.at=Date.now(); localStorage.setItem('wc_state', JSON.stringify(ST)); }catch(e){} }
 function ago(t){ if(!t) return ''; var d=Math.floor((Date.now()-t)/86400000);
   return d<=0?'今天':(d===1?'昨天':(d<30?d+' 天前':'很久以前')); }
-/* 0729:改成委派給現成的 UK.track——它會在 UK.apiBase 設定時真的 POST 到中台。
-   原本這支只 console.log,所有埋點都到不了平台(埋了等於沒埋)。 */
-function track(ev,extra){ try{ UK.track(ev, extra||{}); }catch(e){} }
+function track(ev,extra){ try{ console.log('[track]', ev, extra||{}); /* TODO: POST platform-api /track */ }catch(e){} }
 function toast(m){ var t=document.getElementById('tst'); t.textContent=m; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(function(){t.classList.remove('show');},2400); }
 function nt(n){ return '$'+n.toLocaleString(); }
 function reduceMotion(){ try{ return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){ return false; } }
-/* 0729 v3:年齡整組移除(不問敏感)。原本的 age0()/A0_MIN/A0_MAX/A0_BANDS 與
-   自由填寫輸入框都拿掉了——要接回來看 git 歷史 7a0346c。 */
-function spendTotal(){ var s=0; SPEND.forEach(function(L){ s+=L.amt; }); return s; }
-/* Q3 選的那一項排到最前面。排序與標籤一律走 growKey() 這一個來源——
-   兩邊各自判斷過,會出現「排第一卻沒標籤」的鬼狀態。 */
-function growKey(){ return (ST.ans && ST.ans.growK) || null; }
-function orderedBy(k){ if(!k) return SPEND.slice();
-  return SPEND.slice().sort(function(a,b){ return (b.k===k)-(a.k===k); }); }
-function ordered(){ return orderedBy(growKey()); }
-
-/* ══ 財務試算參數 ══
-   (模型說明見下方 project();主數字 = 累積 HORIZON 年後能撐幾年的停工開銷) */
-var HORIZON=10, INFL=0.02, G_BASE=0.02;
-var NEED=22000, RET_VAR=0.5;   /* 月必要開銷(示範) · 停工後可變開銷剩幾成 */
-/* 發票看得到的其他分項(示範),與三大分項合計 = 月總支出。正式版由中台回填。 */
-var SPEND_OTHER=24593;
-function monthSpend(){ return spendTotal()+SPEND_OTHER; }
-/* 收入不問(0729):由「月支出 ÷ (1−留得住的比例)」反推——這是代數,不是猜。
-   使用者可在結果頁自己設定更精準的收入(選填、可跳過)。 */
-function incomeOf(a){
-  if(typeof a.income==='number') return a.income;
-  return Math.round(monthSpend()/Math.max(0.05, 1-(a.save||0)));
-}
-/* ══ 財務試算(0729 v3:改「撐幾年」)══
-   沒有年齡就沒有退休年,所以不算「撐到幾歲」,改算:
-     照這個結構累積 HORIZON 年 → 這筆錢能支撐幾年的停工開銷
-   ⚠️ 停工後支出不能寫成「月支出 × 12」:那樣儲蓄與支出都跟收入等比,
-      收入會在公式裡被約掉、變成點了不影響(0729 實測踩到)。
-      現實是必要開銷有下限、不隨收入縮放,停工後可變開銷才會降——
-      拆成 NEED(不動) + 可變部分(打 RET_VAR 折),收入才真的有槓桿。
-   刻意不納入:投資報酬、被動收入、既有資產、勞保勞退 → 保守估計。 */
-function project(a){
-  var g=G_BASE+(a.grow||0);                    /* 供品籤:投資自己的人收入成長更快 */
-  var inc=incomeOf(a), sr=a.save||0;
-  var mSave=inc*sr, mSpend=inc-mSave;
-  var mAfter=NEED+Math.max(0,mSpend-NEED)*RET_VAR;
-  var asset=0, s=mSave, i;
-  for(i=0;i<HORIZON;i++){ asset+=s*12; s*=(1+g); }        /* 累積期 */
-  var exp=mAfter*12*Math.pow(1+INFL,HORIZON), yrs=0;
-  while(asset>=exp && yrs<60){ asset-=exp; exp*=(1+INFL); yrs++; }   /* 逐年提領 */
-  var total=yrs+(exp>0?Math.max(0,asset)/exp:0);
-  return {years:total, months:Math.round(total*12), g:g, inc:inc, mSpend:mSpend, mAfter:mAfter};
-}
-function projOf(over){                            /* 用目前答案跑一次,可覆蓋單一參數 */
-  var a=ST.ans||{}, o={income:a.income, save:a.save, grow:a.grow};
-  if(over) for(var k in over) o[k]=over[k];
-  return project(o);
-}
+function age0(){ return ST.age0||A0_DEFAULT; }
+/* 情境數字:三項都堵起來每月可省多少。不再累計使用者的「啟用」操作(那機制已移除) */
+function planTotal(){ var s=0; LEAKS.forEach(function(L){ s+=L.save; }); return s; }
+/* Q3 選的那一項排到最前面:Q3 不只調歲數,也真的改變畫面。
+   排序與標籤一律走 cutKey() 這一個來源——兩邊各自判斷過,
+   會出現「排第一卻沒標籤」的鬼狀態。 */
+function cutKey(){ return (ST.ans && ST.ans.cutK) || null; }
+function orderedBy(k){ if(!k) return LEAKS.slice();
+  return LEAKS.slice().sort(function(a,b){ return (b.k===k)-(a.k===k); }); }
+function ordered(){ return orderedBy(cutKey()); }
 
 /* ── 返回堆疊:過場(v2)與一次性頁(v6)不入堆疊,且站在其上按返回不誤刪 ── */
 var VIEWS=['v0','v1','v2','v3','v4','v6'], STACK=[], CUR=null;   /* v5 讓錢長大已移除 */
@@ -448,15 +366,13 @@ function goHome(){
 /* ── 入口:回訪態 + 空狀態門檻 ── */
 function entryRender(){
   var box=document.getElementById('lastBox'), cta=document.getElementById('cta');
-  if(ST.proj){
+  if(typeof ST.age==='number'){
     box.style.display='';
-    var f=fmtRun(ST.proj);
-    box.innerHTML='<div class="lastbox"><div><small>上次求的籤 · '+ago(ST.at)+'</small><b>'
-      +f.n+'<span> '+f.u.replace('的停工底氣','').replace('——還沒開始累積','')+'</span></b></div>'
+    box.innerHTML='<div class="lastbox"><div><small>上次倒數 · '+ago(ST.at)+'</small><b>'+ST.age+'<span> 歲歸零</span></b></div>'
       +'<button class="lastgo" onclick="showResult()">看上次結果 ›</button></div>';
-    cta.textContent='再求一支';
-    age=ST.proj.months;
-  } else { box.style.display='none'; cta.textContent='求一支財籤 🥠'; }
+    cta.textContent='再算一次';
+    age=ST.age;
+  } else { box.style.display='none'; cta.textContent='我敢看'; }
 }
 function enter(){
   if(INV<MIN_INV){ document.getElementById('invN').textContent=INV; CUR='v6'; _show('v6'); return; }
@@ -464,198 +380,130 @@ function enter(){
 }
 function demoFill(){ INV=47; toast('(示範)已灌入近 90 天發票'); resetAns(); show('v1'); }
 
-/* ══ 抽籤流程(0729 v2)══
-   一屏一支籤,點完自動翻下一支,前三支沒有送出鈕。
-   底層資料與舊問卷完全相同——只是不再一次攤四題給使用者讀。
-   選項文字保持事實清楚(3–5 萬就寫 3–5 萬),不神祕化:答不準的話試算就沒意義。 */
-/* 0729 v3:收入籤與生辰籤都移除(不問敏感)。
-   剩下兩支都是「情境 + 你會怎麼做」的遊戲橋段,陳述句不是問句:
-   沒有問號、沒有「你的收入是」、沒有年齡。
-   底層仍然是真參數(儲蓄傾向 / 成長訊號),收入由支出反推。 */
-var DRAWS=[
-  {q:'save', ttl:'籤 一 · 守 財', ask:'財神塞給你一個紅包', opts:[
-    {t:'📥 收進口袋存起來', v:0.2},{t:'🍜 留一點,其餘照花', v:0.08},{t:'💸 當天就花完', v:0}]},
-  /* 立場反轉:不問「最想砍什麼」(省錢視角),問「哪一樣供品捨得擺」。
-     擺學習那盤的人收入成長率加成,這支籤因此真的影響數字。 */
-  {q:'grow', ttl:'籤 二 · 供 品', ask:'供桌要擺一樣你捨得的', opts:[
-    {t:'🧋 手搖 / 咖啡', v:0, k:'drink'},{t:'🛵 外送', v:0, k:'deliv'},
-    {t:'📚 學習 / 訂閱', v:0.01, k:'learn'},{t:'🙏 整桌都擺', v:0}]}
-];
-/* 結果頁的收入微調選項(選填、可跳過)。null = 回到用支出反推的估值 */
-var INC_OPTS=[{t:'3–5 萬',v:40000},{t:'5–8 萬',v:65000},{t:'8 萬以上',v:100000},{t:'用推估值',v:null}];
-var DI=0;
+/* ── 三題:再點一次可取消並回中性值;Q1 沒選不放行(落差不靠預設值製造) ── */
 function resetAns(){
-  ANS={income:null, save:null, grow:null, growK:null};
-  DI=0;
-  drawRender();
-}
-function drawRender(){
-  var d=DRAWS[DI];
-  document.getElementById('drawProg').innerHTML=DRAWS.map(function(x,i){
-    return '<i class="'+(i<DI?'on':(i===DI?'now':''))+'"></i>'; }).join('');
-  document.getElementById('drawTtl').textContent=d.ttl;
-  document.getElementById('drawAsk').textContent=d.ask;
-  var cur=ANS[d.q], curK=ANS.growK, hasK=d.opts.some(function(x){ return x.k; });
-  document.getElementById('drawOpts').innerHTML=d.opts.map(function(o,i){
-    /* 抽過的那支要標出來(回上一支時看得到自己抽了什麼)。
-       同 v 值的選項用 k 再分辨,不然「整桌都擺」會跟「手搖」一起亮。 */
-    var on = (typeof cur==='number' && cur===o.v && (!hasK || (o.k||null)===(curK||null)));
-    return '<button class="dopt'+(on?' on':'')+'" onclick="drawPick('+i+')">'+o.t+'</button>';
-  }).join('');
-  document.getElementById('drawBack').style.display = DI>0 ? '' : 'none';
+  ANS={income:null, goal:0, cut:0, cutK:null, age0:null};
+  document.querySelectorAll('#v1 .chip').forEach(function(c){ c.classList.remove('on'); });
+  /* 回訪時把上次填的年齡帶回來,不用重打;沒填過就留空 */
+  var el=document.getElementById('a0In'), err=document.getElementById('a0Err');
+  if(typeof ST.age0==='number'){ el.value=String(ST.age0); ANS.age0=ST.age0; } else { el.value=''; }
+  el.classList.remove('bad'); err.style.display='none';
   gate();
 }
-function drawPick(i){
-  var d=DRAWS[DI], o=d.opts[i];
-  ANS[d.q]=o.v;
-  if(d.q==='grow') ANS.growK=o.k||null;
-  track('wc_pick',{q:d.q});
-  if(DI<DRAWS.length-1){ DI++; }        /* 自動翻下一支——無腦一路點 */
-  drawRender();
-}
-function drawPrev(){ if(DI>0){ DI--; drawRender(); } }
-/* 兩支籤都抽過才放行。收入與年齡都不問了,所以這裡不再檢查它們。
-   送出鈕在沒抽完之前不出現(不然又變回「表單 + 送出」)。 */
+/* 收入與年齡都要有才放行:兩個都是結果頁上會被印出來的依據,不能靠預設值製造 */
 function gate(){
-  var b=document.getElementById('goScan'), done=(ANS.save!==null && ANS.grow!==null);
-  b.style.display = done ? '' : 'none';
-  b.disabled = !done;
-  b.textContent = '擲筊,請財神開示 🥠';
+  var b=document.getElementById('goScan');
+  var hasInc=(typeof ANS.income==='number'), hasAge=(typeof ANS.age0==='number');
+  b.disabled=!(hasInc&&hasAge);
+  b.textContent = (hasInc&&hasAge) ? '好了,驗我的發票'
+                : !hasInc && !hasAge ? '先填收入與年齡'
+                : !hasInc ? '還差收入級距' : '還差年齡';
 }
+document.querySelectorAll('#v1 .chips').forEach(function(g){
+  g.addEventListener('click', function(e){
+    var b=e.target.closest('.chip'); if(!b) return;
+    var q=g.getAttribute('data-q'), off=b.classList.contains('on');
+    g.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('on'); });
+    if(off){                                     /* 再點一次 = 取消,回中性值 */
+      if(q==='income') ANS.income=null; else { ANS[q]=0; if(q==='cut') ANS.cutK=null; }
+    } else {
+      b.classList.add('on');
+      if(q==='income') ANS.income=parseInt(b.dataset.age,10);
+      else { ANS[q]=parseInt(b.dataset.d,10)||0; if(q==='cut') ANS.cutK=b.dataset.k||null; }
+    }
+    gate(); track('wc_pick',{q:q, cleared:off});
+  });
+});
 
 /* ── 掃描過場:可跳過,timer 會清掉不會晚一步又跳 ── */
-var _t=null, _seenResult=false;
+var _t=null;
 function scan(){
-  if(ANS.save===null||ANS.grow===null) return;      /* 門檻已擋,這裡不給預設值 */
-  _seenResult=false;                                /* 新的一支籤 → 重新計一次 result_view */
-  /* 先把答案落地,project() 讀的是 ST.ans */
-  ST.ans={income:ANS.income, save:ANS.save, grow:ANS.grow, growK:ANS.growK||null};
-  var p=projOf(); ST.proj=p; age=p.months;
-  /* 【4】埋點:送出(現在只有兩支籤,不含年齡與收入——都不問了) */
-  track('wealth_form_submit',{save:ANS.save, growK:ANS.growK||null,
-    incomeSet:(typeof ANS.income==='number'), months:p.months});
+  if(typeof ANS.income!=='number') return;       /* 保險:門檻已擋,這裡不給預設值 */
+  age=Math.max(28, ANS.income + (ANS.goal||0) + (ANS.cut||0));
+  track('wc_scan',{age:age});
   /* 過場只是表演。設定減少動態的人不該被這 2.5 秒綁著:直接給結果。
      (CSS 的 prefers-reduced-motion 只擋得掉 transition/animation,擋不掉 JS 計時器) */
   if(reduceMotion()){ skipScan(); return; }
   show('v2');
-  /* 0729:過場台詞也跟著改立場——不再是「噴了多少」的控訴,而是逐項唸出結構,
-     自我投資那筆給正向語氣。ANS.growK 是這次剛選的即時答案(ST 已在上面寫好,
-     兩邊同源,不會出現排序不一致)。 */
-  var t=['擲筊…','翻閱近 90 天發票…','清點財庫活水…','財神開示中…'], i=0, el=document.getElementById('scanTxt');
-  var sp=orderedBy(ANS.growK), stg=document.getElementById('scanSting');
-  var stings=sp.map(function(L){
-    return L.ic+' '+L.nm+'　每月 <b>'+nt(L.amt)+'</b>'+(L.kind==='invest'?'　← 這筆算投資':'');
-  }).concat(['發票推估月支出 <b>'+nt(monthSpend())+'</b>']);
+  var t=['吸入近 90 天發票…','計算收支缺口…','定位漏財點…','推演破產倒數…'], i=0, el=document.getElementById('scanTxt');
+  /* 噴出去的錢用真數字說話:前三拍是漏財點(Q3 選的排第一,跟結果頁/處方頁同一個順序,
+     故事接得上),最後一拍收在年度總額——不寫「你很浪費」,讓它自己算給你看。
+     ⚠️ 這裡不能呼叫 ordered()/cutKey():那組讀的是 ST.ans.cutK,要等下面的
+     skipScan() 才會寫入,此刻讀到的是上一輪的舊答案。改用 orderedBy(ANS.cutK)
+     直接讀這次剛選的即時答案,跟 showResult()/rxRender() 走的 ST 分開,互不影響。 */
+  var leaks=orderedBy(ANS.cutK), stg=document.getElementById('scanSting');
+  var stings=leaks.map(function(L){ return L.ic+' '+L.nm+'　每月噴 <b>'+nt(L.leak)+'</b>'; })
+    .concat(['一年下來,噴了 <b>'+nt(leaks.reduce(function(s,L){return s+L.leak;},0)*12)+'</b>']);
   el.textContent=t[0]; stg.innerHTML=stings[0];
   _t=setInterval(function(){ i++; if(i<t.length){ el.textContent=t[i]; stg.innerHTML=stings[i]||''; } else { skipScan(); } }, 620);
 }
 function skipScan(){
   if(_t){ clearInterval(_t); _t=null; }
-  ST.age=age;                                  /* ST.ans / ST.age0 / ST.proj 已在 scan() 寫好 */
-  save(); entryRender(); showResult();
+  ST.age=age; ST.ans={income:ANS.income, goal:ANS.goal, cut:ANS.cut, cutK:ANS.cutK};
+  ST.age0=(typeof ANS.age0==='number')?ANS.age0:A0_DEFAULT;   /* Q4 已是必填,這裡只是保險 */
+  save(); entryRender(); showResult(); track('wc_result',{age:age});
 }
 
 /* ── 結果頁 ── */
-/* 主數字改成「停工底氣」的年數(0729:不問年齡,所以不算「撐到幾歲」)。
-   不足一年就用個月講,不然 0.8 年這種數字沒有體感。 */
-function fmtRun(p){
-  if(p.months<=0) return {n:'0', u:'——還沒開始累積'};
-  if(p.months<12) return {n:String(p.months), u:'個月的停工底氣'};
-  return {n:(Math.round(p.years*10)/10).toFixed(1), u:'年的停工底氣'};
-}
+/* 只重畫「跟起算年齡有關」的部分。輸入框每敲一鍵都會走這裡,
+   所以不能呼叫 show()——那會 scrollTo(0,0),打字時畫面會一直跳。 */
 function renderAge(){
-  var p=ST.proj||projOf(), line=document.getElementById('yrsLine');
-  line.innerHTML = p.months<=0
-    ? '紅包當天就花完的話,財庫不會長大——換一個抽法試試'
-    : '照這個結構,持續累積 <b style="color:var(--gold)">'+HORIZON+'</b> 年之後';
+  document.getElementById('a0N').textContent=age0();
+  var yrs=age-age0(), line=document.getElementById('yrsLine');
+  if(yrs>0){
+    line.innerHTML='距離現在約 <b style="color:var(--red)">'+yrs+'</b> 年,還來得及';
+  } else {
+    /* 邊界:起算年齡已經追過破產歲數,不能再印一個假的「距今 N 年」 */
+    line.innerHTML='<b style="color:var(--red)">缺口已經發生</b>,撐不到你現在的年紀';
+  }
 }
-/* 收入微調(選填、可跳過):預設用支出反推,想更準的人才點開 */
-function incToggle(){
-  var box=document.getElementById('incBox'), on=box.style.display==='none';
-  box.style.display = on ? '' : 'none';
-  document.getElementById('incFix').querySelector('button').textContent =
-    on ? '收起 ‹' : '不是這個收入?自己設定 ›';
-  if(on) incRender();
-}
-function incRender(){
-  var cur=(ST.ans||{}).income;
-  document.getElementById('incOpts').innerHTML=INC_OPTS.map(function(o,i){
-    var on=(o.v===null && typeof cur!=='number') || (o.v!==null && cur===o.v);
-    return '<button class="chip'+(on?' on':'')+'" data-action="pick" onclick="incPick('+i+')">'+o.t+'</button>';
-  }).join('');
-}
-function incPick(i){
-  var o=INC_OPTS[i];
-  ST.ans.income = (o.v===null) ? null : o.v;
-  ST.proj=projOf(); save();
-  incRender(); showResult(); document.getElementById('incBox').style.display='';
-  track('wc_income_set',{income:ST.ans.income});
+/* 自由填寫:即時重算,不用按確認。
+   超出 12–99 或非數字 → 不接受、也不靜默改值(不 clamp),保留上一個有效值並說明。
+   清空 → 回到預設起算年齡,畫面照樣寫明「以 26 歲起算」。 */
+function a0Input(){
+  var el=document.getElementById('a0In'), err=document.getElementById('a0Err'), raw=el.value.trim();
+  if(raw===''){ ANS.age0=null; err.style.display='none'; el.classList.remove('bad'); gate(); return; }
+  var n=/^\d+$/.test(raw)?parseInt(raw,10):NaN;
+  if(isNaN(n)||n<A0_MIN||n>A0_MAX){
+    err.textContent='請填 '+A0_MIN+'–'+A0_MAX+' 之間的年齡';
+    err.style.display=''; el.classList.add('bad');
+    ANS.age0=null; gate();                    /* 不接受就是不接受:不 clamp、也不放行 */
+    return;
+  }
+  err.style.display='none'; el.classList.remove('bad');
+  ANS.age0=n; gate(); track('wc_age0',{a0:n});
 }
 function showResult(){
-  var p=ST.proj||projOf(); ST.proj=p; age=p.months;
-  var f=fmtRun(p);
-  document.getElementById('ageN').textContent=f.n;
-  document.getElementById('ageUnit').textContent=f.u;
+  if(typeof ST.age==='number') age=ST.age;
+  document.getElementById('ageN').textContent=age;
   renderAge();
-  /* 依據:支出是發票來的(真),收入是反推的(要說清楚是反推,不能假裝知道) */
-  var a=ST.ans||{}, byUser=(typeof a.income==='number');
-  document.getElementById('basisLine').innerHTML='發票推估月支出 <b>'+nt(monthSpend())+'</b> · '
-    +(byUser?'你設定的月收入 <b>':'反推月收入 <b>')+nt(p.inc)+'</b>';
-  /* 【3】限制說明:講清楚納入了什麼、沒納入什麼。使用者看不到限制,數字就會被當成承諾 */
-  document.getElementById('limitLine').textContent=
-    (byUser?'':'收入由支出與「留得住幾分」反推,可自行設定;')
-    +'已納入收入年成長 '+Math.round(p.g*1000)/10+'%、通膨 '+(INFL*100)+'%;'
-    +'未計入投資報酬、被動收入、既有資產與勞保勞退。簡化試算,非專業財務建議。';
-  /* 支出結構:事實陳述。自我投資那筆給正向標籤,不貼「浪費」 */
-  var k=growKey();
+  var k=cutKey();
   document.getElementById('leaks').innerHTML=ordered().map(function(L){
-    var tag = L.kind==='invest' ? ' <span class="tag ok">投資自己</span>'
-            : (L.k===k ? ' <span class="tag">你說最不後悔</span>' : '');
-    return '<div class="leak"><span class="nm">'+L.ic+' '+L.nm+tag
-      +'<div class="hint">'+L.note+'</div></span>'
-      +'<span>每月 <b>'+nt(L.amt)+'</b></span></div>';
+    return '<div class="leak"><span class="nm">'+L.ic+' '+L.nm+(L.k===k?' <span class="tag">你說想砍這個</span>':'')+'</span>'
+      +'<span>月漏 <b>'+nt(L.leak)+'</b></span></div>';
   }).join('');
-  document.getElementById('spendNote').textContent=
-    '這三項合計每月 '+nt(spendTotal())+'——這是事實,不是罪狀。';
-  incRender();
   show('v3');
-  /* 【4】看到結果 —— 一次求籤只算一次。
-     收入微調會重呼叫 showResult() 重畫,若不設閘,漏斗的「看到結果」會被灌水
-     (實測微調兩次就變成 3 筆)。閘在 scan() 重置,所以再求一支會重新計一次。 */
-  if(!_seenResult){ _seenResult=true; track('wealth_result_view',{months:p.months, incomeSet:byUser}); }
-}
-/* 成長導向出口(主訊號):結果頁 → 成長方向頁 */
-function goGrow(){
-  track('wealth_cta_click',{step:'growth_page', result:(ST.proj||{}).age});
-  show('v4'); rxRender();
 }
 /* ── 省錢處方:唯讀 ──
    0727:拿掉「啟用／已啟用」三顆開關。那是假的——按了不會真的設定任何東西,
    而本單元的判準就寫著「做不到的功能就移除,不要留 toast 假裝」。
    金額改成情境數字(全部堵起來可省多少),不再累計使用者的假操作。 */
-/* 0729 立場反轉:三個方向都是成長導向,沒有一項是「少花」。
-   第一項的年數差是真的重算出來的(收入成長 +2%),不是寫死的口號——
-   使用者看得到「把收入做大」對那個數字的實際槓桿。
-   第二項用他自己的自我投資金額,正向肯定(Rebecca 的核心回饋)。 */
 function rxRender(){
-  var base=ST.proj||projOf();
-  var better=projOf({grow:((ST.ans&&ST.ans.grow)||0)+0.02});
-  var dm=better.months-base.months;
-  var gain = dm>=12 ? '多換到 '+(Math.round(dm/12*10)/10)+' 年底氣'
-           : (dm>0 ? '多換到 '+dm+' 個月底氣' : '結構已經很穩');
-  var inv=SPEND.filter(function(L){ return L.kind==='invest'; })[0];
-  var DIRS=[
-    {ic:'📈', t:'把收入曲線拉起來', w:'年成長從 '+Math.round(base.g*1000)/10+'% 到 '
-        +Math.round(better.g*1000)/10+'%,同樣的花法就'+gain+'。'},
-    {ic:'📚', t:'繼續投資自己',     w:'你每月 '+nt(inv.amt)+' 花在學習——這是唯一會長回收入的支出,別砍它。'},
-    {ic:'🧾', t:'讓發票替你記帳',   w:'看得到結構才調得動;不用逼自己記帳,載具已經在記。'}
-  ];
-  document.getElementById('rx').innerHTML=DIRS.map(function(D){
-    return '<div class="save"><div>'+D.ic+' '+D.t+'<div class="hint">'+D.w+'</div></div></div>';
+  /* 每項壓到兩行(做法 + 為什麼只省這麼多)。原本四行 × 三張 = 12 行,
+     整頁 262 字、是其他頁的兩倍——CLAUDE.md 寫「每頁字越少越好」。 */
+  document.getElementById('rx').innerHTML=ordered().map(function(L){
+    return '<div class="save"><div>'+L.ic+' '+L.rx
+      +'<div class="hint">'+L.why+'</div></div>'
+      +'<b style="color:var(--teal);font-size:13px;white-space:nowrap">省'+nt(L.save)+'/月</b></div>';
   }).join('');
-  document.getElementById('allin').innerHTML='收入成長的槓桿,比省下每一杯咖啡都大'
-    +'<br><span style="font-weight:600;font-size:11px">前面那個數字,是收入只成長 '
-    +Math.round(base.g*1000)/10+'% 的版本</span>';
+  /* 0729 文案修正:「三個都堵起來」→「三個都堵的話」。
+     啟用機制 0727 移除之後,planTotal() 是三項無條件相加——使用者沒有答應
+     任何一項,畫面卻用完成式宣告他已經省下這筆。兩個字的差別:
+     「都堵起來」是宣告(我幫你算你做到了),「都堵的話」是假設(如果你做)。
+     這跟本單元 v1 堅持「年齡沒填不放行、不幫你猜」是同一個誠實標準;
+     也跟 detox 修掉的「按一下就降毒」是同一類問題。 */
+  document.getElementById('allin').innerHTML='三個都堵的話,一年可以省 '+nt(planTotal()*12)
+    +'<br><span style="font-weight:600;font-size:11px">你剛剛看到的那個歲數,是一個都沒堵的版本</span>';
   secretReset();
 }
 
@@ -699,8 +547,7 @@ function appUrl(a){ return platform()==='ios' ? (a.ios||a.android) : (a.android|
 function goApp(k){
   var a=APPS.filter(function(x){ return x.k===k; })[0]; if(!a) return;
   var url=appUrl(a);
-  /* 同樣算成長導向出口(主訊號),用 step 區分是走到哪一層 */
-  track('wealth_cta_click',{step:'chips_app', app:a.k, platform:platform()});
+  track('wc_go_app',{app:a.k, platform:platform()});
   /* window.open(_blank) 不是 location.href:嵌在載具 App 的 webview 裡,
      location.href 會把整個小程序導航掉,從商店返回時分數與訪談結果全部消失 */
   if(url){ window.open(url, '_blank'); return; }
@@ -713,7 +560,7 @@ function goApp(k){
    所以不是把它丟掉,是把那套 execCommand 優先＋手動攤連結的做法搬進 kit,
    三支一起受惠,這裡才換過來。home:true 保留「回發票載具首頁」那一項
    (頂部列只負責回第一頁,離開單元的出口刻意收在選單裡)。 */
-function menuOpen(){ UK.menu.open(shLink(), { title:'財神開示', text:'財神看過我的發票了。你要不要也求一支?', home:true }); }
+function menuOpen(){ UK.menu.open(shLink(), { title:'幾歲破產', text:'我的錢撐到幾歲?你敢算嗎?', home:true }); }
 function menuClose(){ UK.menu.close(); }
 
 /* ── 分享:改走 UK.share(0727)──
@@ -726,30 +573,23 @@ function menuClose(){ UK.menu.close(); }
    這裡 sub/tint 一律不帶數字,破產歲數只由 ② 呈現。 */
 /* 從 location 推導,不寫死單元路徑:/wealth 或 /wealth-check 都對 */
 function shLink(){ return location.origin + location.pathname.replace(/\/index\.html$/,'').replace(/\/$/,''); }
-/* 0729:分享卡跟著立場反轉改寫。
-   ⚠️ 這裡動到 0728 明確定調的「你很快就要睡路邊了」——那句與本次【2】
-   「不要恐嚇式語氣」直接衝突,而且卡片本來就被模型改動弄壞了:score 現在可能是
-   100(撐得住),舊的「歲・存款歸零」會印出「100 歲・存款歸零」這種矛盾句;
-   stamp 也是越小越好的舊邏輯。要回舊句 git 歷史有,一行可換。 */
 function card(){
-  var p=ST.proj||projOf();
   return {
     theme:'wcheck',
-    head:'🧧 財神開示',
-    score: fmtRun(p).n,
-    unitTxt: p.months<12 ? '個月的停工底氣' : '年的停工底氣',
-    sub:'財神說我的財庫',                /* ③ 大字結論:不帶數字(kit 會查重) */
-    tint: '換得 '+fmtRun(p).n+(p.months<12?' 個月':' 年')+'自由',
-    punch:'娛樂性質・情境試算,非財務預測',  /* ④ 說明行擺法遵(kit 版式沒有獨立免責欄位) */
-    emoji:'🧧',
-    stamp: p.months>=60 ? '上上籤' : (p.months>=36 ? '上籤' : (p.months>=12 ? '中籤' : '該衝收入')),
-    qrHint:'掃碼,求你自己的',
-    title:'我的財神籤',
-    text:'財神說我的財庫換得 '+fmtRun(p).n+(p.months<12?' 個月':' 年')+'的自由。你呢?',
+    head:'💸 幾歲破產',
+    score:age, unitTxt:'歲・存款歸零',   /* ② 數字塊:整張卡唯一出現數字的地方 */
+    sub:'照你這個花法',                  /* ③ 大字結論:不帶數字 */
+    tint:'你很快就要睡路邊了',           /* 0728 文案定調 */
+    punch:'情境試算・非財務預測',        /* ④ 說明行拿來擺法遵(kit 版式沒有獨立的免責欄位) */
+    emoji:'⏳',
+    stamp: age<=35 ? '快歸零' : (age<=45 ? '有點險' : (age<=60 ? '還算穩' : '很能撐')),
+    qrHint:'掃碼,算你自己的',
+    title:'我的破產倒數',
+    text:'我 '+age+' 歲那年存款歸零。你撐到幾歲?',
     url: shLink()
   };
 }
-function share(){ track('wealth_share_click',{result:(ST.proj||{}).age}); UK.share.open(card); }
+function share(){ track('wc_share'); UK.share.open(card); }
 
 /* init */
 STACK=['v0']; CUR='v0';
