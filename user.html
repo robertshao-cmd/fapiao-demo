@@ -473,6 +473,9 @@ button:focus-visible,a:focus-visible{outline:3px solid #7FD1CC;outline-offset:2p
 /* 券卡右側主行動鈕:對照微信卡券「去使用」——藥丸形、品牌色填滿、最小觸控 32px */
 .cpshow{display:block;margin-top:7px;font-size:10.5px;font-weight:800;color:#fff;background:var(--app);border:none;border-radius:99px;padding:7px 11px;min-height:32px;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.12)}
 .cpshow:active{transform:scale(.96)}
+/* 點餐結帳會自動折抵的券:預設不需要客人做任何事,只留一條小連結給現金付款的邊緣情境用 */
+.autonote{display:block;font-size:9.5px;color:#1F8A72;font-weight:700;line-height:1.4}
+.cpcash{display:block;margin-top:5px;font-size:9.5px;color:#A08640;text-decoration:underline;cursor:pointer}
 .coupon.newin{animation:pop .4s ease}
 @keyframes pop{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
 
@@ -547,6 +550,8 @@ button:focus-visible,a:focus-visible{outline:3px solid #7FD1CC;outline-offset:2p
 .bs-main b{font-size:12.5px;display:block}
 .bs-main small{font-size:10.5px;color:#8B96A3;display:block;margin-top:2px;line-height:1.55}
 .bs-btn{flex:none;padding:8px 13px;border-radius:9px;font-size:11.5px;font-weight:800;background:var(--app);color:#fff}
+.bs-auto{flex:none;text-align:right;font-size:10px;font-weight:700;color:#1F8A72;line-height:1.35}
+.bs-auto a{display:block;margin-top:4px;font-size:10px;font-weight:600;color:#8B96A3;text-decoration:underline;cursor:pointer}
 .me-card{margin-top:12px;border-radius:14px;padding:14px;color:#fff;display:flex;gap:12px;align-items:center}
 .me-av{width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;flex:none}
 .me-stats{display:flex;gap:8px;margin-top:12px}
@@ -1740,9 +1745,11 @@ var history1 = [
   { code:"L-A03", store:"louisa", storeName:"路易莎咖啡 復興門市", mode:"自取", when:"上週一 09:41 · 已完成",
     items:[{name:"燕麥拿鐵（微糖去冰）",price:95,qty:1},{name:"原味可頌",price:55,qty:1}], total:150 }
 ];
+/* 效期一律用 daysFromNow() 算,不寫死日期——寫死的「7/31」隔天就變成過期券,跟開獎日是同一類坑 */
+function daysFromNow(n){ var d = new Date(); d.setDate(d.getDate() + n); return (d.getMonth() + 1) + "/" + d.getDate(); }
 var coupons = [
-  { id:"nn40", store:"nuan", storeName:"暖暖窩義式廚房", title:"回頭客券｜套餐折 NT$40", sub:"單筆滿 200 可用 · 效期至 7/31 · 首購後商家自動發送", tag:"-40", amt:40, min:200, used:false },
-  { id:"lucky", store:"louisa", storeName:"路易莎咖啡", title:"槓龜安慰券｜第二杯半價", sub:"上期未中獎自動發放 · 效期至 8/25（限飲品，示範不折算）", tag:"5折", amt:0, min:0, used:false }
+  { id:"nn40", store:"nuan", storeName:"暖暖窩義式廚房", title:"回頭客券｜套餐折 NT$40", sub:"單筆滿 200 可用 · 效期至 " + daysFromNow(14) + " · 首購後商家自動發送", tag:"-40", amt:40, min:200, used:false },
+  { id:"lucky", store:"louisa", storeName:"路易莎咖啡", title:"槓龜安慰券｜第二杯半價", sub:"上期未中獎自動發放 · 效期至 " + daysFromNow(26) + "（限飲品，示範不折算）", tag:"5折", amt:0, min:0, used:false }
 ];
 
 function $(id){ return document.getElementById(id); }
@@ -1940,6 +1947,19 @@ function sheetWrap(title, inner){
     + '<button class="cap-cancel" onclick="closeSheet()" style="margin-top:14px">關閉</button></div>';
   $("sheet-mask").classList.add("show");
 }
+/* 消費者完整鏈路：掃碼點餐 → 結帳「自動折抵」(findApplicable，見下)才是主線,不用任何額外動作。
+   「到店出示」只留給沒走 App 點餐、現金付款的客人 —— 那才需要店員手動核銷、記一筆。
+   amt=0 的券(例如 5 折這種比例券)結帳邏輯算不出折抵金額,只能一律出示,見 findApplicable。 */
+function couponActionHTML(c, kind){
+  if (c.amt > 0){
+    return kind === "row"
+      ? '<div class="bs-auto">點餐結帳<br>自動折抵<a onclick="presentCoupon(\'' + c.id + '\')">現金出示</a></div>'
+      : '<span class="autonote">點餐自動折抵</span><a class="cpcash" onclick="presentCoupon(\'' + c.id + '\')">現金付款 · 出示</a>';
+  }
+  return kind === "row"
+    ? '<button class="bs-btn" onclick="presentCoupon(\'' + c.id + '\')">到店出示</button>'
+    : '<button class="cpshow" onclick="presentCoupon(\'' + c.id + '\')">🎫 到店出示</button>';
+}
 function openBrandCoupons(){
   var st = miniStore(), b = BRAND[st], rows = "";
   for (var i = 0; i < coupons.length; i++){
@@ -1947,8 +1967,7 @@ function openBrandCoupons(){
     if (c.store !== st) continue;
     rows += '<div class="bs-row"><span class="bs-tag' + (c.used ? ' gray' : '') + '">' + c.tag + '</span>'
       + '<div class="bs-main"><b>' + c.title + '</b><small>' + c.sub + '</small></div>'
-      + (c.used ? '<span class="bs-tag gray">已使用</span>'
-                : '<button class="bs-btn" onclick="presentCoupon(\'' + c.id + '\')">到店出示</button>') + '</div>';
+      + (c.used ? '<span class="bs-tag gray">已使用</span>' : couponActionHTML(c, "row")) + '</div>';
   }
   if (!rows) rows = '<div class="bs-row"><div class="bs-main"><small>目前沒有本店的券</small></div></div>';
   /* 見面禮未領才顯示這一列;領了之後它已經是上面清單裡的一張券,不要重複列 */
@@ -1958,7 +1977,7 @@ function openBrandCoupons(){
       + '<div class="bs-main"><b>新客見面禮｜折 NT$' + w.amt + '</b><small>單筆滿 ' + fmtN(w.min) + ' 可用 · 效期 7 天 · 入會即可領</small></div>'
       + '<button class="bs-btn" onclick="claimWel(\'' + st + '\')">領取</button></div>';
   }
-  sheetWrap("🎟️ " + b.n + " · 我的折扣券", rows + '<div style="font-size:10.5px;color:#98A3B0;margin-top:10px;line-height:1.7">結帳時符合門檻的券會自動套用；商家發券也會即時進到這裡。</div>');
+  sheetWrap("🎟️ " + b.n + " · 我的折扣券", rows + '<div style="font-size:10.5px;color:#98A3B0;margin-top:10px;line-height:1.7">點餐結帳符合門檻自動折抵，免任何動作；商家發券也會即時進到這裡。只有現金到店付款才需要「出示」核銷。</div>');
 }
 var WEL = { el:{ amt:200, min:1500 }, dtf:{ amt:50, min:300 } };
 function welOf(st){ return WEL[st] || { amt:20, min:100 }; }
@@ -2587,7 +2606,7 @@ function newCode(){
   if (cart.mode === "宅配") return "EL-9" + (1000 + Math.floor(Math.random()*8000));
   if (cart.mode === "專櫃取貨") return "P-" + (100 + Math.floor(Math.random()*800));
   if (cart.store === "dtf") return "T-" + (10 + Math.floor(Math.random()*80));
-  return cart.store === "nuan" ? "N-B07" : "L-A12";
+  return cart.store === "nuan" ? "N-B" + (10 + Math.floor(Math.random()*80)) : "L-A" + (10 + Math.floor(Math.random()*80));
 }
 function placeOrder(){
   if (cart.mode === "內用" && !cart.table){
@@ -2717,15 +2736,23 @@ function finishOrder(fromRemote){
     $("rv-store").textContent = curOrder ? curOrder.storeName : "路易莎咖啡 復興門市";
     go("review");
   };
+  /* 0730 修正：拿到餐點不代表吃完了，評價不該用計時器自動彈出——
+     改成客人自己按「已取餐」才進評價，邏輯才說得通。這顆鈕借用原本
+     「模擬店家完成製作」的位置，完成後直接變身成「去評價」的入口。 */
+  var showPickupCta = function(){
+    var b = $("demo-fwd");
+    b.textContent = ship ? "🖊️ 我已簽收，去評價 ›" : (dlv ? "🍽️ 已收到餐點，去評價 ›" : "🍽️ 我已取餐，去評價 ›");
+    b.onclick = wrap;
+  };
   if (!paid){
     setTimeout(function(){
       $("tl4").className = "tstep done";
       $("tl4-s").textContent = "12:16 · " + (ship ? "簽收付款 · 嗶載具" : (dlv ? "送達付款 · 嗶載具" : "店內嗶載具")) + " · 發票 AB-58814921 · CM 幣已入帳";
       toast(ship || dlv ? "💳 貨到付款完成 · 發票已歸戶" : "💳 到店付款完成 · 發票已歸戶");
-      setTimeout(wrap, 1500);
+      showPickupCta();
     }, 1000);
   } else {
-    setTimeout(wrap, 1500);
+    showPickupCta();
   }
 }
 
@@ -2782,11 +2809,11 @@ function renderCoupons(){
   var html = '<div class="sec-label">可用券 <span class="chip line" style="margin-left:auto;font-weight:600">商家發券會即時出現在這裡</span></div>';
   for (var i=0;i<coupons.length;i++){
     var c = coupons[i];
-    html += '<div class="coupon' + (c.used ? ' used' : '') + '"><div class="l"><b>' + c.title + '</b><small>' + c.storeName + ' · ' + c.sub + (c.used ? ' · <b>已使用</b>' : '') + '</small></div>'
+    html += '<div class="coupon' + (c.used ? ' used' : '') + '"><div class="l"><b>' + c.title + '</b><small>' + c.storeName + ' · ' + c.sub + '</small></div>'
       + '<div class="r"><b>' + c.tag + '</b><span>' + (c.used ? '已使用' : (c.min ? '滿 ' + c.min : '無門檻')) + '</span>'
-      + (c.used ? '' : '<button class="cpshow" onclick="presentCoupon(\'' + c.id + '\')">🎫 到店出示</button>') + '</div></div>';
+      + (c.used ? '' : couponActionHTML(c, "card")) + '</div></div>';
   }
-  html += '<div class="syncnote">結帳時符合門檻的券會自動套用並顯示折抵；到店消費點「到店出示」給店員核銷。</div>';
+  html += '<div class="syncnote">點餐結帳符合門檻自動折抵，免任何動作；只有現金到店付款才需要按「出示」給店員核銷。</div>';
   $("cp-body").innerHTML = html;
 }
 function receiveCoupon(c){

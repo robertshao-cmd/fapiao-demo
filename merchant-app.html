@@ -448,7 +448,7 @@ window.onerror=function(m,s,l,c){try{if(document.body&&document.body.classList.c
                對應微信卡券核銷鏈路;「按核銷計費」的信任錨點=店家親眼看到核銷那一刻 -->
           <div class="card" style="padding:12px 13px;border-left:4px solid var(--gold)">
             <div class="sec-label">🎫 核銷台 <span class="chip gold" style="margin-left:auto" id="rd-count">今日已核銷 233 張</span></div>
-            <div id="rd-empty" style="font-size:11.5px;color:var(--muted);margin-top:8px;line-height:1.7">等客人在小程序券夾按「到店出示」，這裡會亮。<br>核銷成功才計費（3–6%）——沒帶來客人，一毛不收。</div>
+            <div id="rd-empty" style="font-size:11.5px;color:var(--muted);margin-top:8px;line-height:1.7">用小程序點餐結帳的客人，券會自動折抵，不會出現在這裡。<br>只有現金到店付款的客人按「出示」，這裡才會亮——核銷成功才計費（3–6%），沒帶來客人一毛不收。</div>
             <div id="rd-live" hidden>
               <div style="display:flex;align-items:center;gap:9px;margin-top:8px">
                 <span class="chip gold" id="rd-tag">券</span>
@@ -805,7 +805,7 @@ function showPresent(p){
   $("rd-live").hidden = false;
   $("rd-tag").textContent = p.tag || "券";
   $("rd-title").textContent = p.title || "客人出示了一張券";
-  $("rd-sub").textContent = (p.sub || "") + (p.min ? "（門檻:滿 " + p.min + "）" : "");
+  $("rd-sub").textContent = p.sub || (p.min ? "門檻:滿 " + p.min : "");
   go("orders");
   toast("🎫（聯動）客人出示「" + (p.title || "券") + "」，請確認核銷");
 }
