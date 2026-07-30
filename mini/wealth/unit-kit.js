@@ -362,6 +362,18 @@
      0724 定調:不做多社群尺寸選單。單一 4:5 圖卡(IG/FB/LINE 通吃),
      回鏈長在圖裡(QR)——圖被轉傳時文字與連結會被剝掉,QR 活著。
      入口極簡:右上 ⋯ → 複製連結。 */
+  /* 發票載具 App 真實 icon(0730,取代原本的 🌱 emoji)。
+     來源:invoicemanager_screens_assets/app_icon_no_text.webp,480→160 縮圖
+     (真實 UI/UX 素材站:invoicemanager-screens-dev-557076811903.asia-east1.run.app)。
+     ⚠️ 一定要內嵌 data URI,不能抓遠端圖:跨源圖片畫上 canvas 會讓它 tainted,
+        toBlob() 會拋 SecurityError,分享與下載會整組壞掉。data URI 視為同源,安全。
+     載入前(理論上極短)先用 emoji 墊著,載完若分享卡開著就自動重畫一次。 */
+  var APP_ICON = new Image();
+  APP_ICON.src = 'data:image/webp;base64,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';
+  APP_ICON.onload = function () {
+    try { if (UK.share && UK.share.isOpen && UK.share.isOpen()) UK.share.render(); } catch (e) {}
+  };
+
   UK.share = {
     SIZE: { w: 1080, h: 1350 },
     /* 0727 改亮底:動態消息裡亮色卡比深色卡跳,而且和 App 本體(白底)一致。
@@ -523,27 +535,34 @@
       ctx.fillStyle = '#FFF'; rr(BX, BY, BW, BW, 14); ctx.fill();
       ctx.strokeStyle = T.line; ctx.lineWidth = 2; ctx.stroke();
       ctx.textAlign = 'center';
-      ctx.font = '86px sans-serif'; ctx.fillText('🌱', BX + BW / 2, BY + 106);
+      if (APP_ICON.complete && APP_ICON.naturalWidth) {
+        var IS = 104, ix = BX + (BW - IS) / 2, iy = BY + 16;
+        ctx.drawImage(APP_ICON, ix, iy, IS, IS);
+      } else {
+        ctx.font = '86px sans-serif'; ctx.fillText('🌱', BX + BW / 2, BY + 106);
+      }
       ctx.fillStyle = T.sub2; ctx.font = '800 25px ' + FONT;
       ctx.fillText('發票載具', BX + BW / 2, BY + 156);
-      ctx.textAlign = 'left';
-      /* 中欄文字上限跟著徽章左緣走,不再撞到右書擋 */
-      ctx.fillStyle = T.ink; fit(d.qrHint || '掃碼，開啟發票載具', '800', 30, BX - TX - 24);
-      ctx.fillText(d.qrHint || '掃碼，開啟發票載具', TX, by + 34);
+      /* 中欄:文案與搜尋框在 TX~BX 之間置中(原本兩個都貼左,跟左右兩個
+         置中的方塊——QR／徽章——對不齊,看起來偏一邊)。 */
+      var midL = TX, midR = BX - 24, midCx = (midL + midR) / 2;
+      ctx.fillStyle = T.ink; fit(d.qrHint || '掃碼，開啟發票載具', '800', 30, midR - midL);
+      ctx.fillText(d.qrHint || '掃碼，開啟發票載具', midCx, by + 34);
       /* 搜尋框寬度「跟著字走」,不要撐滿剩餘寬度。
          0728:原本 pw = 剩下的全部(約 714px),但裡面只有「🔍 發票載具」約 170px,
          看起來就是一條又長又空的膠囊。改成量完字再加內距。 */
+      ctx.textAlign = 'left';
       var SEARCH = '發票載具';                 /* 固定字——搜這個名字才搜得到東西 */
       var padL = 26, iconW = 34, gap = 16, padR = 34;
       ctx.font = '900 34px ' + FONT;
       var textW = ctx.measureText(SEARCH).width;
-      var pw = Math.min(padL + iconW + gap + textW + padR, BX - TX - 24);
-      var ph = 72, py = by + 58;
-      ctx.strokeStyle = T.ink; ctx.lineWidth = 4; rr(TX, py, pw, ph, 36); ctx.stroke();
+      var pw = Math.min(padL + iconW + gap + textW + padR, midR - midL);
+      var ph = 72, py = by + 58, px = midCx - pw / 2;
+      ctx.strokeStyle = T.ink; ctx.lineWidth = 4; rr(px, py, pw, ph, 36); ctx.stroke();
       ctx.fillStyle = T.ink; ctx.font = '700 30px ' + FONT;
-      ctx.fillText('🔍', TX + padL, py + 48);
+      ctx.fillText('🔍', px + padL, py + 48);
       ctx.fillStyle = T.ink; ctx.font = '900 34px ' + FONT;
-      ctx.fillText(SEARCH, TX + padL + iconW + gap, py + 49);
+      ctx.fillText(SEARCH, px + padL + iconW + gap, py + 49);
       ctx.textAlign = 'center';
       ctx.fillStyle = T.brand; ctx.font = '700 22px ' + FONT;
       ctx.fillText(UK.dmText('發票載具 × 官方自營（示範）'), cx, p.h - 26);
