@@ -9,8 +9,8 @@
 <title>幾歲破產|發票載具</title>
 <!-- vendored / 共用層:不改。unit-kit 這裡只用到 UK.selfCheck()(唯讀機械自檢),
      nav/state/share 依 0726 決策維持本單元手寫版本。 -->
-<script src="qrcode.min.js?v=ba971a08"></script>
-<script src="unit-kit.js?v=ba971a08"></script>
+<script src="qrcode.min.js?v=de99ccb6"></script>
+<script src="unit-kit.js?v=de99ccb6"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--red-deep:#A50011;--gold:#FFD34D;--teal:#0E7C7B;--mut:#7A8494;--bg:#FFF6F5;--line:#F0E0E1}
@@ -560,7 +560,17 @@ function goApp(k){
    所以不是把它丟掉,是把那套 execCommand 優先＋手動攤連結的做法搬進 kit,
    三支一起受惠,這裡才換過來。home:true 保留「回發票載具首頁」那一項
    (頂部列只負責回第一頁,離開單元的出口刻意收在選單裡)。 */
-function menuOpen(){ UK.menu.open(shLink(), { title:'幾歲破產', text:'我的錢撐到幾歲?你敢算嗎?', home:true }); }
+function menuOpen(){
+  UK.menu.open(shLink(), { title:'幾歲破產', text:'我的錢撐到幾歲?你敢算嗎?', home:true });
+  /* 0730:「📤 分享」原本走 kit 預設(純文字+連結,沒有圖)——量測到的行為是
+     navigator.share 在非 https 的區網環境常常整個不存在,結果按了「分享」
+     卻只跳「已複製連結」,使用者看不到卡片圖,以為分享壞了。
+     改成:「📤 分享」先開圖卡(跟結果頁的曬圖按鈕同一套),圖卡浮層自己的
+     「📤 分享這張圖」再走 UK.share.send() 的三層退路(檔案分享→下載+提示)。
+     「🔗 複製連結」維持 kit 預設的純連結,兩個選項分工,不是重複。 */
+  var ns = document.getElementById('uk-native-share');
+  if (ns) ns.onclick = function(){ UK.menu.close(); share(); };
+}
 function menuClose(){ UK.menu.close(); }
 
 /* ── 分享:改走 UK.share(0727)──

@@ -555,9 +555,11 @@
         var file = new File([blob], 'fapiao-card.png', { type: 'image/png' });
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           navigator.share({ files: [file], text: d.text }).catch(function () {});
-        } else if (navigator.share) {
-          navigator.share({ title: d.title, text: d.text, url: d.url }).catch(function () {});
         } else {
+          /* 系統分享面板支援文字但不支援檔案(webview/舊瀏覽器很常見)時,
+             navigator.share({title,text,url}) 會「分享成功」但圖卡整個消失、
+             沒有任何提示——使用者以為在分享圖,結果只分享到連結。
+             寧可兩種情況都當同一種失敗處理:把圖存起來,老實告訴他自己去貼。 */
           UK.toast('已下載圖卡——貼到社群，QR 就是回程票'); UK.share.download();
         }
         UK.track('share_send', { title: d.title });
