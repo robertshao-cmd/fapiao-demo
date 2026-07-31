@@ -244,6 +244,48 @@
     document.body.appendChild(a);
   };
 
+  /* ── 外開連結(0731 Rebecca TestFlight 回報)────────────────────────
+     症狀:在發票載具 TestFlight 測試機裡,按「Google map 帶你去」完全沒反應。
+     原因:WKWebView 只有在 App 實作了 uiDelegate 的
+       webView(_:createWebViewWith:for:windowFeatures:)
+     時才會處理 window.open / target="_blank"。沒實作的話 window.open 直接
+     回 null 而且**完全靜默**——不丟錯、console 也乾淨,所以從外面看像沒接。
+     這也是為什麼同一顆單元在 Safari 正常、在 App 裡壞掉。
+
+     解法不是求 App 改(那要排版本),而是自己退一階:window.open 回 null 就改
+     同視窗導航。webview 一定吃 location.href,而且 nav 有 pushState、
+     App 的原生返回鍵可以把人帶回單元,不會變成死路。
+
+     via 參數是刻意留的:上線後在 GA4 看 uk_external_open 的 via 分佈,就知道
+     App 那邊到底走哪一條——不用再靠人回報「我按了沒反應」。
+     ⚠️ url 只放地點名/官方名單這種公開字串,絕對不要把帶 cid 的網址丟進來。 */
+  UK.openExternal = function (url, meta) {
+    if (!url) return false;
+    meta = meta || {};
+    var w = null;
+    try { w = global.open(url, '_blank'); } catch (e) {}
+    if (w) {
+      try { w.opener = null; } catch (e) {}      /* 不給新視窗回頭操作本頁的把手 */
+      meta.via = 'newtab'; UK.track('uk_external_open', meta);
+      return 'newtab';
+    }
+    meta.via = 'samewindow'; UK.track('uk_external_open', meta);
+    /* 先讓 track 把 beacon 送出去再離開,不然這顆事件會跟著頁面一起被丟掉 */
+    setTimeout(function () { global.location.href = url; }, 120);
+    return 'samewindow';
+  };
+  /* 頁面上寫死的 <a target="_blank"> 有同一個毛病(例如 bored 的「看名單」)。
+     用一個 capture 階段的委派攔下來走 openExternal,單元不用逐個改成 onclick。
+     opt-in:單元自己在 init 呼叫,不在共用層偷偷全域生效。 */
+  UK.bindExternalLinks = function (root) {
+    (root || document).addEventListener('click', function (e) {
+      var a = e.target && e.target.closest && e.target.closest('a[target="_blank"]');
+      if (!a || !a.href) return;
+      e.preventDefault();
+      UK.openExternal(a.href, { kind: 'link' });
+    }, true);
+  };
+
   /* ═══════════════ 4. TOAST ═══════════════ */
   UK.toast = function (msg) {
     msg = UK.dmText(msg);
@@ -276,7 +318,7 @@
       if (u === null) { UK.toast('這家還沒開通線上點餐——先幫你導航過去'); return false; }
       if (u === '')   { UK.toast('店家連結待填：掃店內桌卡 QR 或到商家後台複製顧客點餐連結'); return false; }
       UK.track('shop_open', { shop: k });
-      global.open(u, '_blank'); return true;
+      UK.openExternal(u, { kind: 'shop' }); return true;   /* App webview 裡 window.open 是靜默失敗的 */
     },
     tag: function (k) {
       var u = this.url(k);
@@ -483,7 +525,11 @@
 
       var go = m.querySelector('.uk-btn-go');
       var canOrder = shopKey && UK.shops.url(shopKey) !== null;
-      function nav() { global.open('https://maps.google.com/?q=' + encodeURIComponent(p.q || p.name), '_blank'); }
+      /* 地點卡的「帶我去」——App webview 裡原本的 window.open 是靜默失敗,改走 openExternal */
+      function nav() {
+        UK.openExternal('https://maps.google.com/?q=' + encodeURIComponent(p.q || p.name),
+                        { kind: 'map_poi' });
+      }
       if (canOrder) {
         go.textContent = '🍝 看菜單，先點起來';
         go.onclick = function () { if (!UK.shops.open(shopKey)) nav(); };

@@ -23,12 +23,19 @@
   }
 })();
 </script>
-<script src="qrcode.min.js?v=6c27e5e3"></script>
-<script src="unit-kit.js?v=6c27e5e3"></script>
+<script src="qrcode.min.js?v=e3fb48f4"></script>
+<script src="unit-kit.js?v=e3fb48f4"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--mut:#7A8494;--line:#F0E0E1;--bg:#FFF6F5}
-  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  /* touch-action:manipulation = 關掉「連點兩下放大」,但保留捏合縮放與捲動
+     (0731 Robert 回報:App 裡點兩下會整頁放大)。
+     ⚠️ 一定要下在 * 而不是 html/body:雙擊縮放看的是**被點到那個元素**的
+     touch-action,只寫 body 的話底下每個 auto 的子元素照樣會放大。
+     刻意不用 viewport 的 user-scalable=no —— 那會連捏合一起鎖掉,是無障礙退步,
+     而且 iOS 從 10 開始本來就會忽略它。 */
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;
+    touch-action:manipulation}
   html{font-size:16px}
   body{font-family:-apple-system,"PingFang TC","Noto Sans TC",sans-serif;background:var(--bg);color:var(--ink);min-height:100dvh}
   button{font-family:inherit;border:none;background:none;cursor:pointer;color:inherit}
@@ -155,6 +162,27 @@
   .plan .tot{font-size:11.5px;color:var(--mut);font-weight:700;margin-top:6px}
   .plan .chain{font-size:11.5px;line-height:1.8;color:#8A5A00;font-weight:800;
                margin-top:10px;padding-top:9px;border-top:1px dashed var(--line)}
+  /* 外層已經有自己的標題列/返回鍵時(App webview、測試殼),把本單元那條收掉,
+     不然兩條返回鍵疊在一起(0731 Robert 回報)。判斷在下面的 hostChrome()。 */
+  html.nochrome .top{display:none}
+  /* ── 🔧 連線自檢(只有測試環境/開發參數/連點五下臉才出現,正式使用者看不到)── */
+  .diag{background:#141A24;color:#D7E0EE;border-radius:14px;padding:13px;margin-top:12px;
+        font-size:12px;line-height:1.75;text-align:left}
+  .diag h4{font-size:12.5px;font-weight:900;color:#8FD0CB;margin-bottom:7px}
+  .diag .kv{display:flex;gap:8px;border-bottom:1px dashed rgba(255,255,255,.12);padding:4px 0}
+  .diag .kv:last-of-type{border-bottom:none}
+  .diag .kv span{flex:none;width:104px;color:#93A2B8;font-weight:700}
+  .diag .kv b{flex:1;min-width:0;font-weight:800;word-break:break-all}
+  .diag .ok{color:#7BE3A9} .diag .bad{color:#FF9AA5} .diag .warn{color:#FFD98A}
+  .diag input{width:100%;margin-top:9px;padding:10px;border-radius:9px;border:1px solid rgba(255,255,255,.2);
+              background:#0C1119;color:#fff;font-size:14px;font-family:ui-monospace,monospace}
+  .diag .dbtn{width:100%;margin-top:8px;padding:11px;border-radius:9px;background:#0E7C7B;
+              color:#fff;font-size:13px;font-weight:800;min-height:44px}
+  .diag .pv{font-size:10.5px;color:#7E8DA6;margin-top:9px;line-height:1.7}
+  .diag pre{background:#0C1119;border-radius:9px;padding:9px;margin-top:8px;font-size:10.5px;
+            line-height:1.6;max-height:190px;overflow:auto;white-space:pre-wrap;word-break:break-all}
+  .diagOpen{font-size:11px;color:#8B96A3;text-decoration:underline;text-underline-offset:3px;
+            padding:12px 6px;min-height:44px;display:block;margin:2px auto 0}
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -174,6 +202,9 @@
     <div id="lastBox"></div>
     <button class="btn p" id="cta" onclick="enter()">我敢測</button>
     <div class="sec" id="retest" style="display:none"><button onclick="retest()">重新驗一次</button></div>
+    <!-- 連線自檢入口:預設不存在,由 initDiag() 決定要不要長出來 -->
+    <button class="diagOpen" id="diagOpen" style="display:none" onclick="toggleDiag()">🔧 發票 API 連線自檢</button>
+    <div id="diagBox"></div>
   </div>
 
   <!-- v1 訪談:兩題都要答(落差不能靠預設值製造) -->
@@ -305,6 +336,161 @@ if (UK.apiBase) UK.data.load(UK.apiBase);
    「平台」維度或 hostname 把我們的 H5 流量跟 App 原生流量分開看。 */
 var GA4_ID = 'G-MTZ5H145TC';
 UK.ga.init(GA4_ID, 'bored');
+
+/* ══ 外層自己有標題列時,把本單元那條收掉(0731 Robert:返回鍵重疊)═══════
+   本單元的 .top 有「‹ 返回」,App webview 外面也有一條原生返回——兩條疊在一起。
+   拿掉我們自己的那條就好:UK.nav 每切一頁都有 pushState、也聽 popstate,
+   所以 App 的原生返回鍵會照著 v0→v1→v3→v4 一層一層退,行為跟本單元的返回鍵一樣,
+   不會變成「一按就整個關掉」。
+
+   判斷順序刻意這樣排:
+     ?chrome=1 → 強制留著(要單獨除錯這條列時用)
+     ?chrome=0 → 強制收掉
+     iframe    → 測試殼,殼自己有標題列
+     有 cid    → App 外開格式一定帶 cid,帶了就一定在 App webview 裡
+     UA        → 最後一道,抓自訂 WebView 的 UA */
+function hostChrome() {
+  var q;
+  try { q = new URLSearchParams(location.search); } catch (e) { q = null; }
+  if (q && q.get('chrome') === '1') return false;
+  if (q && q.get('chrome') === '0') return true;
+  if (UK.embedded()) return true;
+  if (q && q.has('cid')) return true;
+  return /fapiao|invoice|cmoney/i.test(navigator.userAgent || '');
+}
+var HOST_CHROME = hostChrome();
+if (HOST_CHROME) document.documentElement.classList.add('nochrome');
+
+/* ══ 🔧 發票 API 連線自檢(0731 Robert:要能在 TestFlight 測試機上驗)═════
+   它只回答一個問題:這台機器上,單元到底有沒有真的拿到「你的」發票?
+
+   ⚠️ 個資鐵律(CLAUDE.md:載具條碼=個資,只比對不落地、不寫 log)。所以:
+     · 手輸的條碼與 cid 解出來的條碼,只活在下面這個區域變數(記憶體)
+     · 衍生顯示一律遮罩(/KZ***KG);輸入框裡是他自己現在打的字,不遮
+     · 不進 GA4(下面每個 UK.track 都沒有條碼參數)、不寫 console、不寫 localStorage
+     · **不會把條碼送進任何 API 網址** —— 中台 /features/summary 認的是 session
+       不是條碼,把條碼塞 query 只會讓它落進中台的 access log,那就是「落地」。
+       條碼在這裡的唯一用途是**本地比對**:確認 App 帶進來的 cid 是不是你本人。 */
+var _bc = { typed: '', fromCid: '' };
+function b64url(s) {                       /* Base64URL(RFC 4648):-_ 要換回 +/,還要補 padding */
+  try {
+    var t = String(s).replace(/-/g, '+').replace(/_/g, '/');
+    while (t.length % 4) t += '=';
+    return atob(t);
+  } catch (e) { return ''; }
+}
+function maskBc(b) { return !b ? '' : (b.length <= 4 ? '***' : b.slice(0, 3) + '***' + b.slice(-2)); }
+function validBc(b) { return /^\/[0-9A-Z.+\-]{7}$/.test(b || ''); }   /* 手機條碼 = / + 7 碼,共 8 碼 */
+try {
+  var _cidQ = new URLSearchParams(location.search).get('cid');
+  if (_cidQ) _bc.fromCid = b64url(_cidQ);
+} catch (e) {}
+
+var _diagOn = false;
+function toggleDiag() { _diagOn = !_diagOn; renderDiag(); UK.track('bored_diag_toggle', { on: _diagOn }); }
+function dRow(k, v, cls) {
+  return '<div class="kv"><span>' + k + '</span><b class="' + (cls || '') + '">' + v + '</b></div>';
+}
+function diagRows() {
+  var inv = UK.data.INV, plat = UK.data.source === 'platform';
+  var h = dRow('環境', (location.hostname || '(本機檔案)') + (HOST_CHROME ? ' · 外層有標題列' : ''))
+    + dRow('中台 apiBase', UK.apiBase || '無 —— 這台不連中台,一定拿不到真發票',
+           UK.apiBase ? 'ok' : 'warn')
+    + dRow('資料來源', plat ? 'platform（真發票）' : 'demo（示範值，不是你的）', plat ? 'ok' : 'bad')
+    + dRow('近 30 天', inv.d30.n + ' 張 · ' + inv.d30.shops + ' 家'
+           + (plat ? '' : '（示範值本來就是 47／23）'))
+    + dRow('App 帶的 cid', _bc.fromCid
+             ? (maskBc(_bc.fromCid) + (validBc(_bc.fromCid) ? ' ✓ 解出合法條碼' : ' ✗ 解不出合法條碼'))
+             : '沒有 —— 這次不是從 App 外開進來的',
+           _bc.fromCid ? (validBc(_bc.fromCid) ? 'ok' : 'bad') : 'warn');
+  if (_bc.typed) {
+    h += dRow('你輸入的', maskBc(_bc.typed) + (validBc(_bc.typed) ? ' ✓ 格式正確' : ' ✗ 格式不對（要 / 開頭共 8 碼）'),
+              validBc(_bc.typed) ? 'ok' : 'bad')
+      + dRow('兩邊比對', !_bc.fromCid ? '沒有 cid 可比'
+               : (_bc.typed === _bc.fromCid ? '一致 ✓ App 帶進來的就是你本人' : '不一致 ✗ App 帶的是別人的條碼'),
+             !_bc.fromCid ? 'warn' : (_bc.typed === _bc.fromCid ? 'ok' : 'bad'));
+  }
+  return h;
+}
+function renderRows() {
+  var r = document.getElementById('diagRows');
+  if (r) r.innerHTML = diagRows();
+}
+function renderDiag() {
+  var box = document.getElementById('diagBox');
+  if (!_diagOn) { box.innerHTML = ''; return; }
+  if (!box.firstChild) {
+    /* 骨架只建一次:輸入框不能跟著資料列一起重畫,不然打到一半就被清掉 */
+    box.innerHTML = '<div class="diag"><h4>🔧 發票 API 連線自檢</h4><div id="diagRows"></div>'
+      + '<input id="bcIn" type="text" inputmode="text" autocapitalize="characters"'
+      + ' autocomplete="off" spellcheck="false" placeholder="輸入你的手機條碼，例：/ABC1234">'
+      + '<button class="dbtn" onclick="runDiag()">測一次中台連線</button>'
+      + '<pre id="diagOut" style="display:none"></pre>'
+      + '<div class="pv">條碼只留在這個畫面的記憶體：不送 GA4、不寫 console、不存 localStorage、'
+      + '也不會塞進任何 API 網址。中台認的是你在 App 裡的登入狀態，不是條碼——'
+      + '輸入條碼的用途是<b>本地比對</b> App 帶進來的 cid 是不是你本人。</div></div>';
+    document.getElementById('bcIn').addEventListener('input', function () {
+      _bc.typed = this.value.trim().toUpperCase();
+      renderRows();
+    });
+  }
+  renderRows();
+}
+function runDiag() {
+  var out = document.getElementById('diagOut');
+  out.style.display = '';
+  if (!UK.apiBase) {
+    out.textContent = '這台沒有 apiBase（hostname = ' + (location.hostname || '本機檔案') + '）。\n'
+      + '只有 ailab-dev.cmoney.tw / ailab-prod.cmoney.tw 會連中台；\n'
+      + '本機與公開 demo 一律用示範值，不會發任何請求出去。';
+    UK.track('bored_diag_run', { ok: false, reason: 'no_apibase' });
+    return;
+  }
+  var url = UK.apiBase.replace(/\/$/, '') + '/features/summary', t0 = Date.now();
+  out.textContent = '打中台…\nGET ' + url;
+  fetch(url, { credentials: 'include' })
+    .then(function (r) { return r.text().then(function (b) { return { r: r, body: b }; }); })
+    .then(function (x) {
+      var ms = Date.now() - t0;
+      var L = ['GET ' + url, 'HTTP ' + x.r.status + ' ' + (x.r.statusText || '') + ' · ' + ms + ' ms', ''];
+      if (x.r.status === 401)
+        L.push('401 = 這台沒有登入態（session）。要在真的發票載具 App 裡開才建得起來，',
+               '瀏覽器直開拿到 401 是正常的，不是壞掉。', '');
+      var j = null; try { j = JSON.parse(x.body); } catch (e) {}
+      if (j) {
+        /* 測到真資料就順手接上,畫面直接變成他的數字——不然「測通了」沒有意義 */
+        if (j.invoices) { UK.data.INV = j.invoices; UK.data.source = 'platform'; }
+        if (j.poison && j.poison.length) UK.data.POISON = j.poison;
+        L.push(JSON.stringify(j, null, 2).slice(0, 1200));
+      } else L.push(x.body.slice(0, 600) || '(空回應)');
+      out.textContent = L.join('\n');
+      applyDims(); entryRender(); renderRows();
+      UK.track('bored_diag_run', { ok: x.r.ok, status: x.r.status, ms: ms });
+    })
+    .catch(function (e) {
+      out.textContent = 'GET ' + url + '\n連線失敗：' + e.message
+        + '\n\n常見原因：CORS 被擋、不在公司網路、或中台這支還沒開。';
+      UK.track('bored_diag_run', { ok: false, reason: 'network' });
+    });
+}
+/* 誰看得到這顆入口:測試環境 / ?dev=1 / 本機。
+   另外留一個保底手勢——TestFlight 那台指的是 dev 還是 prod 我沒把握,
+   所以連點五下入口那顆臉也叫得出來(正式使用者不會連點五下同一個 emoji)。 */
+function initDiag() {
+  var btn = document.getElementById('diagOpen'), h = location.hostname;
+  var q; try { q = new URLSearchParams(location.search); } catch (e) { q = null; }
+  if ((q && q.get('dev') === '1') || h === 'ailab-dev.cmoney.tw'
+      || h === 'localhost' || h === '127.0.0.1' || !h) btn.style.display = '';
+  var face = document.querySelector('#v0 .face'), hit = 0, last = 0;
+  if (face) face.addEventListener('click', function () {
+    var now = Date.now();
+    hit = (now - last < 800) ? hit + 1 : 1; last = now;
+    if (hit < 5) return;
+    hit = 0; btn.style.display = '';
+    if (!_diagOn) toggleDiag();
+    UK.toast('連線自檢已開啟');
+  });
+}
 
 /* ══ 文案挑選盤 ══════════════════════════════════════════════
    挑文案只改這三個數字,不用在檔案裡翻。每組的備選都在下面的陣列裡,
@@ -835,7 +1021,10 @@ function openRoute() {
   /* 0729 主訊號:真的點了導航。刷載具只是輔助(發票有時間落差,不能當即時或必要條件) */
   UK.track('bored_map_click', { n:list.length, km:Math.round(list.reduce(function (a, p) { return a + p.km; }, 0) * 10) / 10,
                                 radius:stats().radius, score:score });
-  window.open(mapsRouteURL(list), '_blank');
+  /* 0731:原本是 window.open(...,'_blank'),在發票載具 TestFlight 的 WKWebView 裡
+     回 null 並且完全靜默——按了什麼都不會發生(Robert 回報)。改走 UK.openExternal,
+     開不了新視窗就退成同視窗導航,App 原生返回鍵可以回來。 */
+  UK.openExternal(mapsRouteURL(list), { kind:'map_route', n:list.length });
 }
 function planCarrier() {
   UK.carrier.open({ from:'plan', onDone: function () {
@@ -955,11 +1144,18 @@ window.addEventListener('scroll', function () {
   f.classList.toggle('stuck', f.getBoundingClientRect().top <= top + 1);
 }, { passive: true });
 
+/* 頁面上寫死的 <a target="_blank">(「看名單」那些官方來源連結)在 App webview 裡
+   跟 window.open 是同一個毛病,委派給 UK.openExternal 統一處理 */
+UK.bindExternalLinks(document);
 applyDims();
 entryRender();
+initDiag();
 nav.reset('v0');
 UK.applyDemoMode(document.body);
-UK.homeHint();          /* 單機直開時顯示「從發票載具首頁進入」的正規路徑 */
+/* 「從發票載具首頁進入」只對單機直開的人有意義。在 App webview 裡他人已經在
+   載具裡了,再掛一條回首頁的橫幅是第三條 chrome,跟這次要修的重疊問題同一類。
+   (UK.homeHint 自己只擋 iframe,擋不到 App webview——所以這裡多一道 HOST_CHROME) */
+if (!HOST_CHROME) UK.homeHint();
 UK.track('bored_view');
 /* 開發時在 console 打 UK.selfCheck() 做機械自檢 */
 </script>
