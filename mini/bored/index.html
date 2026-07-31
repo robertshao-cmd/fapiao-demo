@@ -6,8 +6,25 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>無聊快篩｜發票載具</title>
-<script src="qrcode.min.js?v=6b08bdea"></script>
-<script src="unit-kit.js?v=6b08bdea"></script>
+<script>
+/* ══ 補結尾斜線(0731,必須放在所有 <script src> 之前)══════════════
+   App 外開單元的網址格式是 /<slug>?cid=...(沒有結尾斜線),照的是
+   check-food-safety 的慣例——它是 Next.js,吐的是絕對路徑,所以不受影響。
+   本檔的 script 用相對路徑,少一個斜線瀏覽器就會把 unit-kit.js 解析到
+   上一層 → 404 → UK undefined → 整支 JS 掛掉、GA4 也不會啟動。
+   實測:/bored 完全壞掉、/bored/ 正常。
+   判斷式刻意寫成通用的(結尾沒斜線、且最後一段沒有副檔名才補),
+   這樣它在 /fapiao-demo/mini/bored/ 與 /fapiao-demo/mini/bored/index.html
+   兩種情況都不會誤動。 */
+(function () {
+  var p = location.pathname, last = p.split('/').pop();
+  if (!/\/$/.test(p) && !/\.[a-z0-9]+$/i.test(last)) {
+    location.replace(p + '/' + location.search + location.hash);
+  }
+})();
+</script>
+<script src="qrcode.min.js?v=6c27e5e3"></script>
+<script src="unit-kit.js?v=6c27e5e3"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--mut:#7A8494;--line:#F0E0E1;--bg:#FFF6F5}

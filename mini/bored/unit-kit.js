@@ -305,6 +305,41 @@
   UK.ga = {
     id: null,
     ready: false,
+    /* ══ 個資不進 GA4(0731)══════════════════════════════════════
+       App 外開單元的 URL 會帶敏感參數,實例:
+         /check-food-safety?cid=L0taWVVES0c&phone=MDk4NzY1NDMyMQ
+         cid   = 載具條碼 Base64URL(RFC 4648) → 解出 /KZYUDKG
+         phone = 手機號碼 Base64URL          → 解出 0987654321
+       GA4 的 page_view 預設把「完整 href」當 page_location 送出,
+       等於把條碼與手機號寫進 GA4 —— GA4 就是一種 log,這違反口徑鐵律
+       「載具條碼=個資,只比對不落地、不寫 log(含 error log)」。
+       ⚠️ Base64 不是加密:任何有 GA4 報表權限的人一行就解得開。
+       所以 config 時明確覆寫 page_location / page_referrer,把敏感參數剝掉。
+       這是四顆單元共同需要的,所以放在共用層而不是各單元自己做。 */
+    SENSITIVE: ['cid', 'phone', 'carrier', 'carrierno', 'barcode', 'tel',
+                'email', 'uid', 'userid', 'token', 'idno'],
+    cleanUrl: function (u) {
+      if (!u) return '';
+      try {
+        var url = new URL(u, global.location.href), hit = [], keys = [], self = this;
+        /* 先把現有 key 蒐集成陣列再刪 —— 邊迭代邊刪會漏掉。
+           ⚠️ 不要用 Array.prototype.slice.call(searchParams.keys()):
+           keys() 是迭代器、沒有 length,slice 會回傳空陣列(踩過)。 */
+        url.searchParams.forEach(function (v, k) { keys.push(k); });
+        keys.forEach(function (real) {
+          if (self.SENSITIVE.indexOf(real.toLowerCase()) !== -1) {
+            url.searchParams.delete(real); hit.push(real);
+          }
+        });
+        if (hit.length && global.console) {
+          console.info('[unit-kit] 已從 GA4 的 page_location 剝掉敏感參數:', hit.join(', '));
+        }
+        return url.toString();
+      } catch (e) {
+        /* URL 建不起來(極舊環境)→ 寧可整段 query 丟掉,也不要漏個資出去 */
+        return String(u).split('?')[0];
+      }
+    },
     /* 呼叫方式:UK.ga.init('G-XXXXXXXXXX', 'bored')
        unit 會自動掛進每一個事件,GA4 報表就能用它切分三顆單元。 */
     init: function (id, unit) {
@@ -324,7 +359,11 @@
         global.gtag('js', new Date());
         /* 單元是獨立頁面,page_view 就讓 GA4 自己送(不像 SPA 要自己補);
            但把 unit 設成全域參數,之後每個事件都自動帶上。 */
-        global.gtag('config', id, { unit: this.unit });
+        /* page_location 一定要明確給乾淨版,不能讓 GA4 用預設的完整 href */
+        var cfg = { unit: this.unit, page_location: this.cleanUrl(global.location.href) };
+        var ref = this.cleanUrl(document.referrer || '');
+        if (ref) cfg.page_referrer = ref;
+        global.gtag('config', id, cfg);
         this.ready = true;
       } catch (e) {
         if (global.console) console.warn('[unit-kit] GA4 載入失敗(不影響其他埋點):', e && e.message);
