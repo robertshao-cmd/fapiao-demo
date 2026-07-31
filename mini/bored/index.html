@@ -23,8 +23,8 @@
   }
 })();
 </script>
-<script src="qrcode.min.js?v=0d318324"></script>
-<script src="unit-kit.js?v=0d318324"></script>
+<script src="qrcode.min.js?v=30ca800c"></script>
+<script src="unit-kit.js?v=30ca800c"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--mut:#7A8494;--line:#F0E0E1;--bg:#FFF6F5}
@@ -137,6 +137,18 @@
   .row .rb i{display:block;font-style:normal;font-size:12px;line-height:1.65;color:#8A5A00;font-weight:800;margin-top:6px}
   .tag{font-size:10px;font-weight:900;background:#EDF1FE;color:#2B4BD7;border-radius:99px;padding:2px 7px}
   .tag.no{background:#F2F3F5;color:#8B96A3}
+  /* 社群搜尋列(0731):每張卡下面三顆鈕,點下去開該平台的**實際搜尋結果**。
+     用 <button> 而不是 <a>:kit 的 poi.bind 遇到 closest('button') 會 return,
+     所以按鈕不會誤觸整列的地點卡(用 <a> 就會兩個一起觸發)。 */
+  .soc{display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-top:7px}
+  .soc .sh{font-size:10.5px;font-weight:900;color:#8A5A5E}
+  /* min-height 44px 是硬要求 —— UK.selfCheck() 會擋(我第一版寫 30px,被它抓出 27 個)。
+     字小、但可按的範圍要夠拇指。用 inline-flex 讓小字在 44px 裡垂直居中,
+     視覺上不會變成一排大方塊。 */
+  .soc button{font-size:10.5px;font-weight:900;padding:0 12px;min-height:44px;border-radius:99px;
+              border:1px solid var(--line);background:#fff;color:#5A0E14;
+              display:inline-flex;align-items:center}
+  .soc .sn{font-size:10px;font-weight:700;color:var(--mut);width:100%;line-height:1.6}
   /* 被拆穿那一行(只有回訪＋沒去才出現) */
   .busted{font-size:12px;font-weight:800;color:#A50011;background:#FFE9EB;border-radius:11px;
           padding:9px 12px;margin-top:8px;line-height:1.6}
@@ -208,19 +220,35 @@
   .chk.on{display:flex}
   .chk .box{background:#fff;border-radius:20px;padding:20px 18px 14px;width:min(340px,100%);
             text-align:center;box-shadow:0 18px 40px rgba(31,36,48,.28)}
-  .chk .stage{position:relative;height:58px;overflow:hidden}
-  .chk .sofa2{position:absolute;left:6px;bottom:6px;font-size:30px;line-height:1}
-  .chk .walk{position:absolute;left:46px;bottom:8px;font-size:28px;line-height:1;
-             animation:walkOff 2.8s cubic-bezier(.4,0,.6,1) .3s infinite}
-  /* 這組 keyframes 刻意跟 .radar 的 tryRun 相反:那一隻走兩步就被拉回原地,
-     這一隻走出畫面。人家真的出門刷了載具,動畫還把他拉回來就是在打自己的臉。 */
+  /* 舞台整組置中(0731 Robert):沙發在中間,人從沙發裡「剝」出來再走掉。
+     用 inline-block + 固定寬度讓它跟卡片一起置中,不是靠 left 定位貼邊。 */
+  .chk .stage{position:relative;height:62px;width:190px;margin:0 auto}
+  .chk .sofa2{position:absolute;left:8px;bottom:6px;font-size:32px;line-height:1}
+  /* 兩段式:🫠 黏在沙發上被拉開(squash) → 交棒給 🚶 走掉。
+     「從沙發裡剝出來」的關鍵是 scaleX 先被拉長再回彈,不是單純位移。 */
+  .chk .blob2{position:absolute;left:16px;bottom:16px;font-size:22px;line-height:1;
+              transform-origin:left center;
+              animation:peel 3.2s cubic-bezier(.34,0,.5,1) .2s infinite}
+  .chk .walk{position:absolute;left:44px;bottom:9px;font-size:28px;line-height:1;
+             animation:walkOff 3.2s cubic-bezier(.34,0,.5,1) .2s infinite}
+  /* 這兩組 keyframes 刻意跟 .radar 的 tryRun 相反:那一隻走兩步就被拉回原地,
+     這一隻真的走掉。人家出門刷了載具,動畫還把他拉回來就是在打自己的臉。 */
+  @keyframes peel{
+    0%  {transform:translateX(0) scaleX(1)   scaleY(1);   opacity:1}
+    26% {transform:translateX(10px) scaleX(1.5) scaleY(.72);opacity:1}   /* 被拉開、變扁 */
+    40% {transform:translateX(20px) scaleX(.8)  scaleY(1.1);opacity:.55} /* 彈開 */
+    50%,100%{transform:translateX(24px) scaleX(.6) scaleY(1);opacity:0}}
   @keyframes walkOff{
-    0%{transform:translateX(0);opacity:0}
-    14%{opacity:1}
-    88%{opacity:1}
-    100%{transform:translateX(212px);opacity:0}}
+    0%,38%{transform:translateX(0);opacity:0}
+    48%   {transform:translateX(6px);opacity:1}
+    88%   {transform:translateX(118px);opacity:1}
+    100%  {transform:translateX(132px);opacity:0}}
   .chk .chkT{font-size:14.5px;font-weight:900;color:#5A0E14}
   .chk .chkU{font-size:11.5px;font-weight:700;color:var(--mut);margin-top:-3px}
+  /* 分數變化:舊值劃掉 → 新值。降多少是真的重算出來的,不是動畫效果 */
+  .chk .delta{display:flex;align-items:baseline;justify-content:center;gap:8px;margin-top:2px}
+  .chk .delta s{font-size:20px;font-weight:800;color:#B9AEB0}
+  .chk .delta i{font-style:normal;font-size:13px;font-weight:900;color:#0E7C7B}
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -337,9 +365,11 @@
        所以不進 VIEWS,改用 nav 的 sheets 契約讓返回鍵先關它。 -->
   <div class="chk" id="chk">
     <div class="box">
-      <div class="stage"><span class="sofa2">🛋️</span><span class="walk">🚶</span></div>
+      <div class="stage"><span class="sofa2">🛋️</span>
+        <span class="blob2">🫠</span><span class="walk">🚶</span></div>
       <div class="chkT">你真的出門了</div>
       <div class="big-score" style="margin-top:4px"><b id="chkN">&mdash;</b><span>/100</span></div>
+      <div class="delta" id="chkDelta" style="display:none"><s id="chkOld"></s><i id="chkDiff"></i></div>
       <div class="chkU">現在的無聊值</div>
       <div class="cause" id="chkCause"></div>
       <button class="btn p" onclick="chkNext()">再排下一站</button>
@@ -730,7 +760,11 @@ function stats() {
     shops: inv.d30.shops,
     d90n: inv.d90.n,
     streak: Math.min(21, Math.max(3, Math.round(n * .45))),
-    newShops: RAW.newShops,
+    /* 出門刷了載具 = 真的去了一個新地方 → 新店嘗試 +1。
+       這是我們自己觀測到的事實(他按了「店員掃好了」),不是猜的,所以可以進分項。
+       ⚠️ 只有「出門」這件事會動;那筆消費的**內容**(超商佔比、外送依賴)要等發票
+          真的歸戶才算得出來 —— 打卡卡上也是這樣寫的,不要在文案上講超過資料。 */
+    newShops: RAW.newShops + (ST.trips || 0),
     topShop: RAW.topShop,
     radius: ans.q1 ? Q1[ans.q1].radius : RAW.baseRadius,
     askedRadius: !!ans.q1
@@ -777,6 +811,9 @@ function noShow() {
   if (!keys.length) return null;
   if (typeof ST.pickAt !== 'number' || ST.pickAt >= _sessionStart) return null;  /* 同一次造訪不算 */
   if (ST.pickInv !== invN()) return null;                                        /* 發票有多 → 可能真的去了 */
+  /* 0731:排完之後有刷過載具 = 我們親眼看到他去了。發票還沒歸戶不代表他沒去
+     (中間有幾小時到幾天的落差)。少了這一行,打卡完下次進來會被自己的產品冤枉。 */
+  if (typeof ST.wentAt === 'number' && ST.wentAt >= ST.pickAt) return null;
   return { k: keys[keys.length - 1], name: placeName(keys[keys.length - 1]), n: keys.length };
 }
 
@@ -1068,28 +1105,97 @@ var SOURCES = {
   gov:   { tag:'🏛️ 100 亮點', name:'2026-2027 台灣觀光100亮點', by:'交通部觀光署',
            note:'中央與地方推薦＋百萬民眾票選',
            url:'https://spotlightaward.taiwan.net.tw/spotlight_n.php', at:'2026-07 查證' },
-  local: { tag:'💬 在地推薦',  name:'在地與社群分享的去處',       by:'示範資料',
-           note:'正式版接社群熱度與縣市觀光局清單', url:'', at:'' }
+  /* 0731:原本這一組寫「示範資料 · 正式版接社群熱度與縣市觀光局清單」。
+     Robert 要求改成真的。改法是給**真的可以點的搜尋連結**,不是假的熱度數字。
+     ⚠️ 我們沒有搜尋量數據 —— 關鍵字表(見 TW-SOCIAL-KEYWORDS.json)自己就標了
+        confidence: MEDIUM、NOT validated against live search-volume data。
+        所以文案只敢說「開搜尋結果」,不敢說「熱門排名」。
+        把未驗證的 saturation/trend 畫成熱度條,只是把示範資料包裝得更像真的。 */
+  local: { tag:'💬 社群在聊',  name:'IG／Threads／小紅書 上的實際討論',
+           by:'每張卡下面的鈕會開該平台的搜尋結果',
+           note:'我們沒有熱度數據,給的是連結不是排名', url:'', at:'' }
 };
+
+/* ══ 社群搜尋(0731)═══════════════════════════════════════════
+   平台選擇依據 Robert 提供的台灣旅遊關鍵字表(TW-SOCIAL-KEYWORDS.json)裡
+   每個詞的 platforms 欄位。**刻意沒有放 X**:那份表裡 29 個詞,沒有任何一個
+   把 X/Twitter 列為有份量的平台 —— 台灣的旅遊發現不在 X 上發生。
+   放一顆點下去沒東西的鈕,比不放更糟。
+
+   查詢字串照那份表的 _patterns.modifier_stacking 疊:{地點} + {詞},
+   因為「單一關鍵字會高報,疊起來的長尾才是使用者真的打的字」。
+   IG 例外 —— hashtag 不能有空格,所以 IG 直接開該地點的 hashtag。 */
+var SOCIAL = {
+  ig:      { nm:'IG',      url:function (q) {
+               return 'https://www.instagram.com/explore/tags/'
+                    + encodeURIComponent(String(q).replace(/[\s·・、,，.。]/g, '')) + '/'; } },
+  threads: { nm:'Threads', url:function (q, t) {
+               return 'https://www.threads.net/search?q=' + encodeURIComponent(q + ' ' + t); } },
+  xhs:     { nm:'小紅書',  url:function (q, t) {
+               return 'https://www.xiaohongshu.com/search_result?keyword=' + encodeURIComponent(q + ' ' + t); } }
+};
+/* 只留這顆單元用得到的詞。plats 順序 = 那個詞在哪個平台最有份量(照關鍵字表)。
+   ⚠️ 刻意不用「秘境」:那份表的 scarcity_proof 明確寫了
+      「'秘境' with a paved carpark」已經不管用,而這幾個地點都有鋪好的停車場。
+      硬掛「秘境」就是它警告的那種 unearned tag —— 在台灣讀起來就是標題殺人。 */
+var TAGS = {
+  '私房景點': { plats:['xhs','ig','threads'] },
+  '慢旅':     { plats:['ig','threads','xhs'] },
+  '老屋咖啡': { plats:['ig','xhs','threads'] },
+  '打卡景點': { plats:['ig','xhs','threads'] },
+  '網美景點': { plats:['ig','xhs','threads'] },
+  '山系生活': { plats:['ig','xhs','threads'] },
+  '免費景點': { plats:['xhs','ig','threads'] },
+  '一日遊':   { plats:['xhs','ig','threads'] },
+  '野溪溫泉': { plats:['ig','xhs','threads'], season:'10–3 月枯水期水位低才進得去' }
+};
+function socialClick(plat, tag, poi, q) {
+  var p = SOCIAL[plat]; if (!p) return;
+  UK.track('bored_social_click', { plat:plat, tag:tag, poi:poi });
+  UK.openExternal(p.url(q, tag), { kind:'social' });
+}
+/* 一張卡一列:兩個詞當標籤 + 三顆平台鈕(用第一個詞去搜,不然一排六顆太擠) */
+function socRow(p) {
+  var tags = p.tags || [];
+  if (!tags.length) return '';
+  var q = p.sq || p.q, main = tags[0], meta = TAGS[main] || { plats:['ig','xhs','threads'] };
+  return '<div class="soc">'
+    + tags.map(function (t) { return '<span class="sh">#' + t + '</span>'; }).join('')
+    + meta.plats.map(function (pl) {
+        return '<button onclick="socialClick(\'' + pl + '\',\'' + main + '\',\'' + p.k + '\',\''
+             + q + '\')">' + SOCIAL[pl].nm + '</button>';
+      }).join('')
+    + (meta.season ? '<span class="sn">⏳ ' + meta.season + '</span>' : '')
+    + '</div>';
+}
 /* 距離是從板橋府中一帶抓的直線距離,示範用。正式版用中台給的座標算。 */
 var SPOTS = [
   { k:'linpark',  src:'local', emoji:'🌳', name:'府中商圈 · 林本源園邸', km:1.3, q:'林本源園邸',
+    tags:['私房景點','慢旅'],
     why:function(s){ return '1.3 公里，比你週末的 ' + radTxt(s.radius) + '多一點——今天先破這個'; } },
   { k:'nancun',   src:'local', emoji:'🏘️', name:'四四南村',             km:7.6, q:'四四南村',
+    tags:['老屋咖啡','打卡景點'],
     why:function(s){ return '走完等於你這個月的移動總量'; } },
   { k:'ntcart',   src:'gov',   emoji:'🖼️', name:'新北市美術館（鶯歌）', km:8.0, q:'新北市美術館',
+    tags:['網美景點','打卡景點'],
     why:function(s){ return '新店嘗試 ' + s.newShops + ' 家。這裡連館都是新的'; } },
   { k:'dadaocheng',src:'gov',  emoji:'🏮', name:'大稻埕',               km:8.5, q:'大稻埕',
+    tags:['老屋咖啡','慢旅'],
     why:function(s){ return '官方票選出來的地方,你 90 天內一張發票都沒留在那'; } },
   { k:'hushan',   src:'local', emoji:'⛰️', name:'虎山親山步道',         km:9.5, q:'虎山親山步道',
+    tags:['山系生活','免費景點'],
     why:function(s){ return '外送員這個月見你 ' + s.deliv + ' 次，山一次都沒見過你'; } },
   { k:'songshan', src:'gov',   emoji:'🎨', name:'松山文創園區',         km:12.0, q:'松山文創園區',
+    tags:['打卡景點','老屋咖啡'],
     why:function(s){ return '你的圓是 ' + radTxt(s.radius) + '，這裡 12 公里。捷運就到'; } },
-  { k:'maokong',  src:'gov',   emoji:'🍃', name:'貓空',                 km:16.0, q:'貓空纜車',
+  { k:'maokong',  src:'gov',   emoji:'🍃', name:'貓空',                 km:16.0, q:'貓空纜車', sq:'貓空',
+    tags:['慢旅','私房景點'],
     why:function(s){ return '纜車上去,連走路都不用——你連這樣都不去?'; } },
   { k:'tamsui',   src:'gov',   emoji:'⛵', name:'淡水漁人碼頭',         km:24.0, q:'淡水漁人碼頭',
+    tags:['一日遊','打卡景點'],
     why:function(s){ return '24 公里。你這個月的移動總量還不到它的一半'; } },
-  { k:'wulai',    src:'gov',   emoji:'🚞', name:'烏來台車',             km:28.0, q:'烏來台車',
+  { k:'wulai',    src:'gov',   emoji:'🚞', name:'烏來台車',             km:28.0, q:'烏來台車', sq:'烏來',
+    tags:['野溪溫泉','慢旅'],
     why:function(s){ return '你的紀錄是 ' + radTxt(s.radius) + '。28 公里,一次作廢'; } }
 ];
 
@@ -1134,7 +1240,7 @@ function spotHTML(p, s) {
     + '<div class="meta"><span>' + p.km + ' 公里</span>'
     + '<span class="tag' + (p.src === 'gov' ? '' : ' no') + '">' + src.tag + '</span>'
     + (busted ? '<span class="tag no">上次你說要來</span>' : '') + '</div>'
-    + '<i>' + why + '</i></div>'
+    + '<i>' + why + '</i>' + socRow(p) + '</div>'
     + '<button class="uk-vf rowbtn' + (picked ? ' done' : '') + '" data-label="帶你衝">'
     + (picked ? '✅ 已排入' : '帶你衝') + '</button>'
     + '</div></div>';
@@ -1207,12 +1313,41 @@ function planCarrier() {
    關掉之後回到原本那一頁。做成 view 會把使用者原本的位置弄丟。 */
 function showChk() {
   if (typeof score !== 'number') return false;      /* 還沒測過,沒有數字可給 */
-  document.getElementById('chkN').textContent = score;
-  document.getElementById('chkCause').textContent =
-    '這筆發票進來之後,這個數字會往下掉。回來看它掉多少。';
+  var before = score;
+
+  /* 分數真的重算一次 —— 不是動畫,也不是寫死的 -3。
+     ST.trips 進 stats().newShops → 🆕 新店嘗試那一項的值真的變了 →
+     UK.data.composite() 用同一條算式吐出新分數。使用者按「算式」追得出來。
+     0731 Robert 明確要求「掃完數字要真的往下掉」;我原本主張不能顯示新分數,
+     他重申之後改成這個做法 —— 讓真實觀測到的行為去驅動真實的重算,
+     而不是編一個假的降幅。兩者的差別是:這個數字下次回來還會站得住。 */
+  ST.trips  = (ST.trips || 0) + 1;
+  ST.wentAt = Date.now();                           /* 給 noShow() 用,免得下次冤枉他 */
+  applyDims();
+  var after = UK.data.composite();
+  ST.prev = before; ST.n = after;
+  ST = UK.state.save(KEY, ST);
+  score = after;
+  entryRender();                                    /* 入口的「上次無聊值」跟著更新 */
+
+  document.getElementById('chkN').textContent = after;
+  var d = document.getElementById('chkDelta');
+  if (after < before) {
+    document.getElementById('chkOld').textContent = before;
+    document.getElementById('chkDiff').textContent = '↓ ' + (before - after);
+    d.style.display = '';
+  } else {
+    d.style.display = 'none';                        /* 沒降就不假裝有降 */
+  }
+  /* 講清楚降的是哪一部分 —— 不要讓他以為消費內容已經算進去了 */
+  document.getElementById('chkCause').textContent = (after < before)
+    ? '去了一個新地方,🆕 新店嘗試那一項動了。這筆消費的內容要等發票歸戶才會再掉。'
+    : '出門記錄下來了。這筆消費的內容要等發票歸戶才會反映到分數上。';
+
   document.getElementById('chk').classList.add('on');
   try { history.pushState({ uk: 1 }, ''); } catch (e) {}
-  UK.track('bored_checkin_view', { score:score, radius:stats().radius });
+  UK.track('bored_checkin_view', { score:after, prev:before, drop:before - after,
+                                   trips:ST.trips, radius:stats().radius });
   return true;
 }
 function closeChk() {
