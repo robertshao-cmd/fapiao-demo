@@ -23,11 +23,11 @@
   }
 })();
 </script>
-<script src="qrcode.min.js?v=30ca800c"></script>
-<script src="unit-kit.js?v=30ca800c"></script>
+<script src="qrcode.min.js?v=4f59b415"></script>
+<script src="unit-kit.js?v=4f59b415"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
-  :root{--ink:#1F2430;--red:#E4001A;--mut:#7A8494;--line:#F0E0E1;--bg:#FFF6F5}
+  :root{--ink:#262626;--red:#01AFA2;--mut:#8C8C8C;--line:#F0F0F0;--bg:#F5F5F5}
   /* touch-action:manipulation = 關掉「連點兩下放大」,但保留捏合縮放與捲動
      (0731 Robert 回報:App 裡點兩下會整頁放大)。
      ⚠️ 一定要下在 * 而不是 html/body:雙擊縮放看的是**被點到那個元素**的
@@ -57,15 +57,15 @@
     46%{transform:translateY(7px) rotate(3deg) scale(.98)}
     72%{transform:translateY(4px) rotate(1deg) scale(1)}}
   .btn{display:block;width:100%;padding:14px;border-radius:13px;font-size:16px;font-weight:800;text-align:center;margin-top:10px;min-height:50px}
-  .btn.p{background:var(--red);color:#fff;box-shadow:0 4px 14px rgba(228,0,26,.28)}
+  .btn.p{background:var(--red);color:#fff;box-shadow:0 4px 14px rgba(1,175,162,.28)}
   .btn.p:disabled{opacity:.45;box-shadow:none}
-  .card{background:#fff;border-radius:16px;padding:14px;margin-top:12px;box-shadow:0 2px 10px rgba(31,36,48,.06)}
+  .card{background:#fff;border-radius:16px;padding:14px;margin-top:12px;box-shadow:0 2px 10px rgba(38,38,38,.06)}
   .note{font-size:11px;color:var(--mut);line-height:1.7;margin-top:10px;text-align:center}
   .sec{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px}
-  .sec button{font-size:12.5px;font-weight:800;color:#8A5A5E;text-decoration:underline;text-underline-offset:3px;padding:12px 6px;min-height:44px}
+  .sec button{font-size:12.5px;font-weight:800;color:#8C8C8C;text-decoration:underline;text-underline-offset:3px;padding:12px 6px;min-height:44px}
   .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
-  .q{font-size:13px;font-weight:800;color:#5A0E14;margin-top:12px}
-  .scan{text-align:center;padding:26px 14px 20px;font-size:13.5px;font-weight:800;color:#8A5A5E}
+  .q{font-size:13px;font-weight:800;color:#017C73;margin-top:12px}
+  .scan{text-align:center;padding:26px 14px 20px;font-size:13.5px;font-weight:800;color:#8C8C8C}
   /* 雷達:你在中間,圈一直往外掃 —— 掃了半天發現你就在原地 */
   .radar{position:relative;width:132px;height:132px;margin:0 auto 14px}
   .radar .ring{position:absolute;inset:0;border:2px solid var(--red);border-radius:50%;
@@ -84,17 +84,17 @@
                     55%{transform:translate(46px,0);opacity:1}
                     75%{transform:translate(6px,2px);opacity:.6}}
   .scanTxt{min-height:38px;line-height:1.6}
-  .scanTxt b{display:block;font-size:14.5px;color:#5A0E14}
+  .scanTxt b{display:block;font-size:14.5px;color:#017C73}
   .scanTxt small{display:block;font-size:11.5px;font-weight:700;color:var(--mut);margin-top:3px}
-  .bar{height:5px;background:#F3E3E4;border-radius:99px;overflow:hidden;margin-top:14px}
+  .bar{height:5px;background:#F0F0F0;border-radius:99px;overflow:hidden;margin-top:14px}
   .bar i{display:block;height:100%;width:0;background:var(--red);border-radius:99px;transition:width .5s ease}
   .big-score{display:flex;align-items:baseline;justify-content:center;gap:8px;margin:0 0 4px}
   .big-score b{font-size:52px;color:var(--red)}
   .big-score span{font-size:13px;color:var(--mut)}
   /* 攤在沙發上的那一坨:分數越高融得越徹底(reduced-motion 會被關掉,靜態也看得出在攤) */
-  .couch{position:relative;height:30px;margin:0}
-  .couch .sofa{position:absolute;left:50%;bottom:0;transform:translateX(-50%);font-size:26px;line-height:1}
-  .couch .blob{position:absolute;left:50%;bottom:11px;font-size:17px;line-height:1;
+  .couch{position:relative;height:48px;margin:0}
+  .couch .sofa{position:absolute;left:50%;bottom:0;transform:translateX(-50%);font-size:36px;line-height:1}
+  .couch .blob{position:absolute;left:50%;bottom:15px;font-size:17px;line-height:1;
                transform:translateX(-50%);animation:melt 3.6s ease-in-out infinite}
   .couch.deep .blob{animation-duration:2.6s}
   .couch.light .blob{animation-duration:5s}
@@ -104,20 +104,20 @@
     70%    {transform:translateX(-50%) translateY(12px) rotate(-18deg) scaleY(.74) scaleX(1.18)}}
   /* 戳章圖示:分數旁邊那顆會刺人的臉 */
   .stampi{font-size:40px!important;line-height:1;align-self:center}
-  .stampT{display:inline-block;font-size:12px;font-weight:900;color:#A50011;background:#FFE9EB;
+  .stampT{display:inline-block;font-size:12px;font-weight:900;color:#019F93;background:#E6F7F6;
           border-radius:99px;padding:4px 12px}
   /* 跳過訪談時的一行:分數是純發票算的,不能讓他以為那兩題有算進去 */
   .skipnote{font-size:11px;font-weight:700;color:var(--mut);margin-top:6px}
   /* 分數 → 行動的因果句(0729):跟半徑同一區塊,不另外佔高度 */
-  .cause{font-size:12px;font-weight:800;color:#A50011;background:#FFF1F2;border-radius:10px;
+  .cause{font-size:12px;font-weight:800;color:#019F93;background:#E6F7F6;border-radius:10px;
          padding:7px 10px;margin-top:7px;line-height:1.6}
   /* 訪談標題 */
   .lead{font-size:15px;font-weight:900;line-height:1.6;padding:14px 4px 0}
   .lead small{display:block;font-size:11.5px;font-weight:700;color:var(--mut);margin-top:6px}
   /* 生活半徑:併進分數卡,不另開一張(0727 瘦身) */
-  .radl{font-size:12.5px;font-weight:800;color:#3C4657;margin-top:7px;padding-top:7px;border-top:1px dashed var(--line)}
-  .radl b{font-size:17px;color:#2B4BD7}
-  .radl span{color:#7A8494}
+  .radl{font-size:12.5px;font-weight:800;color:#595959;margin-top:7px;padding-top:7px;border-top:1px dashed var(--line)}
+  .radl b{font-size:17px;color:#01AFA2}
+  .radl span{color:#8C8C8C}
   /* 發票證據:讓證據自己罵人 */
   .ev{display:flex;gap:9px;padding:7px 0;border-bottom:1px dashed var(--line)}
   .ev:last-child{border-bottom:none;padding-bottom:2px}
@@ -125,54 +125,74 @@
   .ev .e{font-size:19px;line-height:1.3;flex:none}
   .ev b{display:block;font-size:13.5px;line-height:1.5;font-weight:800}
   /* 標題就是那句數字,不寫「發票怎麼說」這種說明語 */
-  .evh{display:block;font-size:14.5px;font-weight:900;line-height:1.5;color:#5A0E14;margin-bottom:2px}
+  .evh{display:block;font-size:14.5px;font-weight:900;line-height:1.5;color:#017C73;margin-bottom:2px}
   /* 好去處列 */
-  .subh{font-size:13px;font-weight:900;color:#5A0E14;margin:14px 4px 0}
+  .subh{font-size:13px;font-weight:900;color:#017C73;margin:14px 4px 0}
   .subh small{display:block;font-size:11.5px;font-weight:700;color:var(--mut);margin-top:4px;line-height:1.6}
-  .row{display:flex;gap:10px;align-items:flex-start;background:#fff;border-radius:15px;padding:13px;margin-top:10px;box-shadow:0 2px 10px rgba(31,36,48,.06);cursor:pointer}
+  .row{display:flex;gap:10px;align-items:flex-start;background:#fff;border-radius:15px;padding:13px;margin-top:10px;box-shadow:0 2px 10px rgba(38,38,38,.06);cursor:pointer}
   .row .re{font-size:26px;flex:none;line-height:1.2}
   .row .rb{flex:1;min-width:0}
   .row .rb b{font-size:14px;font-weight:900;display:block}
-  .row .rb .meta{font-size:11px;color:#7A8494;font-weight:700;margin-top:3px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-  .row .rb i{display:block;font-style:normal;font-size:12px;line-height:1.65;color:#8A5A00;font-weight:800;margin-top:6px}
-  .tag{font-size:10px;font-weight:900;background:#EDF1FE;color:#2B4BD7;border-radius:99px;padding:2px 7px}
-  .tag.no{background:#F2F3F5;color:#8B96A3}
+  .row .rb .meta{font-size:11px;color:#8C8C8C;font-weight:700;margin-top:3px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+  .row .rb i{display:block;font-style:normal;font-size:12px;line-height:1.65;color:#E88B21;font-weight:800;margin-top:6px}
+  .tag{font-size:10px;font-weight:900;background:#E6F7F6;color:#01AFA2;border-radius:99px;padding:2px 7px}
+  .tag.no{background:#F5F5F5;color:#8C8C8C}
   /* 社群搜尋列(0731):每張卡下面三顆鈕,點下去開該平台的**實際搜尋結果**。
      用 <button> 而不是 <a>:kit 的 poi.bind 遇到 closest('button') 會 return,
      所以按鈕不會誤觸整列的地點卡(用 <a> 就會兩個一起觸發)。 */
+  /* ── 圖示系統(0731)─────────────────────────────────────────
+     .ic  = 24x24 線條圖,吃 currentColor,跟著所在文字的顏色與字級走
+     .msc = 吉祥物,由 mascot() 產生,不吃 currentColor(它是彩色插畫) */
+  .ic{width:1.05em;height:1.05em;display:inline-block;vertical-align:-.16em;flex:none;
+      fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+  .msc{display:block;margin:0 auto}
+  .tico{display:inline-block;width:20px;height:20px;vertical-align:-.3em;
+        background:#fff;border-radius:6px;position:relative}
+  .tico::after{content:'';position:absolute;inset:3px;border-radius:50%;
+               background:linear-gradient(135deg,#3EBD7A,#257349)}
   .soc{display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-top:7px}
-  .soc .sh{font-size:10.5px;font-weight:900;color:#8A5A5E}
+  .soc .sh{font-size:10.5px;font-weight:900;color:#8C8C8C}
+  .soc button .ic{width:16px;height:16px;stroke-width:2}
+  /* ── 蓋掉共用層兩個還是舊配色的控件(0731)───────────────────────
+     kit 注入的 CSS 裡 .uk-chip.on 是藍(#2B4BD7)、.uk-vf 是紅(#FFE9EB/#A50011)。
+     截圖才發現:整頁都換成品牌綠了,只有每張卡最主要的「帶你衝」還是紅的、
+     篩選條選中態還是藍的 —— 一眼就看得出不是同一套。
+     在單元裡蓋掉而不是改 kit:解毒吧與幾歲破產還在用舊配色,
+     動 kit 會把它們一起改掉,那要它們各自的 owner 同意。 */
+  .uk-chip.on{border-color:#01AFA2!important;color:#017C73!important;background:#E6F7F6!important}
+  .uk-vf{background:#E6F7F6!important;color:#017C73!important}
+  .uk-vf.done{background:#01AFA2!important;color:#fff!important}
   /* min-height 44px 是硬要求 —— UK.selfCheck() 會擋(我第一版寫 30px,被它抓出 27 個)。
      字小、但可按的範圍要夠拇指。用 inline-flex 讓小字在 44px 裡垂直居中,
      視覺上不會變成一排大方塊。 */
   .soc button{font-size:10.5px;font-weight:900;padding:0 12px;min-height:44px;border-radius:99px;
-              border:1px solid var(--line);background:#fff;color:#5A0E14;
+              border:1px solid var(--line);background:#fff;color:#017C73;
               display:inline-flex;align-items:center}
   .soc .sn{font-size:10px;font-weight:700;color:var(--mut);width:100%;line-height:1.6}
   /* 被拆穿那一行(只有回訪＋沒去才出現) */
-  .busted{font-size:12px;font-weight:800;color:#A50011;background:#FFE9EB;border-radius:11px;
+  .busted{font-size:12px;font-weight:800;color:#019F93;background:#E6F7F6;border-radius:11px;
           padding:9px 12px;margin-top:8px;line-height:1.6}
   .rowbtn{flex:none;align-self:center;font-size:11.5px;padding:8px 9px}
   .spot{margin-top:10px}
   .spot .row{margin-top:0}
   /* 「全部」的分組標頭:來源要看得見,官方那組附可查連結 */
-  .grp{font-size:12px;font-weight:900;color:#5A0E14;margin:16px 4px 2px}
+  .grp{font-size:12px;font-weight:900;color:#017C73;margin:16px 4px 2px}
   .grp small{display:block;font-size:10.5px;font-weight:700;color:var(--mut);margin-top:3px;line-height:1.6}
-  .grp a{color:#2B4BD7}
+  .grp a{color:#01AFA2}
   /* 篩選條:精選 / 我的清單 / 全部 —— 釘在標題列下面,清單隨時看得到。
      top 用 --topH(JS 量出來的標題列實高),因為那條有 safe-area,寫死會露餡。 */
   .fbar{display:flex;gap:7px;padding:10px 2px;margin:0 -2px;
         position:sticky;top:var(--topH,58px);z-index:8;background:var(--bg)}
-  .fbar.stuck{box-shadow:0 6px 12px -8px rgba(31,36,48,.35)}
+  .fbar.stuck{box-shadow:0 6px 12px -8px rgba(38,38,38,.35)}
   .fbar .uk-chip{flex:1;text-align:center;font-size:12px;padding:9px 4px;min-height:44px}
   .fbar .uk-chip b{color:inherit}
   /* 出走計畫:最優順序 + 一鍵開地圖 + 到店報載具 */
-  .plan{background:#fff;border-radius:16px;padding:14px;margin-top:12px;box-shadow:0 2px 10px rgba(31,36,48,.06)}
-  .plan h3{font-size:13.5px;font-weight:900;color:#5A0E14}
-  .plan ol{margin:8px 0 0 18px;font-size:12.5px;line-height:2;color:#3C4657}
+  .plan{background:#fff;border-radius:16px;padding:14px;margin-top:12px;box-shadow:0 2px 10px rgba(38,38,38,.06)}
+  .plan h3{font-size:13.5px;font-weight:900;color:#017C73}
+  .plan ol{margin:8px 0 0 18px;font-size:12.5px;line-height:2;color:#595959}
   .plan ol b{color:var(--ink)}
   .plan .tot{font-size:11.5px;color:var(--mut);font-weight:700;margin-top:6px}
-  .plan .chain{font-size:11.5px;line-height:1.8;color:#8A5A00;font-weight:800;
+  .plan .chain{font-size:11.5px;line-height:1.8;color:#E88B21;font-weight:800;
                margin-top:10px;padding-top:9px;border-top:1px dashed var(--line)}
   /* 外層已經有自己的標題列/返回鍵時(App webview、測試殼),把本單元那條收掉,
      不然兩條返回鍵疊在一起(0731 Robert 回報)。判斷在下面的 hostChrome()。 */
@@ -196,30 +216,30 @@
   #hostpad{height:0}
   html.nochrome #hostpad{height:var(--hostTop, calc(env(safe-area-inset-top, 0px) + 56px))}
   /* ── 🔧 連線自檢(只有測試環境/開發參數/連點五下臉才出現,正式使用者看不到)── */
-  .diag{background:#141A24;color:#D7E0EE;border-radius:14px;padding:13px;margin-top:12px;
+  .diag{background:#262626;color:#D9D9D9;border-radius:14px;padding:13px;margin-top:12px;
         font-size:12px;line-height:1.75;text-align:left}
-  .diag h4{font-size:12.5px;font-weight:900;color:#8FD0CB;margin-bottom:7px}
+  .diag h4{font-size:12.5px;font-weight:900;color:#8ADAD4;margin-bottom:7px}
   .diag .kv{display:flex;gap:8px;border-bottom:1px dashed rgba(255,255,255,.12);padding:4px 0}
   .diag .kv:last-of-type{border-bottom:none}
-  .diag .kv span{flex:none;width:104px;color:#93A2B8;font-weight:700}
+  .diag .kv span{flex:none;width:104px;color:#BFBFBF;font-weight:700}
   .diag .kv b{flex:1;min-width:0;font-weight:800;word-break:break-all}
-  .diag .ok{color:#7BE3A9} .diag .bad{color:#FF9AA5} .diag .warn{color:#FFD98A}
+  .diag .ok{color:#55C9C1} .diag .bad{color:#FF6A49} .diag .warn{color:#FFD09A}
   .diag input{width:100%;margin-top:9px;padding:10px;border-radius:9px;border:1px solid rgba(255,255,255,.2);
-              background:#0C1119;color:#fff;font-size:14px;font-family:ui-monospace,monospace}
-  .diag .dbtn{width:100%;margin-top:8px;padding:11px;border-radius:9px;background:#0E7C7B;
+              background:#141414;color:#fff;font-size:14px;font-family:ui-monospace,monospace}
+  .diag .dbtn{width:100%;margin-top:8px;padding:11px;border-radius:9px;background:#017C73;
               color:#fff;font-size:13px;font-weight:800;min-height:44px}
-  .diag .pv{font-size:10.5px;color:#7E8DA6;margin-top:9px;line-height:1.7}
-  .diag pre{background:#0C1119;border-radius:9px;padding:9px;margin-top:8px;font-size:10.5px;
+  .diag .pv{font-size:10.5px;color:#8C8C8C;margin-top:9px;line-height:1.7}
+  .diag pre{background:#141414;border-radius:9px;padding:9px;margin-top:8px;font-size:10.5px;
             line-height:1.6;max-height:190px;overflow:auto;white-space:pre-wrap;word-break:break-all}
-  .diagOpen{font-size:11px;color:#8B96A3;text-decoration:underline;text-underline-offset:3px;
+  .diagOpen{font-size:11px;color:#8C8C8C;text-decoration:underline;text-underline-offset:3px;
             padding:12px 6px;min-height:44px;display:block;margin:2px auto 0}
   /* ── 掃完載具的打卡卡(0731)────────────────────────────────
      整顆單元的敘事收尾:那隻在雷達裡一直被拉回沙發的人,這次真的走掉了。 */
   .chk{position:fixed;inset:0;z-index:9500;display:none;align-items:center;justify-content:center;
-       background:rgba(15,20,30,.55);padding:20px}
+       background:rgba(38,38,38,.55);padding:20px}
   .chk.on{display:flex}
   .chk .box{background:#fff;border-radius:20px;padding:20px 18px 14px;width:min(340px,100%);
-            text-align:center;box-shadow:0 18px 40px rgba(31,36,48,.28)}
+            text-align:center;box-shadow:0 18px 40px rgba(38,38,38,.28)}
   /* 舞台整組置中(0731 Robert):沙發在中間,人從沙發裡「剝」出來再走掉。
      用 inline-block + 固定寬度讓它跟卡片一起置中,不是靠 left 定位貼邊。 */
   .chk .stage{position:relative;height:62px;width:190px;margin:0 auto}
@@ -243,19 +263,28 @@
     48%   {transform:translateX(6px);opacity:1}
     88%   {transform:translateX(118px);opacity:1}
     100%  {transform:translateX(132px);opacity:0}}
-  .chk .chkT{font-size:14.5px;font-weight:900;color:#5A0E14}
+  .chk .chkT{font-size:14.5px;font-weight:900;color:#017C73}
   .chk .chkU{font-size:11.5px;font-weight:700;color:var(--mut);margin-top:-3px}
   /* 分數變化:舊值劃掉 → 新值。降多少是真的重算出來的,不是動畫效果 */
   .chk .delta{display:flex;align-items:baseline;justify-content:center;gap:8px;margin-top:2px}
-  .chk .delta s{font-size:20px;font-weight:800;color:#B9AEB0}
-  .chk .delta i{font-style:normal;font-size:13px;font-weight:900;color:#0E7C7B}
+  .chk .delta s{font-size:20px;font-weight:800;color:#BFBFBF}
+  .chk .delta i{font-style:normal;font-size:13px;font-weight:900;color:#017C73}
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
+<!-- ══ 圖示系統的漸層定義(0731)══════════════════════════════════
+     只放一次,底下所有吉祥物 svg 都用 url(#tgrad) 引用。每個 svg 各自帶 defs
+     會產生重複 id(HTML 不合法)而且檔案肥一圈。
+     色票是從 App 真實素材 img_tree_lv5.png **逐像素取樣**出來的,不是目測:
+       樹冠亮 #3EBD7A → 暗 #257349 · 樹幹 #B99A55 · 瞳孔 #257349 -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <linearGradient id="tgrad" x1="0" y1="0" x2=".85" y2="1">
+    <stop offset="0" stop-color="#3EBD7A"/><stop offset="1" stop-color="#257349"/></linearGradient>
+</defs></svg>
 <div class="top">
   <button onclick="nav.back()" aria-label="返回">&lsaquo;</button>
-  <button class="ttl" onclick="goTop()" aria-label="回到第一頁">😶 無聊快篩</button>
+  <button class="ttl" onclick="goTop()" aria-label="回到第一頁"><span class="tico"></span> 無聊快篩</button>
   <span class="off">官方自營</span>
   <button onclick="shareNow()" aria-label="分享">&ctdot;</button>
 </div>
@@ -266,13 +295,13 @@
 
   <!-- v0 入口:一頁只有一個主 CTA。不放說明文字、不放隱私長註(0724 定調) -->
   <div id="v0">
-    <div class="hero"><div class="big"><span class="face">😶</span></div>
+    <div class="hero"><div class="big"><span class="face"></span></div>
       <h1>你的日子，規律到可以被預測</h1><p>你的發票已經寫好答案</p></div>
     <div id="lastBox"></div>
     <button class="btn p" id="cta" onclick="enter()">我敢測</button>
     <div class="sec" id="retest" style="display:none"><button onclick="retest()">重新驗一次</button></div>
     <!-- 連線自檢入口:預設不存在,由 initDiag() 決定要不要長出來 -->
-    <button class="diagOpen" id="diagOpen" style="display:none" onclick="toggleDiag()">🔧 發票 API 連線自檢</button>
+    <button class="diagOpen" id="diagOpen" style="display:none" onclick="toggleDiag()"><span class="wr"></span> 發票 API 連線自檢</button>
     <div id="diagBox"></div>
   </div>
 
@@ -305,7 +334,7 @@
     <div class="card scan">
       <div class="radar">
         <span class="ring"></span><span class="ring r2"></span>
-        <span class="dot">😶</span><span class="run">🚶</span>
+        <span class="dot"></span><span class="run"></span>
       </div>
       <div class="scanTxt" id="scanTxt"><b>翻你的發票…</b></div>
       <div class="bar"><i id="scanBar"></i></div>
@@ -318,7 +347,7 @@
   <div id="v3" style="display:none">
     <div class="uk-trend" id="trend" style="display:none"></div>
     <div class="card" style="text-align:center">
-      <div class="couch" id="couch"><span class="sofa">🛋️</span><span class="blob" id="blob">🫠</span></div>
+      <div class="couch" id="couch"><span class="sofa"></span><span class="blob" id="blob"></span></div>
       <div class="big-score"><b id="scoreN">&mdash;</b><span>/100</span></div>
       <div class="stampT" id="stampT"></div>
       <div class="skipnote" id="skipnote" style="display:none">你沒回答，這是純發票版</div>
@@ -350,7 +379,7 @@
 
   <!-- v7 空狀態(transient:一次性頁,有引導也有出路) -->
   <div id="v7" style="display:none">
-    <div class="hero"><div class="big">🧾</div>
+    <div class="hero"><div class="big rcpt"></div>
       <h1>你連發票都懶得存</h1><p>近 30 天只有 <b id="invN">0</b> 張&mdash;&mdash;連無聊都證明不了</p></div>
     <div class="card"><b style="font-size:13px">怎麼讓發票自己跑進來</b>
       <div style="font-size:12.5px;line-height:2;margin-top:6px">1️⃣ 結帳報手機條碼（載具）<br>2️⃣ 自動歸戶，不用拍不用存<br>3️⃣ 5 張就能開測</div></div>
@@ -365,8 +394,8 @@
        所以不進 VIEWS,改用 nav 的 sheets 契約讓返回鍵先關它。 -->
   <div class="chk" id="chk">
     <div class="box">
-      <div class="stage"><span class="sofa2">🛋️</span>
-        <span class="blob2">🫠</span><span class="walk">🚶</span></div>
+      <div class="stage"><span class="sofa2"></span>
+        <span class="blob2"></span><span class="walk"></span></div>
       <div class="chkT">你真的出門了</div>
       <div class="big-score" style="margin-top:4px"><b id="chkN">&mdash;</b><span>/100</span></div>
       <div class="delta" id="chkDelta" style="display:none"><s id="chkOld"></s><i id="chkDiff"></i></div>
@@ -378,14 +407,14 @@
   </div>
 
   <div id="v8" style="display:none">
-    <div class="hero"><div class="big">🧾</div>
+    <div class="hero"><div class="big rcpt"></div>
       <h1>發票載具</h1><p>結帳報手機條碼，發票自動歸戶——不用拍、不用存</p></div>
     <div class="card"><b style="font-size:13px">裝了之後</b>
       <div style="font-size:12.5px;line-height:2;margin-top:6px">
         1️⃣ 結帳時報手機條碼，發票自動進來<br>
         2️⃣ 中獎自動對獎、自動通知<br>
         3️⃣ 官方小程序都在裡面（你朋友分享給你的就是其中一顆）</div></div>
-    <button class="btn p" id="dlBtn" onclick="dlGo()">⬇️ 下載發票載具</button>
+    <button class="btn p" id="dlBtn" onclick="dlGo()"><span class="dlic"></span> 下載發票載具</button>
     <div class="sec"><button onclick="dlSkip()">先看看無聊快篩 &rsaquo;</button></div>
   </div>
 
@@ -470,7 +499,7 @@ if (HOST_CHROME) {
   } catch (e) {}
 }
 
-/* ══ 🔧 發票 API 連線自檢(0731 Robert:要能在 TestFlight 測試機上驗)═════
+/* ══ <span class="wr"></span> 發票 API 連線自檢(0731 Robert:要能在 TestFlight 測試機上驗)═════
    它只回答一個問題:這台機器上,單元到底有沒有真的拿到「你的」發票?
 
    ⚠️ 個資鐵律(CLAUDE.md:載具條碼=個資,只比對不落地、不寫 log)。所以:
@@ -562,7 +591,7 @@ function renderDiag() {
   if (!_diagOn) { box.innerHTML = ''; return; }
   if (!box.firstChild) {
     /* 骨架只建一次:輸入框不能跟著資料列一起重畫,不然打到一半就被清掉 */
-    box.innerHTML = '<div class="diag"><h4>🔧 發票 API 連線自檢</h4><div id="diagRows"></div>'
+    box.innerHTML = '<div class="diag"><h4><span class="wr"></span> 發票 API 連線自檢</h4><div id="diagRows"></div>'
       + '<input id="bcIn" type="text" inputmode="text" autocapitalize="characters"'
       + ' autocomplete="off" spellcheck="false" placeholder="輸入你的手機條碼，例：/ABC1234">'
       + '<button class="dbtn" onclick="runDiag()">測一次中台連線</button>'
@@ -774,10 +803,156 @@ function radTxt(r) { return r >= 1000 ? (Math.round(r / 100) / 10) + ' 公里' :
 /* 分級表情＋戳章詞。結果頁的戳章與分享卡數字旁那顆用同一套(Robert 0731 指定),
    所以抽成一支 —— 兩邊各寫一份遲早會分岔。 */
 function tierOf(s) {
-  return s >= 85 ? { i:'🛋️', t:'和沙發長在一起' }
-       : s >= 70 ? { i:'😶', t:'可預測' }
-       : s >= 50 ? { i:'🙃', t:'有點悶' }
-                 : { i:'🚶', t:'還有救' };
+  return s >= 85 ? { m:'melt',   t:'和沙發長在一起' }
+       : s >= 70 ? { m:'sleepy', t:'可預測' }
+       : s >= 50 ? { m:'yawn',   t:'有點悶' }
+                 : { m:'walk',   t:'還有救' };
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   圖示系統(0731 Robert:全部 emoji 改成發票載具 App 的風格)
+   ══════════════════════════════════════════════════════════════════
+   分兩層,因為 App 自己就是分兩層的:
+
+   ① 吉祥物 mascot() —— 對照 App 的 img_tree_lv5.png:圓潤堆疊的樹冠、
+      綠色漸層、白框大眼、無描邊、卡其樹幹。色票是逐像素取樣出來的。
+      這顆單元的角色是「懶樹」,所以加了睡帽與條紋睡衣(品牌綠 #01AFA2),
+      四個表情對應四個分數級距。
+
+   ② 小圖示 ic() —— 對照 App 的 tab_icon_*.svg / icon_scan.svg:
+      24x24、單色、圓端線條。用 stroke 而不是 fill,是因為手寫 path 時
+      線條圖的一致性遠比填色圖好控制(填色差一點就會歪得很明顯)。
+      顏色吃 currentColor,所以放在哪一段文字裡就跟著那段的顏色。
+
+   ⚠️ 為什麼全部 inline 在 index.html 而不是拆成 icons.js:
+      build-public-demo.py 只複製 index.html + unit-kit.js + qrcode.min.js。
+      多一個檔案不會被複製,公開 demo 會變成一堆破圖。 */
+
+function mascot(mood, px) {
+  var s = px || 64;
+  var eyesOpen = '<circle cx="41" cy="47" r="8.5" fill="#fff"/><circle cx="59" cy="47" r="8.5" fill="#fff"/>'
+               + '<circle cx="41" cy="47" r="4.2" fill="#257349"/><circle cx="59" cy="47" r="4.2" fill="#257349"/>';
+  /* 睏眼:兩道往下的弧線。不畫白眼球 —— 閉著的眼睛看不到眼白,畫了會變成「瞇眼瞪人」 */
+  var eyesShut = '<path d="M33.5 45.5q7.5 8 15 0M51.5 45.5q7.5 8 15 0" stroke="#1C5C39" stroke-width="3.6"'
+               + ' fill="none" stroke-linecap="round"/>';
+  var mouthYawn = '<ellipse cx="50" cy="61" rx="5.2" ry="6.4" fill="#1C5C39"/>'
+                + '<ellipse cx="50" cy="64.5" rx="3" ry="2.2" fill="#E8776B"/>';
+  var mouthSmile = '<path d="M45 59q5 5 10 0" stroke="#1C5C39" stroke-width="3.2" fill="none" stroke-linecap="round"/>';
+  var mouthFlat = '<path d="M44 61q3 2.5 6 0t6 0" stroke="#1C5C39" stroke-width="3" fill="none" stroke-linecap="round"/>';
+  /* zzz 放**左側背景**上。第一版放右上角,壓在樹冠與睡帽上變成綠底綠字,看不見。 */
+  var zzz = '<g fill="#01AFA2" font-family="sans-serif" font-weight="900">'
+          + '<text x="2" y="34" font-size="14">z</text><text x="11" y="22" font-size="10">z</text></g>';
+
+  /* 樹冠:五顆圓疊出蓬鬆感(照 App 那顆的做法),再補兩片亮葉當高光 */
+  /* ⚠️ 樹冠必須明顯大過睡衣。第一版睡衣做太寬(w32),截圖起來像個行李箱不像樹。 */
+  var canopy = '<circle cx="30" cy="32" r="19" fill="url(#tgrad)"/>'
+             + '<circle cx="70" cy="32" r="19" fill="url(#tgrad)"/>'
+             + '<circle cx="21" cy="57" r="15" fill="url(#tgrad)"/>'
+             + '<circle cx="79" cy="57" r="15" fill="url(#tgrad)"/>'
+             + '<circle cx="50" cy="44" r="33" fill="url(#tgrad)"/>'
+             + '<ellipse cx="33" cy="24" rx="8" ry="4.2" fill="#5FD292" opacity=".5" transform="rotate(-28 33 24)"/>'
+             + '<ellipse cx="19" cy="54" rx="5" ry="2.8" fill="#5FD292" opacity=".45" transform="rotate(-20 19 54)"/>';
+  /* 睡衣:品牌綠 + 白條紋 + 一顆扣子。收窄成 w22,讓樹幹上緣還看得到卡其色 */
+  var trunk = '<path d="M43 70h14l3 36H40z" fill="#B99A55"/>';
+  var pj = '<path d="M40 84h20a4 4 0 014 4v14a4 4 0 01-4 4H40a4 4 0 01-4-4V88a4 4 0 014-4z" fill="#01AFA2"/>'
+         + '<g fill="#fff" opacity=".55"><rect x="36" y="90" width="28" height="3" rx="1.5"/>'
+         + '<rect x="36" y="97" width="28" height="3" rx="1.5"/></g>'
+         + '<circle cx="50" cy="87" r="1.6" fill="#E6F7F6"/>';
+  /* 睡帽:小三角錐斜掛在樹冠**右上角** + 白帽緣 + 毛球。
+     踩過兩次:第一版畫成曲線團塊 → 像一片葉子;第二版做太大(帽緣寬 52)
+     → 橫跨整個樹冠頂端,變成一條白髮帶,樹的圓形輪廓被切掉、認不出是樹。
+     現在只佔右上角,樹冠左側與頂端留白,tree-ness 才回來。 */
+  var cap = '<path d="M55 24L84 5l3 19z" fill="#01AFA2"/>'
+          + '<rect x="52" y="20" width="33" height="8" rx="4" fill="#E6F7F6" transform="rotate(-8 68 24)"/>'
+          + '<circle cx="85" cy="5" r="5" fill="#E6F7F6"/>';
+
+  var body, extra = '';
+  if (mood === 'melt') {
+    /* 融在沙發上:整組壓扁 + 往下沉。squash 用 group transform,不用改每個座標 */
+    body = '<g transform="translate(0,16) scale(1.14,.74)">' + canopy + eyesShut + mouthFlat + '</g>'
+         + '<g transform="translate(0,10)">' + trunk + pj + '</g>'
+         + '<g transform="translate(-6,14) scale(1.05,.8)">' + cap + '</g>';
+    extra = zzz;
+  } else if (mood === 'walk') {
+    /* 真的走掉:身體前傾,睡衣下面伸出兩條在跨步的腿 */
+    body = '<g transform="rotate(-5 50 60)">' + canopy + eyesOpen + mouthSmile + trunk + pj + cap + '</g>'
+         + '<g stroke="#B99A55" stroke-width="6" stroke-linecap="round">'
+         + '<path d="M44 104l-7 8"/><path d="M57 104l8 6"/></g>';
+  } else if (mood === 'yawn') {
+    body = canopy + eyesShut + mouthYawn + trunk + pj + cap;
+  } else {                                   /* sleepy(預設) */
+    body = canopy + eyesShut + mouthFlat + trunk + pj + cap;
+    extra = zzz;
+  }
+  return '<svg class="msc" viewBox="0 0 100 118" width="' + s + '" height="' + Math.round(s * 1.18)
+       + '" role="img" aria-label="無聊快篩吉祥物">' + body + extra + '</svg>';
+}
+
+/* 小圖示:24x24 線條圖,吃 currentColor。對照 App 的 tab_icon_*.svg 風格。 */
+var ICON = {
+  shop:     '<path d="M3 10l2-5h14l2 5"/><path d="M5 10v9h14v-9"/><path d="M9 19v-5h6v5"/>',
+  repeat:   '<path d="M4 11a8 8 0 0113-4"/><path d="M20 13a8 8 0 01-13 4"/><path d="M18 3v5h-5M6 21v-5h5"/>',
+  ruler:    '<rect x="2" y="8" width="20" height="8" rx="2"/><path d="M7 8v3.5M12 8v4.5M17 8v3.5"/>',
+  scooter:  '<circle cx="6" cy="17" r="3"/><circle cx="18" cy="17" r="3"/><path d="M9 17h6l-2-8h4"/><path d="M13 9l-4 5"/>',
+  sparkle:  '<path d="M12 3l2.2 6.3L20 11l-5.8 1.7L12 19l-2.2-6.3L4 11l5.8-1.7z"/>',
+  receipt:  '<path d="M6 3h12v17l-3-2-3 2-3-2-3 2z"/><path d="M9.5 8h5M9.5 12h5"/>',
+  map:      '<path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/>',
+  compass:  '<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2.2 5.3-5.3 2.2 2.2-5.3z"/>',
+  eyeoff:   '<path d="M3 12s3.6-6 9-6 9 6 9 6-3.6 6-9 6-9-6-9-6z"/><path d="M4 4l16 16"/>',
+  alert:    '<path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17h.01"/>',
+  sofa:     '<path d="M4 11V8.5a2 2 0 014 0V11"/><path d="M16 11V8.5a2 2 0 014 0V11"/>'
+          + '<rect x="2" y="11" width="20" height="7" rx="2"/><path d="M6 18v2M18 18v2"/>',
+  pin:      '<path d="M12 21s7-7 7-12a7 7 0 10-14 0c0 5 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/>',
+  check:    '<path d="M5 13l4 4 10-10"/>',
+  wrench:   '<path d="M15 4.5a4 4 0 105 5l-9.5 9.5-4.5 1 1-4.5z"/>',
+  hourglass:'<path d="M7 3h10M7 21h10"/><path d="M8.5 3c0 5 3.5 6 3.5 9s-3.5 4-3.5 9M15.5 3c0 5-3.5 6-3.5 9s3.5 4 3.5 9"/>',
+  download: '<path d="M12 4v11M8 12l4 4 4-4"/><path d="M5 19h14"/>',
+  gov:      '<path d="M3 10l9-6 9 6"/><path d="M5 10v9h14v-9"/><path d="M9.5 19v-5M14.5 19v-5"/><path d="M3 21h18"/>',
+  /* 景點 */
+  tree:     '<path d="M12 3l5.5 7.5h-3l4.5 6H5l4.5-6h-3z"/><path d="M12 16.5V21"/>',
+  house:    '<path d="M3 11l9-7 9 7"/><path d="M6 10v10h12V10"/><path d="M10 20v-6h4v6"/>',
+  art:      '<rect x="3" y="4" width="18" height="14" rx="2"/><path d="M7 14l3-4 3 3 2-2 2 3"/><path d="M12 18v3"/>',
+  lantern:  '<path d="M12 3v2M12 19v2"/><ellipse cx="12" cy="12" rx="6" ry="7"/><path d="M7 8.5h10M7 15.5h10"/>',
+  mountain: '<path d="M2 19l6-11 4 6 3-4 7 9z"/>',
+  palette:  '<path d="M12 3a9 9 0 100 18c1.2 0 2-.9 2-2s-1-2 .2-3 3 .2 4-1.2A9 9 0 0012 3z"/>'
+          + '<circle cx="8.5" cy="9.5" r="1.1"/><circle cx="13" cy="7.2" r="1.1"/>',
+  leaf:     '<path d="M20 4c0 9-6.5 15.5-15 16.5C5 11.5 10.5 5 20 4z"/><path d="M13.5 11c-3 2-5.2 5.2-6.5 9.5"/>',
+  boat:     '<path d="M4 15h16l-2.2 5H6.2z"/><path d="M12 15V4l7 8z"/>',
+  tram:     '<rect x="5" y="4" width="14" height="12" rx="2.5"/><path d="M9 16v3M15 16v3"/><path d="M5 10.5h14"/><path d="M12 2v2"/>',
+  /* 社群品牌(0731 Robert:只留 IG 與 Threads,各自 logo)
+     ⚠️ IG 那顆是它標準的圓角方框＋圓＋點,形狀是對的。
+        Threads 的標誌是特殊繪製的「@」勾,我用 path 近似 —— 認得出來,
+        但不是官方檔案。要 100% 精準得拿它的品牌素材。 */
+  ig:       '<rect x="3" y="3" width="18" height="18" rx="5.4"/><circle cx="12" cy="12" r="4.2"/>'
+          + '<circle cx="17.2" cy="6.8" r="1.15" fill="currentColor" stroke="none"/>',
+  threads:  '<path d="M16.8 8.4C15.9 6.2 14.1 5 11.9 5 8 5 5.6 7.8 5.6 12s2.4 7 6.3 7c2.9 0 4.7-1.6 4.7-3.5'
+          + ' 0-1.8-1.4-3-3.5-3-1.9 0-3.1 1-3.1 2.2 0 1 .7 1.7 1.7 1.7 1.4 0 2.2-1.2 2.2-3.2"/>'
+};
+function ic(name, cls) {
+  var d = ICON[name];
+  if (!d) return '';
+  return '<svg class="ic' + (cls ? ' ' + cls : '') + '" viewBox="0 0 24 24" aria-hidden="true">' + d + '</svg>';
+}
+/* 靜態 HTML 裡的圖示槽在 init 時填入。
+   為什麼不直接把 svg 寫進 HTML:那幾行會變成沒人看得懂的一團標記,
+   而且同一顆吉祥物出現五次就要複製五份。這裡一次填完,來源只有 mascot()。 */
+function paintIcons() {
+  function set(sel, html) {
+    var el = document.querySelector(sel);
+    if (el) el.innerHTML = html;
+  }
+  set('#v0 .hero .face',  mascot('sleepy', 104));   /* 入口主視覺 */
+  set('#v2 .radar .dot',  mascot('sleepy', 44));    /* 掃描過場:原地不動的那一隻 */
+  set('#v2 .radar .run',  mascot('walk', 26));      /* 想跑但會被拉回來的那一隻 */
+  set('#v3 .couch .sofa', ic('sofa'));
+  set('#chk .sofa2',      ic('sofa'));
+  set('#chk .blob2',      mascot('melt', 30));      /* 從沙發剝出來 */
+  set('#chk .walk',       mascot('walk', 30));      /* 走掉 */
+  set('.top .ttl .tico',  mascot('sleepy', 20));
+  set('#diagOpen .wr',    ic('wrench'));
+  set('#dlBtn .dlic',     ic('download'));
+  var b = document.querySelectorAll('.hero .big.rcpt');   /* v7 空狀態 / v8 下載落地頁 */
+  for (var i = 0; i < b.length; i++) b[i].innerHTML = ic('receipt');
 }
 
 /* -- 五個分項:寫回 UK.data.POISON,總分仍由 UK.data.composite() 算。
@@ -905,7 +1080,7 @@ function demoFill() {
 function goCarrier() {
   UK.carrier.open({ from: 'empty', onDone: function () { demoFill(); } });
 }
-/* 點標題上的 😶 = 回第一頁,並清掉堆疊(不是往回一層) */
+/* 點標題上的吉祥物 = 回第一頁,並清掉堆疊(不是往回一層) */
 function goTop() {
   if (nav.current() === 'v0') { window.scrollTo(0, 0); return; }
   UK.closeTopSheet(); nav.reset('v0'); UK.track('go_top');
@@ -1032,11 +1207,13 @@ function showResult() {
   t.innerHTML = html; t.style.display = html ? '' : 'none';
   /* 分數旁邊那顆圖示 + 一個戳章詞:越無聊越像家具 */
   var tier = tierOf(score);
-  document.getElementById('stampT').textContent = tier.i + ' ' + tier.t;
+  /* 戳章只留文字 —— 18px 的吉祥物看不出是什麼,而且正上方的沙發區已經有一隻大的了 */
+  document.getElementById('stampT').textContent = tier.t;
   /* 沙發上那一坨:分數越高融得越快、越扁 */
   var couch = document.getElementById('couch');
   couch.className = 'couch ' + (score >= 85 ? 'deep' : (score >= 70 ? '' : 'light'));
-  document.getElementById('blob').textContent = score >= 85 ? '🫠' : (score >= 50 ? '😪' : '🙂');
+  document.getElementById('blob').innerHTML =
+    mascot(score >= 85 ? 'melt' : (score >= 50 ? 'yawn' : 'sleepy'), 38);
   document.getElementById('skipnote').style.display = ST.skipped ? '' : 'none';
   /* 0729:講清楚這個數字能幹嘛 —— 出門一趟、發票進來,分項就會動,數字自己會掉。
      不承諾具體掉幾分(那要真發票回來才算得出來),只講因果方向。 */
@@ -1080,17 +1257,17 @@ function evidence(s, ans) {
   var L = [];
   /* 沒去的那行最痛,排第一 —— 它是「你自己說的」對上「發票沒動」 */
   var ns = noShow();
-  if (ns) L.push({ e:'🫥', t:'你說要衝「' + ns.name + '」，之後 0 張新發票' });
-  L.push({ e:'🏪', t:'人生的 ' + s.convPct + '% 在超商結帳' });
-  L.push({ e:'🐻', t:'同一家' + s.topShop + '連續 ' + s.streak + ' 天，店員比你朋友熟你' });
+  if (ns) L.push({ e:ic('eyeoff'), t:'你說要衝「' + ns.name + '」，之後 0 張新發票' });
+  L.push({ e:ic('shop'), t:'人生的 ' + s.convPct + '% 在超商結帳' });
+  L.push({ e:ic('repeat'), t:'同一家' + s.topShop + '連續 ' + s.streak + ' 天，店員比你朋友熟你' });
   if (ans.q1 === 'roam' && s.newShops === 0)
-    L.push({ e:'🙃', t:'你說「每週不同地方」，發票沒看到' });
+    L.push({ e:ic('alert'), t:'你說「每週不同地方」，發票沒看到' });
   if (ans.q2 === 'vary' && s.convPct >= 50)
-    L.push({ e:'🙃', t:'你說「到處吃」，' + s.conv + ' 張超商發票舉手' });
+    L.push({ e:ic('alert'), t:'你說「到處吃」，' + s.conv + ' 張超商發票舉手' });
   /* 半徑的吐槽在分數卡,這裡只給數字;「只」不能亂用,6.5 公里說「只」就變假話 */
-  L.push({ e:'📏', t:'週末' + (s.radius < 1000 ? '只移動 ' : '平均移動 ') + radTxt(s.radius) });
-  if (s.deliv > 0) L.push({ e:'🛵', t:'這個月最常見到你的人：外送員' });
-  L.push({ e:'🆕', t:'新店嘗試 ' + s.newShops + ' 家，勇氣同分' });
+  L.push({ e:ic('ruler'), t:'週末' + (s.radius < 1000 ? '只移動 ' : '平均移動 ') + radTxt(s.radius) });
+  if (s.deliv > 0) L.push({ e:ic('scooter'), t:'這個月最常見到你的人：外送員' });
+  L.push({ e:ic('sparkle'), t:'新店嘗試 ' + s.newShops + ' 家，勇氣同分' });
   return L.slice(0, EV_MAX);
 }
 
@@ -1102,7 +1279,7 @@ function evidence(s, ans) {
    官方那組是真的可查(2026-07 查證);在地／社群那組是示範資料,不冒充官方——
    口徑鐵律的同一個原則:要標來源就標得出來,標不出來就說是示範。 */
 var SOURCES = {
-  gov:   { tag:'🏛️ 100 亮點', name:'2026-2027 台灣觀光100亮點', by:'交通部觀光署',
+  gov:   { tag:'100 亮點', name:'2026-2027 台灣觀光100亮點', by:'交通部觀光署',
            note:'中央與地方推薦＋百萬民眾票選',
            url:'https://spotlightaward.taiwan.net.tw/spotlight_n.php', at:'2026-07 查證' },
   /* 0731:原本這一組寫「示範資料 · 正式版接社群熱度與縣市觀光局清單」。
@@ -1111,9 +1288,7 @@ var SOURCES = {
         confidence: MEDIUM、NOT validated against live search-volume data。
         所以文案只敢說「開搜尋結果」,不敢說「熱門排名」。
         把未驗證的 saturation/trend 畫成熱度條,只是把示範資料包裝得更像真的。 */
-  local: { tag:'💬 社群在聊',  name:'IG／Threads／小紅書 上的實際討論',
-           by:'每張卡下面的鈕會開該平台的搜尋結果',
-           note:'我們沒有熱度數據,給的是連結不是排名', url:'', at:'' }
+  local: { tag:'', name:'', by:'', note:'', url:'', at:'' }   /* 0731:標頭文字整段移除,來源改由每張卡的 IG/Threads 鈕自己講 */
 };
 
 /* ══ 社群搜尋(0731)═══════════════════════════════════════════
@@ -1130,24 +1305,22 @@ var SOCIAL = {
                return 'https://www.instagram.com/explore/tags/'
                     + encodeURIComponent(String(q).replace(/[\s·・、,，.。]/g, '')) + '/'; } },
   threads: { nm:'Threads', url:function (q, t) {
-               return 'https://www.threads.net/search?q=' + encodeURIComponent(q + ' ' + t); } },
-  xhs:     { nm:'小紅書',  url:function (q, t) {
-               return 'https://www.xiaohongshu.com/search_result?keyword=' + encodeURIComponent(q + ' ' + t); } }
+               return 'https://www.threads.net/search?q=' + encodeURIComponent(q + ' ' + t); } }
 };
 /* 只留這顆單元用得到的詞。plats 順序 = 那個詞在哪個平台最有份量(照關鍵字表)。
    ⚠️ 刻意不用「秘境」:那份表的 scarcity_proof 明確寫了
       「'秘境' with a paved carpark」已經不管用,而這幾個地點都有鋪好的停車場。
       硬掛「秘境」就是它警告的那種 unearned tag —— 在台灣讀起來就是標題殺人。 */
 var TAGS = {
-  '私房景點': { plats:['xhs','ig','threads'] },
-  '慢旅':     { plats:['ig','threads','xhs'] },
-  '老屋咖啡': { plats:['ig','xhs','threads'] },
-  '打卡景點': { plats:['ig','xhs','threads'] },
-  '網美景點': { plats:['ig','xhs','threads'] },
-  '山系生活': { plats:['ig','xhs','threads'] },
-  '免費景點': { plats:['xhs','ig','threads'] },
-  '一日遊':   { plats:['xhs','ig','threads'] },
-  '野溪溫泉': { plats:['ig','xhs','threads'], season:'10–3 月枯水期水位低才進得去' }
+  '私房景點': { plats:['ig','threads'] },
+  '慢旅':     { plats:['ig','threads'] },
+  '老屋咖啡': { plats:['ig','threads'] },
+  '打卡景點': { plats:['ig','threads'] },
+  '網美景點': { plats:['ig','threads'] },
+  '山系生活': { plats:['ig','threads'] },
+  '免費景點': { plats:['ig','threads'] },
+  '一日遊':   { plats:['ig','threads'] },
+  '野溪溫泉': { plats:['ig','threads'], season:'10–3 月枯水期水位低才進得去' }
 };
 function socialClick(plat, tag, poi, q) {
   var p = SOCIAL[plat]; if (!p) return;
@@ -1158,43 +1331,45 @@ function socialClick(plat, tag, poi, q) {
 function socRow(p) {
   var tags = p.tags || [];
   if (!tags.length) return '';
-  var q = p.sq || p.q, main = tags[0], meta = TAGS[main] || { plats:['ig','xhs','threads'] };
+  var q = p.sq || p.q, main = tags[0], meta = TAGS[main] || { plats:['ig','threads'] };
   return '<div class="soc">'
     + tags.map(function (t) { return '<span class="sh">#' + t + '</span>'; }).join('')
+    /* 鈕上放各自的品牌 logo,不是文字(Robert 0731)。
+       aria-label 留平台名字 —— 圖示對用讀螢幕的人沒有意義。 */
     + meta.plats.map(function (pl) {
-        return '<button onclick="socialClick(\'' + pl + '\',\'' + main + '\',\'' + p.k + '\',\''
-             + q + '\')">' + SOCIAL[pl].nm + '</button>';
+        return '<button aria-label="' + SOCIAL[pl].nm + '" onclick="socialClick(\'' + pl
+             + '\',\'' + main + '\',\'' + p.k + '\',\'' + q + '\')">' + ic(pl) + '</button>';
       }).join('')
-    + (meta.season ? '<span class="sn">⏳ ' + meta.season + '</span>' : '')
+    + (meta.season ? '<span class="sn">' + ic('hourglass') + ' ' + meta.season + '</span>' : '')
     + '</div>';
 }
 /* 距離是從板橋府中一帶抓的直線距離,示範用。正式版用中台給的座標算。 */
 var SPOTS = [
-  { k:'linpark',  src:'local', emoji:'🌳', name:'府中商圈 · 林本源園邸', km:1.3, q:'林本源園邸',
+  { k:'linpark',  src:'local', emoji:'🌳', icon:'tree', name:'府中商圈 · 林本源園邸', km:1.3, q:'林本源園邸',
     tags:['私房景點','慢旅'],
     why:function(s){ return '1.3 公里，比你週末的 ' + radTxt(s.radius) + '多一點——今天先破這個'; } },
-  { k:'nancun',   src:'local', emoji:'🏘️', name:'四四南村',             km:7.6, q:'四四南村',
+  { k:'nancun',   src:'local', emoji:'🏘️', icon:'house', name:'四四南村',             km:7.6, q:'四四南村',
     tags:['老屋咖啡','打卡景點'],
     why:function(s){ return '走完等於你這個月的移動總量'; } },
-  { k:'ntcart',   src:'gov',   emoji:'🖼️', name:'新北市美術館（鶯歌）', km:8.0, q:'新北市美術館',
+  { k:'ntcart',   src:'gov',   emoji:'🖼️', icon:'art', name:'新北市美術館（鶯歌）', km:8.0, q:'新北市美術館',
     tags:['網美景點','打卡景點'],
     why:function(s){ return '新店嘗試 ' + s.newShops + ' 家。這裡連館都是新的'; } },
-  { k:'dadaocheng',src:'gov',  emoji:'🏮', name:'大稻埕',               km:8.5, q:'大稻埕',
+  { k:'dadaocheng',src:'gov',  emoji:'🏮', icon:'lantern', name:'大稻埕',               km:8.5, q:'大稻埕',
     tags:['老屋咖啡','慢旅'],
     why:function(s){ return '官方票選出來的地方,你 90 天內一張發票都沒留在那'; } },
-  { k:'hushan',   src:'local', emoji:'⛰️', name:'虎山親山步道',         km:9.5, q:'虎山親山步道',
+  { k:'hushan',   src:'local', emoji:'⛰️', icon:'mountain', name:'虎山親山步道',         km:9.5, q:'虎山親山步道',
     tags:['山系生活','免費景點'],
     why:function(s){ return '外送員這個月見你 ' + s.deliv + ' 次，山一次都沒見過你'; } },
-  { k:'songshan', src:'gov',   emoji:'🎨', name:'松山文創園區',         km:12.0, q:'松山文創園區',
+  { k:'songshan', src:'gov',   emoji:'🎨', icon:'palette', name:'松山文創園區',         km:12.0, q:'松山文創園區',
     tags:['打卡景點','老屋咖啡'],
     why:function(s){ return '你的圓是 ' + radTxt(s.radius) + '，這裡 12 公里。捷運就到'; } },
-  { k:'maokong',  src:'gov',   emoji:'🍃', name:'貓空',                 km:16.0, q:'貓空纜車', sq:'貓空',
+  { k:'maokong',  src:'gov',   emoji:'🍃', icon:'leaf', name:'貓空',                 km:16.0, q:'貓空纜車', sq:'貓空',
     tags:['慢旅','私房景點'],
     why:function(s){ return '纜車上去,連走路都不用——你連這樣都不去?'; } },
-  { k:'tamsui',   src:'gov',   emoji:'⛵', name:'淡水漁人碼頭',         km:24.0, q:'淡水漁人碼頭',
+  { k:'tamsui',   src:'gov',   emoji:'⛵', icon:'boat', name:'淡水漁人碼頭',         km:24.0, q:'淡水漁人碼頭',
     tags:['一日遊','打卡景點'],
     why:function(s){ return '24 公里。你這個月的移動總量還不到它的一半'; } },
-  { k:'wulai',    src:'gov',   emoji:'🚞', name:'烏來台車',             km:28.0, q:'烏來台車', sq:'烏來',
+  { k:'wulai',    src:'gov',   emoji:'🚞', icon:'tram', name:'烏來台車',             km:28.0, q:'烏來台車', sq:'烏來',
     tags:['野溪溫泉','慢旅'],
     why:function(s){ return '你的紀錄是 ' + radTxt(s.radius) + '。28 公里,一次作廢'; } }
 ];
@@ -1202,8 +1377,8 @@ var SPOTS = [
 /* 傳給 UK.poi 的字典(kit 的 bind 介面不動,只在 init 呼叫一次) */
 var POI = {};
 SPOTS.forEach(function (p) {
-  POI[p.k] = { emoji:p.emoji, name:p.name, q:p.q, why:'', info:'',
-    addLabel:'🧾 發票載具帶你衝', onAdd:function (vf, row) { togglePick(vf, row); } };
+  POI[p.k] = { emoji:ic(p.icon || 'pin'), name:p.name, q:p.q, why:'', info:'',
+    addLabel:'發票載具帶你衝', onAdd:function (vf, row) { togglePick(vf, row); } };
 });
 
 function spotsSorted() { return SPOTS.slice().sort(function (a, b) { return a.km - b.km; }); }
@@ -1235,22 +1410,22 @@ function spotHTML(p, s) {
   var busted = ns && ns.k === p.k;                     /* 上次排的就是這個景點 */
   return '<div class="spot">'
     + '<div class="row" data-poi="' + p.k + '" role="button" tabindex="0">'
-    + '<span class="re">' + p.emoji + '</span>'
+    + '<span class="re">' + ic(p.icon || 'pin') + '</span>'
     + '<div class="rb"><b>' + p.name + '</b>'
     + '<div class="meta"><span>' + p.km + ' 公里</span>'
-    + '<span class="tag' + (p.src === 'gov' ? '' : ' no') + '">' + src.tag + '</span>'
+    + (src.tag ? '<span class="tag">' + ic('gov') + ' ' + src.tag + '</span>' : '')
     + (busted ? '<span class="tag no">上次你說要來</span>' : '') + '</div>'
     + '<i>' + why + '</i>' + socRow(p) + '</div>'
     + '<button class="uk-vf rowbtn' + (picked ? ' done' : '') + '" data-label="帶你衝">'
-    + (picked ? '✅ 已排入' : '帶你衝') + '</button>'
+    + (picked ? ic('check') + ' 已排入' : '帶你衝') + '</button>'
     + '</div></div>';
 }
 function togglePick(vf, row) {
   if (!vf) return;
   var k = row.getAttribute('data-poi'), picks = ST.picks || {};
   var label = vf.getAttribute('data-label') || '帶你衝';
-  if (picks[k]) { delete picks[k]; vf.classList.remove('done'); vf.textContent = label; }
-  else { picks[k] = 1; vf.classList.add('done'); vf.textContent = '✅ 已排入';
+  if (picks[k]) { delete picks[k]; vf.classList.remove('done'); vf.innerHTML = label; }
+  else { picks[k] = 1; vf.classList.add('done'); vf.innerHTML = ic('check') + ' 已排入';
          UK.toast('排進出走清單了——別又滑掉'); }
   /* 記下「什麼時候排的」與「當時幾張發票」——下次回來就是用這兩個數字拆穿他 */
   ST.picks = picks; ST.pickAt = Date.now(); ST.pickInv = invN();
@@ -1341,7 +1516,7 @@ function showChk() {
   }
   /* 講清楚降的是哪一部分 —— 不要讓他以為消費內容已經算進去了 */
   document.getElementById('chkCause').textContent = (after < before)
-    ? '去了一個新地方,🆕 新店嘗試那一項動了。這筆消費的內容要等發票歸戶才會再掉。'
+    ? '去了一個新地方,「新店嘗試」那一項動了。這筆消費的內容要等發票歸戶才會再掉。'
     : '出門記錄下來了。這筆消費的內容要等發票歸戶才會反映到分數上。';
 
   document.getElementById('chk').classList.add('on');
@@ -1370,7 +1545,7 @@ function planHTML(s) {
   }
   var tot = list.reduce(function (a, p) { return a + p.km; }, 0);
   return '<div class="plan">'
-    + '<h3>🗺️ 由近到遠,這樣走</h3>'
+    + '<h3>' + ic('map') + ' 由近到遠,這樣走</h3>'
     + '<ol>' + list.map(function (p) {
         return '<li><b>' + p.name + '</b>　' + p.km + ' 公里</li>'; }).join('') + '</ol>'
     + '<div class="tot">' + list.length + ' 站 · 直線距離合計 ' + (Math.round(tot * 10) / 10)
@@ -1378,7 +1553,7 @@ function planHTML(s) {
     + '<div class="chain">到了之後:結帳報手機條碼 → 發票自動歸戶 → 下次進來這裡的數字會動。'
     + '<br>這就是我們要的那條鏈:出門 → 消費 → 發票 → 再被戳一次。</div>'
     + '</div>'
-    + '<button class="btn p" onclick="openRoute()">🧭 Google map 帶你去</button>'
+    + '<button class="btn p" onclick="openRoute()">' + ic('compass') + ' Google map 帶你去</button>'
     /* 反諷版:不講功能(降低無聊值),講他不做的後果——沒刷就等於沒去過 */
     + '<div class="sec"><button onclick="planCarrier()">刷載具，不然誰知道你去過？</button></div>';
 }
@@ -1395,6 +1570,7 @@ function renderRx(s) {
         var g = list.filter(function (p) { return (p.src || 'local') === key; });
         if (!g.length) return '';
         var src = SOURCES[key];
+        if (!src.name) return g.map(function (p) { return spotHTML(p, s); }).join('');
         return '<div class="grp">' + src.tag + ' ' + src.name
              + '<small>' + src.by + ' · ' + src.note + (src.at ? ' · ' + src.at : '')
              + (src.url ? ' · <a href="' + src.url + '" target="_blank" rel="noopener">看名單</a>' : '')
@@ -1495,6 +1671,7 @@ window.addEventListener('scroll', function () {
 
 /* 頁面上寫死的 <a target="_blank">(「看名單」那些官方來源連結)在 App webview 裡
    跟 window.open 是同一個毛病,委派給 UK.openExternal 統一處理 */
+paintIcons();
 UK.bindExternalLinks(document);
 applyDims();
 entryRender();
@@ -1503,7 +1680,7 @@ initDiag();
    不會退到一個他沒看過的入口頁。 */
 if (isDlLanding()) {
   var _dlB = document.getElementById('dlBtn');
-  if (!DL_URL) { _dlB.textContent = '⬇️ 下載發票載具（網址待設定）'; _dlB.disabled = true; }
+  if (!DL_URL) { _dlB.textContent = ic('download') + ' 下載發票載具（網址待設定）'; _dlB.disabled = true; }
   nav.reset('v8');
   UK.track('bored_dl_view', { plat: uaPlat(), src: dlSrc() });   /* ⚠️ 含社群預抓,只能當上限 */
 } else nav.reset('v0');

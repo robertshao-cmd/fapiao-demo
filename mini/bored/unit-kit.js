@@ -517,7 +517,10 @@
         m.querySelector('.uk-sheet-cancel').onclick = function () { UK.poi.close(); };
         document.body.appendChild(m); this._el = m;
       }
-      m.querySelector('.uk-poi-emoji').textContent = p.emoji || '📍';
+      /* 0731:改成 innerHTML —— 單元可能傳 svg 圖示(無聊快篩把 emoji 全換成
+         發票載具 App 風格的線條圖了)。textContent 會把 <svg> 當字面文字印出來。
+         對還在傳 emoji 的單元(解毒吧/幾歲破產)完全沒差,emoji 本來就是合法 HTML 文字。 */
+      m.querySelector('.uk-poi-emoji').innerHTML = p.emoji || '📍';
       m.querySelector('.uk-poi-name').textContent = p.name;
       m.querySelector('.uk-poi-why').textContent = p.why || '';
       var extra = shopKey ? '　·　' + UK.shops.tag(shopKey) : '';
