@@ -397,6 +397,15 @@
         var s = document.createElement('script');
         s.async = true;
         s.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(id);
+        /* 0731:分得出「腳本真的載到」與「只是把標籤插進去了」。
+           ⚠️ 底下的 this.ready = true 只代表沒丟例外,**不代表 gtag.js 載得到**。
+           在 App 的 WebView 裡如果 googletagmanager.com 被內容阻擋／網域白名單擋掉,
+           整個 GA4 會靜默失效:畫面完全正常、console 乾淨、一個事件都不會到。
+           跟今天那個 window.open 是同一種失敗模式,所以一定要有個地方看得出來。
+           self 而不是 this:onload 觸發時的 this 是 script 元素。 */
+        var self = this;
+        s.onload  = function () { self.scriptOk = true; };
+        s.onerror = function () { self.scriptFail = true; };
         document.head.appendChild(s);
         global.gtag('js', new Date());
         /* 單元是獨立頁面,page_view 就讓 GA4 自己送(不像 SPA 要自己補);

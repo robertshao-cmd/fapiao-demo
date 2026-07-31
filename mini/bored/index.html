@@ -23,8 +23,8 @@
   }
 })();
 </script>
-<script src="qrcode.min.js?v=5ba04c68"></script>
-<script src="unit-kit.js?v=5ba04c68"></script>
+<script src="qrcode.min.js?v=06837a5f"></script>
+<script src="unit-kit.js?v=06837a5f"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#262626;--red:#01AFA2;--mut:#8C8C8C;--line:#F0F0F0;--bg:#F5F5F5}
@@ -215,24 +215,6 @@
      真機上還是差幾 px 的話,用 ?top=NN 直接指定(px),不用改程式重部署。 */
   #hostpad{height:0}
   html.nochrome #hostpad{height:var(--hostTop, calc(env(safe-area-inset-top, 0px) + 56px))}
-  /* ── 🔧 連線自檢(只有測試環境/開發參數/連點五下臉才出現,正式使用者看不到)── */
-  .diag{background:#262626;color:#D9D9D9;border-radius:14px;padding:13px;margin-top:12px;
-        font-size:12px;line-height:1.75;text-align:left}
-  .diag h4{font-size:12.5px;font-weight:900;color:#8ADAD4;margin-bottom:7px}
-  .diag .kv{display:flex;gap:8px;border-bottom:1px dashed rgba(255,255,255,.12);padding:4px 0}
-  .diag .kv:last-of-type{border-bottom:none}
-  .diag .kv span{flex:none;width:104px;color:#BFBFBF;font-weight:700}
-  .diag .kv b{flex:1;min-width:0;font-weight:800;word-break:break-all}
-  .diag .ok{color:#55C9C1} .diag .bad{color:#FF6A49} .diag .warn{color:#FFD09A}
-  .diag input{width:100%;margin-top:9px;padding:10px;border-radius:9px;border:1px solid rgba(255,255,255,.2);
-              background:#141414;color:#fff;font-size:14px;font-family:ui-monospace,monospace}
-  .diag .dbtn{width:100%;margin-top:8px;padding:11px;border-radius:9px;background:#017C73;
-              color:#fff;font-size:13px;font-weight:800;min-height:44px}
-  .diag .pv{font-size:10.5px;color:#8C8C8C;margin-top:9px;line-height:1.7}
-  .diag pre{background:#141414;border-radius:9px;padding:9px;margin-top:8px;font-size:10.5px;
-            line-height:1.6;max-height:190px;overflow:auto;white-space:pre-wrap;word-break:break-all}
-  .diagOpen{font-size:11px;color:#8C8C8C;text-decoration:underline;text-underline-offset:3px;
-            padding:12px 6px;min-height:44px;display:block;margin:2px auto 0}
   /* ── 掃完載具的打卡卡(0731)────────────────────────────────
      整顆單元的敘事收尾:那隻在雷達裡一直被拉回沙發的人,這次真的走掉了。 */
   .chk{position:fixed;inset:0;z-index:9500;display:none;align-items:center;justify-content:center;
@@ -300,9 +282,6 @@
     <div id="lastBox"></div>
     <button class="btn p" id="cta" onclick="enter()">我敢測</button>
     <div class="sec" id="retest" style="display:none"><button onclick="retest()">重新驗一次</button></div>
-    <!-- 連線自檢入口:預設不存在,由 initDiag() 決定要不要長出來 -->
-    <button class="diagOpen" id="diagOpen" style="display:none" onclick="toggleDiag()"><span class="wr"></span> 發票 API 連線自檢</button>
-    <div id="diagBox"></div>
   </div>
 
   <!-- v1 訪談:兩題都要答(落差不能靠預設值製造) -->
@@ -464,7 +443,19 @@ if (UK.apiBase) UK.data.load(UK.apiBase);
    同一個 property 底下還有 iOS/Android 兩條 App 串流,所以報表裡要用
    「平台」維度或 hostname 把我們的 H5 流量跟 App 原生流量分開看。 */
 var GA4_ID = 'G-MTZ5H145TC';
-UK.ga.init(GA4_ID, 'bored');
+/* 0731:只有真的部署到 ailab 才送 GA4。
+   之前是無條件 init,結果我在 localhost 跑的每一次自動化測試都寫進正式 property
+   ——一天下來上百筆。量小的時候被 App 的 8.7 萬事件淹沒看不出來,
+   但上架初期分母小,這些假流量會把完成率／閉環率整組灌歪。
+   不送 GA4 不影響其他兩條路:UK.track 照樣寫 console(開發時看得到)、
+   照樣打中台 /track(如果有 apiBase)。 */
+function gaShouldSend() {
+  var h = location.hostname;
+  return h === 'ailab-dev.cmoney.tw' || h === 'ailab-prod.cmoney.tw';
+}
+var GA_ON = gaShouldSend();
+if (GA_ON) UK.ga.init(GA4_ID, 'bored');
+else if (window.console) console.info('[bored] 非 ailab 環境 → GA4 不啟動(只留 console 與中台 /track)');
 
 /* ══ 外層自己有標題列時,把本單元那條收掉(0731 Robert:返回鍵重疊)═══════
    本單元的 .top 有「‹ 返回」,App webview 外面也有一條原生返回——兩條疊在一起。
@@ -509,7 +500,7 @@ if (HOST_CHROME) {
      · **不會把條碼送進任何 API 網址** —— 中台 /features/summary 認的是 session
        不是條碼,把條碼塞 query 只會讓它落進中台的 access log,那就是「落地」。
        條碼在這裡的唯一用途是**本地比對**:確認 App 帶進來的 cid 是不是你本人。 */
-var _bc = { typed: '', fromCid: '' };
+var _bc = { fromCid: '' };   /* 只留 cid 解出來的條碼(給條碼浮層用) */
 function b64url(s) {                       /* Base64URL(RFC 4648):-_ 要換回 +/,還要補 padding */
   try {
     var t = String(s).replace(/-/g, '+').replace(/_/g, '/');
@@ -517,7 +508,6 @@ function b64url(s) {                       /* Base64URL(RFC 4648):-_ 要換回 +
     return atob(t);
   } catch (e) { return ''; }
 }
-function maskBc(b) { return !b ? '' : (b.length <= 4 ? '***' : b.slice(0, 3) + '***' + b.slice(-2)); }
 function validBc(b) { return /^\/[0-9A-Z.+\-]{7}$/.test(b || ''); }   /* 手機條碼 = / + 7 碼,共 8 碼 */
 try {
   var _cidQ = new URLSearchParams(location.search).get('cid');
@@ -544,123 +534,6 @@ try {
         · 不寫 localStorage、不寫 console */
 if (validBc(_bc.fromCid)) UK.carrier.setCode(_bc.fromCid);
 
-var _diagOn = false;
-function toggleDiag() { _diagOn = !_diagOn; renderDiag(); UK.track('bored_diag_toggle', { on: _diagOn }); }
-function dRow(k, v, cls) {
-  return '<div class="kv"><span>' + k + '</span><b class="' + (cls || '') + '">' + v + '</b></div>';
-}
-function diagRows() {
-  var inv = UK.data.INV, plat = UK.data.source === 'platform';
-  var pad = document.getElementById('hostpad');
-  var padH = pad ? Math.round(pad.getBoundingClientRect().height) : 0;
-  var h = dRow('環境', (location.hostname || '(本機檔案)') + (HOST_CHROME ? ' · 外層有標題列' : ''))
-    /* 真機上調 banner 讓位:看這個數字,不夠就 ?top=NN 加大、太多就減小 */
-    + dRow('banner 讓位', HOST_CHROME
-             ? (padH + ' px（不夠或太多用 ?top=NN 調）·  篩選條吸附 '
-                + (getComputedStyle(document.documentElement).getPropertyValue('--topH') || '?').trim())
-             : '不需要（有自己的標題列）')
-    + dRow('中台 apiBase', UK.apiBase || '無 —— 這台不連中台,一定拿不到真發票',
-           UK.apiBase ? 'ok' : 'warn')
-    + dRow('資料來源', plat ? 'platform（真發票）' : 'demo（示範值，不是你的）', plat ? 'ok' : 'bad')
-    + dRow('近 30 天', inv.d30.n + ' 張 · ' + inv.d30.shops + ' 家'
-           + (plat ? '' : '（示範值本來就是 47／23）'))
-    + dRow('App 帶的 cid', _bc.fromCid
-             ? (maskBc(_bc.fromCid) + (validBc(_bc.fromCid) ? ' ✓ 解出合法條碼' : ' ✗ 解不出合法條碼'))
-             : '沒有 —— 這次不是從 App 外開進來的',
-           _bc.fromCid ? (validBc(_bc.fromCid) ? 'ok' : 'bad') : 'warn')
-    /* 「我的手機條碼」浮層到底出示誰的號碼 —— 這一行就是驗收點 */
-    + dRow('條碼浮層', UK.carrier.isReal()
-             ? '出示你自己的載具號 ' + maskBc(UK.carrier.code()) + ' ✓'
-             : '示範條碼 ' + UK.carrier.DEMO + '（App 沒帶 cid，或 cid 解不出合法條碼）',
-           UK.carrier.isReal() ? 'ok' : 'warn');
-  if (_bc.typed) {
-    h += dRow('你輸入的', maskBc(_bc.typed) + (validBc(_bc.typed) ? ' ✓ 格式正確' : ' ✗ 格式不對（要 / 開頭共 8 碼）'),
-              validBc(_bc.typed) ? 'ok' : 'bad')
-      + dRow('兩邊比對', !_bc.fromCid ? '沒有 cid 可比'
-               : (_bc.typed === _bc.fromCid ? '一致 ✓ App 帶進來的就是你本人' : '不一致 ✗ App 帶的是別人的條碼'),
-             !_bc.fromCid ? 'warn' : (_bc.typed === _bc.fromCid ? 'ok' : 'bad'));
-  }
-  return h;
-}
-function renderRows() {
-  var r = document.getElementById('diagRows');
-  if (r) r.innerHTML = diagRows();
-}
-function renderDiag() {
-  var box = document.getElementById('diagBox');
-  if (!_diagOn) { box.innerHTML = ''; return; }
-  if (!box.firstChild) {
-    /* 骨架只建一次:輸入框不能跟著資料列一起重畫,不然打到一半就被清掉 */
-    box.innerHTML = '<div class="diag"><h4><span class="wr"></span> 發票 API 連線自檢</h4><div id="diagRows"></div>'
-      + '<input id="bcIn" type="text" inputmode="text" autocapitalize="characters"'
-      + ' autocomplete="off" spellcheck="false" placeholder="輸入你的手機條碼，例：/ABC1234">'
-      + '<button class="dbtn" onclick="runDiag()">測一次中台連線</button>'
-      + '<pre id="diagOut" style="display:none"></pre>'
-      + '<div class="pv">條碼只留在這個畫面的記憶體：不送 GA4、不寫 console、不存 localStorage、'
-      + '也不會塞進任何 API 網址。中台認的是你在 App 裡的登入狀態，不是條碼——'
-      + '輸入條碼的用途是<b>本地比對</b> App 帶進來的 cid 是不是你本人。</div></div>';
-    document.getElementById('bcIn').addEventListener('input', function () {
-      _bc.typed = this.value.trim().toUpperCase();
-      renderRows();
-    });
-  }
-  renderRows();
-}
-function runDiag() {
-  var out = document.getElementById('diagOut');
-  out.style.display = '';
-  if (!UK.apiBase) {
-    out.textContent = '這台沒有 apiBase（hostname = ' + (location.hostname || '本機檔案') + '）。\n'
-      + '只有 ailab-dev.cmoney.tw / ailab-prod.cmoney.tw 會連中台；\n'
-      + '本機與公開 demo 一律用示範值，不會發任何請求出去。';
-    UK.track('bored_diag_run', { ok: false, reason: 'no_apibase' });
-    return;
-  }
-  var url = UK.apiBase.replace(/\/$/, '') + '/features/summary', t0 = Date.now();
-  out.textContent = '打中台…\nGET ' + url;
-  fetch(url, { credentials: 'include' })
-    .then(function (r) { return r.text().then(function (b) { return { r: r, body: b }; }); })
-    .then(function (x) {
-      var ms = Date.now() - t0;
-      var L = ['GET ' + url, 'HTTP ' + x.r.status + ' ' + (x.r.statusText || '') + ' · ' + ms + ' ms', ''];
-      if (x.r.status === 401)
-        L.push('401 = 這台沒有登入態（session）。要在真的發票載具 App 裡開才建得起來，',
-               '瀏覽器直開拿到 401 是正常的，不是壞掉。', '');
-      var j = null; try { j = JSON.parse(x.body); } catch (e) {}
-      if (j) {
-        /* 測到真資料就順手接上,畫面直接變成他的數字——不然「測通了」沒有意義 */
-        if (j.invoices) { UK.data.INV = j.invoices; UK.data.source = 'platform'; }
-        if (j.poison && j.poison.length) UK.data.POISON = j.poison;
-        L.push(JSON.stringify(j, null, 2).slice(0, 1200));
-      } else L.push(x.body.slice(0, 600) || '(空回應)');
-      out.textContent = L.join('\n');
-      applyDims(); entryRender(); renderRows();
-      UK.track('bored_diag_run', { ok: x.r.ok, status: x.r.status, ms: ms });
-    })
-    .catch(function (e) {
-      out.textContent = 'GET ' + url + '\n連線失敗：' + e.message
-        + '\n\n常見原因：CORS 被擋、不在公司網路、或中台這支還沒開。';
-      UK.track('bored_diag_run', { ok: false, reason: 'network' });
-    });
-}
-/* 誰看得到這顆入口:測試環境 / ?dev=1 / 本機。
-   另外留一個保底手勢——TestFlight 那台指的是 dev 還是 prod 我沒把握,
-   所以連點五下入口那顆臉也叫得出來(正式使用者不會連點五下同一個 emoji)。 */
-function initDiag() {
-  var btn = document.getElementById('diagOpen'), h = location.hostname;
-  var q; try { q = new URLSearchParams(location.search); } catch (e) { q = null; }
-  if ((q && q.get('dev') === '1') || h === 'ailab-dev.cmoney.tw'
-      || h === 'localhost' || h === '127.0.0.1' || !h) btn.style.display = '';
-  var face = document.querySelector('#v0 .face'), hit = 0, last = 0;
-  if (face) face.addEventListener('click', function () {
-    var now = Date.now();
-    hit = (now - last < 800) ? hit + 1 : 1; last = now;
-    if (hit < 5) return;
-    hit = 0; btn.style.display = '';
-    if (!_diagOn) toggleDiag();
-    UK.toast('連線自檢已開啟');
-  });
-}
 
 /* ══ 文案挑選盤 ══════════════════════════════════════════════
    挑文案只改這三個數字,不用在檔案裡翻。每組的備選都在下面的陣列裡,
@@ -670,7 +543,7 @@ function initDiag() {
      evh   證據卡標題 · 說實話時                   (EVH,       5 句:0-4)
      liar  證據卡標題 · 被抓到說謊時               (EVH_LIAR,  3 句:0-2)
    ═══════════════════════════════════════════════════════════ */
-var COPY = { push: 0, evh: 0, liar: 0 };
+var COPY = { push: 0, evh: 0 };
 
 /* ══ 發票載具下載頁(0731 Robert:分享文字要帶下載連結,而且要追得到)═════
    ⚠️ 等 Robert 給官網下載頁網址,填進 DL_URL 就開通。
@@ -734,14 +607,18 @@ function push() { return PUSH[COPY.push] || PUSH[0]; }
 /* -- 證據卡標題:要刺、要口語、數字要在句子裡 --
    換句改最上面的 COPY.evh / COPY.liar,其餘都留著讓 Robert 挑。
    s.n=近 30 天張數,s.conv=其中在超商的張數(會跟著發票變,不寫死)。 */
+/* 證據卡標題。0731 大修:
+   ① 只用真的算得出來的數字(張數、店家數、平均次數),不再有 62%／全家／外送員
+   ② 語氣從「指控使用者」改成「陳述 + 把懶的角色丟給那隻樹」
+      Robert 指出原本那套是 bad intention —— 箭頭指著拿手機的人。
+      同樣的幽默感,對象換成吉祥物就不傷人,而且那才是吉祥物存在的意義。 */
 var EVH = [
-  function (s) { return s.conv + ' 張發票長得一樣，你不膩我都膩了'; },      /* 0 ← 目前用這句 */
-  function (s) { return '你的發票在重播，' + s.conv + ' 張同一集'; },        /* 1 */
-  function (s) { return s.n + ' 張發票，' + s.conv + ' 張同一種店。膩了沒？'; }, /* 2 */
-  function (s) { return s.conv + ' 張一模一樣，這叫習慣還是卡住？'; },       /* 3 */
-  function (s) { return s.conv + ' 張同一種店，我幫你數的'; }               /* 4 */
+  function (s) { return s.shops + ' 家店，被你排成一張班表'; },              /* 0 ← 目前用這句 */
+  function (s) { return s.n + ' 張發票，' + s.shops + ' 家店。牠看完就躺回去了'; }, /* 1 */
+  function (s) { return '平均每家 ' + s.perShop + ' 次——熟得可以續約了'; },   /* 2 */
+  function (s) { return s.shops + ' 家店輪播中'; },                          /* 3 */
+  function (s) { return '這是你近 30 天的全部去處：' + s.shops + ' 家'; }      /* 4 */
 ];
-/* 被抓到說謊時換這組(這一格本來就最好笑,別浪費) */
 /* -- 掃描過場的台詞:主句戳他,小字補刀。四拍,每拍 620ms。
       要換整組就改 SCAN_SET(現在用第 0 組),不要只改一句,節奏會歪。 -- */
 var SCAN = [
@@ -760,11 +637,8 @@ var SCAN = [
 ];
 var SCAN_SET = 0;
 
-var EVH_LIAR = [
-  function (s) { return '你嘴上這樣講，發票不是這樣寫'; },                  /* 0 ← 目前用這句 */
-  function (s) { return '你剛才那句，' + s.conv + ' 張發票舉手反對'; },      /* 1 */
-  function (s) { return '你說的版本，' + s.n + ' 張發票沒有一張同意'; }      /* 2 */
-];
+/* EVH_LIAR(被抓到說謊時的標題)整組移除 —— 見下面 mismatch() 的說明。
+   它引用的 s.conv 也一起沒了(那是常數推導出來的假數字)。 */
 
 var Q2 = {                                   /* 晚餐怎麼來 → 外送依賴 */
   deliver: { label: '外送送來',         v: 96 },
@@ -775,31 +649,64 @@ var Q2 = {                                   /* 晚餐怎麼來 → 外送依賴
 
 /* -- 示範明細:kit 的 INV 只有張數與商家數,這裡把它拆成可吐槽的結構。
       全部以 UK.data.INV 當分母推導 → ?inv=N / 灌發票之後證據行會跟著變,不寫死 62%。 -- */
-var RAW = { convRatio: .62, delivRatio: .19, newShops: 0, topShop: '全家', baseRadius: 1200 };
+/* ══════════════════════════════════════════════════════════════════
+   我們到底真的知道什麼(0731 大修)
+   ══════════════════════════════════════════════════════════════════
+   Robert 指出原本那些「證據」是 bad intention —— 追下去發現比 tone 更嚴重:
+   它們是**寫死的常數**,不是從任何人的發票算出來的。
+
+     convRatio .62  → 「人生的 62% 在超商結帳」  任何張數都是 62%
+     topShop '全家' → 「同一家全家連續 21 天」    指名一間他可能沒去過的店
+     delivRatio .19 → 「最常見到你的人:外送員」
+     streak         → 從**張數**推的,跟「連續」無關
+     baseRadius     → 半徑其實是他自己選的那個選項,不是量出來的
+
+   而且判斷式 convPct >= 50 恆真(因為 convPct 永遠 62),所以**任何人**
+   選「到處吃」都會被說謊。那不是根據資料的笑話,是一句寫死的台詞穿上證據的外衣。
+   同時也踩到 CLAUDE.md 的口徑鐵律:「不對任何商家貼標」。
+
+   所以這一版把算不出來的東西**刪掉**,不是改文案。剩下的是真的:
+
+     ① 張數 n、商家數 shops   ← 中台 /features/summary(接上就是真的)
+     ② 每家平均去幾次 = n/shops ← 由 ① 推導,是真實的重複度指標
+     ③ 90 天張數                ← 中台
+     ④ 兩題答案                 ← 使用者自己說的(必須標明是「你說的」)
+     ⑤ 出門次數 trips           ← 我們親眼看到他按「店員掃好了」
+
+   ⚠️ 接中台之前 ①③ 是 UK.data 的示範值(47/23/128)。示範值不會假裝是真的:
+      自檢面板的「資料來源」會顯示 demo,而且不會有任何文案說「你的」。 */
 var _forceInv = 0;                  /* （示範）灌發票之後蓋掉 ?inv= */
 function invN() { return _forceInv || UK.data.invCount(); }
 
 function stats() {
-  var n = invN(), inv = UK.data.INV;
-  var conv = Math.round(n * RAW.convRatio), deliv = Math.round(n * RAW.delivRatio);
-  var ans = curAns();
+  var n = invN(), inv = UK.data.INV, ans = curAns();
+  var shops = inv.d30.shops || 0;
+  /* 每家平均去幾次 —— 這是真的重複度:同樣 47 張,去 23 家 vs 去 5 家差很多 */
+  var perShop = shops ? Math.round(n / shops * 10) / 10 : 0;
   return {
-    n: n, conv: conv, deliv: deliv,
-    convPct: n ? Math.round(conv / n * 100) : 0,
-    shops: inv.d30.shops,
+    n: n,
+    shops: shops,
+    perShop: perShop,
     d90n: inv.d90.n,
-    streak: Math.min(21, Math.max(3, Math.round(n * .45))),
-    /* 出門刷了載具 = 真的去了一個新地方 → 新店嘗試 +1。
-       這是我們自己觀測到的事實(他按了「店員掃好了」),不是猜的,所以可以進分項。
-       ⚠️ 只有「出門」這件事會動;那筆消費的**內容**(超商佔比、外送依賴)要等發票
-          真的歸戶才算得出來 —— 打卡卡上也是這樣寫的,不要在文案上講超過資料。 */
-    newShops: RAW.newShops + (ST.trips || 0),
-    topShop: RAW.topShop,
-    radius: ans.q1 ? Q1[ans.q1].radius : RAW.baseRadius,
-    askedRadius: !!ans.q1
+    real: UK.data.source === 'platform',        /* 中台接上了嗎(文案要看這個) */
+    /* 出門刷了載具 = 我們觀測到的事實,可以進分項 */
+    trips: ST.trips || 0,
+    /* ⚠️ 半徑與外送依賴都是**他自己說的**,不是發票算的。
+       欄位名故意帶 said,這樣任何人在寫文案時都會看到「這是自述」。 */
+    saidRadius: ans.q1 ? Q1[ans.q1].radius : null,
+    saidDinner: ans.q2 || null,
+    answered: !!(ans.q1 || ans.q2)
   };
 }
 function radTxt(r) { return r >= 1000 ? (Math.round(r / 100) / 10) + ' 公里' : r + ' 公尺'; }
+/* ══ 半徑的取用規則(0731)══════════════════════════════════════════
+   半徑是**他自己在 Q1 選的**,不是發票量的。跳過訪談就等於我們不知道。
+     radOf(s)   → 有答:公尺數;沒答:null。要顯示的地方一律先判 null。
+     radSort(s) → 只給「推薦排序」用的退路值。排序需要一個數字才跑得動,
+                  但那個數字不會被顯示出來,所以用中位數 2200(同一個商圈)當中性值,
+                  不會變成畫面上的假數字。 */
+function radOf(s) { return (s && typeof s.saidRadius === 'number') ? s.saidRadius : null; }
+function radSort(s) { var r = radOf(s); return r === null ? 2200 : r; }
 /* 分級表情＋戳章詞。結果頁的戳章與分享卡數字旁那顆用同一套(Robert 0731 指定),
    所以抽成一支 —— 兩邊各寫一份遲早會分岔。 */
 /* 分享卡的退路用:圖沒載好時 kit 會 fillText 這顆 emoji。
@@ -974,7 +881,6 @@ function paintIcons() {
   set('#chk .blob2',      mascot('melt', 30));      /* 從沙發剝出來 */
   set('#chk .walk',       mascot('walk', 30));      /* 走掉 */
   set('.top .ttl .tico',  mascot('sleepy', 20));
-  set('#diagOpen .wr',    ic('wrench'));
   set('#dlBtn .dlic',     ic('download'));
   var b = document.querySelectorAll('.hero .big.rcpt');   /* v7 空狀態 / v8 下載落地頁 */
   for (var i = 0; i < b.length; i++) b[i].innerHTML = ic('receipt');
@@ -984,13 +890,21 @@ function paintIcons() {
       (kit 本來就設計成分項可被換掉——UK.data.load 接中台時做的是同一件事) -- */
 function applyDims() {
   var s = stats(), ans = curAns();
+  /* 四個分項。刪掉了「超商佔比」——我們算不出那個數字(原本是常數 .62)。
+     ⚠️ 前兩項是發票算的,後兩項是他自己說的。文案上一定要分清楚,
+        不然又會變成「拿自述當證據」。 */
   UK.data.POISON = [
-    { k: 'conv',   nm: '🏪 超商佔比',   w: .25, v: clamp(Math.round(s.convPct * 1.32)) },
-    { k: 'focus',  nm: '🐻 同店集中度', w: .25, v: clamp(Math.round(40 + s.streak * 2.3)) },
-    { k: 'deliver',nm: '🛵 外送依賴',   w: .20,
-      v: clamp(ans.q2 ? Q2[ans.q2].v : Math.round(45 + RAW.delivRatio * 180)) },
-    { k: 'radius', nm: '📏 週末半徑',   w: .20, v: clamp(Math.round(100 - Math.min(93, s.radius / 70))) },
-    { k: 'fresh',  nm: '🆕 新店嘗試',   w: .10, v: clamp(95 - s.newShops * 18) }
+    /* ① 重複度:同樣 47 張,去 23 家 vs 去 5 家差很多。這是真的。
+          每家平均 1 次 → 幾乎不重複(低分);每家平均 5 次以上 → 很重複(高分) */
+    { k: 'focus',  nm: '重複度(發票)', w: .35,
+      v: clamp(Math.round(30 + Math.min(60, (s.perShop - 1) * 22))) },
+    /* ② 店家數的絕對量:去的地方少本身就是一種無聊,跟張數無關 */
+    { k: 'spread', nm: '去過幾家(發票)', w: .25,
+      v: clamp(Math.round(95 - Math.min(75, s.shops * 2.6))) },
+    /* ③④ 自述,不是發票 */
+    { k: 'radius', nm: '週末半徑(你說的)', w: .25,
+      v: s.saidRadius === null ? 50 : clamp(Math.round(100 - Math.min(93, s.saidRadius / 70))) },
+    { k: 'fresh',  nm: '新地方(觀測到的)', w: .15, v: clamp(95 - s.trips * 18) }
   ];
   return s;
 }
@@ -1124,14 +1038,14 @@ function shareNow() {
     UK.track('bored_share_blocked', { from: nav.current() });
     UK.toast('先測一次,才有東西可以曬'); return;
   }
-  UK.track('bored_share_click', { score:score, radius:stats().radius, from:nav.current() });
+  UK.track('bored_share_click', { score:score, radius:radOf(stats()), from:nav.current() });
   UK.share.open(card);
 }
 /* 原生分享面板的文字(UK.share.send 會用 card().text,這支留給需要純文字時用) */
 function shareMeta() {
   var s = stats();
   return { title: '無聊快篩',
-           text: (typeof score === 'number' ? '我的無聊值 ' + score + '，生活半徑 ' + radTxt(s.radius) + '。' : '')
+           text: (typeof score === 'number' ? '我的無聊值 ' + score + '。' : '')
                  + (EVH[COPY.evh] || EVH[0])(s) + dlLine() };
 }
 
@@ -1217,7 +1131,7 @@ function finish(skipped) {
   ST.inv = invN(); ST.mat = Date.now();
   ST = UK.state.save(KEY, ST);
   entryRender(); showResult();
-  UK.track('bored_result', { score: score, radius: stats().radius, skipped: !!skipped });
+  UK.track('bored_result', { score: score, radius: radOf(stats()), skipped: !!skipped });
 }
 
 function showResult() {
@@ -1245,14 +1159,20 @@ function showResult() {
   document.getElementById('cause').textContent = '出門刷一次載具，這個數字就會往下掉';
 
   /* 生活半徑(併在分數卡裡,一行講完) */
-  document.getElementById('radN').textContent = radTxt(s.radius);
-  document.getElementById('radTxt').textContent = radLine(s);
+  /* 沒回答 Q1 → 我們不知道他的半徑,整行藏起來(不要印 undefined,也不要編一個) */
+  var rr = radOf(s), radl = document.querySelector('#v3 .radl');
+  if (rr === null) { if (radl) radl.style.display = 'none'; }
+  else {
+    if (radl) radl.style.display = '';
+    document.getElementById('radN').textContent = radTxt(rr);
+    document.getElementById('radTxt').textContent = radLine(s);
+  }
   document.getElementById('rxCta').textContent = push();
 
   /* 標題:被抓到說謊換另一組,其餘用刺人那句(數字都在句子裡) */
-  document.getElementById('evh').textContent = (!ST.skipped && mismatch(s, ans))
-    ? (EVH_LIAR[COPY.liar] || EVH_LIAR[0])(s)
-    : (EVH[COPY.evh] || EVH[0])(s);
+  /* 0731:原本這裡會在 mismatch() 命中時換成「你嘴上這樣講,發票不是這樣寫」。
+     那條路已經移除(見 mismatch() 的說明),所以永遠走 EVH。 */
+  document.getElementById('evh').textContent = (EVH[COPY.evh] || EVH[0])(s);
 
   /* 證據:一行一句,不再帶灰色小字(一句話罵完) */
   document.getElementById('ev').innerHTML = evidence(s, ans).map(function (l) {
@@ -1264,14 +1184,21 @@ function showResult() {
    要復原的話:v6 一頁 + 一顆文字連結,算式取 UK.data.formula() 的 total/max/avg。 */
 
 function radLine(s) {                        /* 一句話,不解釋(0727 瘦身) */
-  if (s.radius < 500)  return '外送員的機車比你有見識';
-  if (s.radius < 1000) return '樓下就是你的遠方';
-  if (s.radius < 3000) return '一個商圈就是你的國境';
+  var r = radOf(s);
+  if (r === null)  return '';
+  if (r < 500)  return '外送員的機車比你有見識';
+  if (r < 1000) return '樓下就是你的遠方';
+  if (r < 3000) return '一個商圈就是你的國境';
   return '會動，但去的還是那幾家';
 }
-function mismatch(s, ans) {
-  return (ans.q1 === 'roam' && s.newShops === 0) || (ans.q2 === 'vary' && s.convPct >= 50);
-}
+/* ══ 「說謊偵測」已移除(0731)══════════════════════════════════
+   原本:mismatch() 命中就換一組「你嘴上這樣講,發票不是這樣寫」的標題。
+   移除的原因不是不好笑,是**它不可能是對的**:判斷式吃 convPct,
+   而 convPct 是常數 62,所以 >= 50 恆真 —— 任何人選「到處吃」都會被判說謊,
+   跟他的發票完全無關。用編出來的數字指控使用者說謊,是這顆單元最不該做的事。
+   要復活的話,前提是中台真的給得出消費結構,而且措辭要從「你錯了」
+   改成把兩個事實並排、結論留給他自己下。 */
+function mismatch() { return false; }
 /* 證據行:一行一句,句子裡自己帶數字。不寫「你很無聊」,也不再補灰色說明。
    固定最多 5 行 —— 行數會變的話,主 CTA 就會被擠出首屏(說謊時本來會變 7 行)。
    排序就是優先序:被抓到說謊的那兩行最好笑,所以排在前面,擠掉後面比較弱的。 */
@@ -1280,19 +1207,22 @@ function mismatch(s, ans) {
 var EV_MAX = 4;
 function evidence(s, ans) {
   var L = [];
-  /* 沒去的那行最痛,排第一 —— 它是「你自己說的」對上「發票沒動」 */
+  /* 沒去的那行是真的(存的 pick + 發票數),留著。它講的是事實不是指控。 */
   var ns = noShow();
   if (ns) L.push({ e:ic('eyeoff'), t:'你說要衝「' + ns.name + '」，之後 0 張新發票' });
-  L.push({ e:ic('shop'), t:'人生的 ' + s.convPct + '% 在超商結帳' });
-  L.push({ e:ic('repeat'), t:'同一家' + s.topShop + '連續 ' + s.streak + ' 天，店員比你朋友熟你' });
-  if (ans.q1 === 'roam' && s.newShops === 0)
-    L.push({ e:ic('alert'), t:'你說「每週不同地方」，發票沒看到' });
-  if (ans.q2 === 'vary' && s.convPct >= 50)
-    L.push({ e:ic('alert'), t:'你說「到處吃」，' + s.conv + ' 張超商發票舉手' });
-  /* 半徑的吐槽在分數卡,這裡只給數字;「只」不能亂用,6.5 公里說「只」就變假話 */
-  L.push({ e:ic('ruler'), t:'週末' + (s.radius < 1000 ? '只移動 ' : '平均移動 ') + radTxt(s.radius) });
-  if (s.deliv > 0) L.push({ e:ic('scooter'), t:'這個月最常見到你的人：外送員' });
-  L.push({ e:ic('sparkle'), t:'新店嘗試 ' + s.newShops + ' 家，勇氣同分' });
+  /* 以下每一行都只用真的算得出來的數字 —— 張數、商家數、由兩者推導的平均次數。
+     刪掉的:超商佔比%(常數)、指名商家+連續天數(常數+推導錯)、外送員(常數)。 */
+  if (s.n && s.shops) {
+    L.push({ e:ic('shop'), t:'近 30 天 ' + s.n + ' 張發票，只出現在 ' + s.shops + ' 家店' });
+    if (s.perShop >= 1.5)
+      L.push({ e:ic('repeat'), t:'平均每家去 ' + s.perShop + ' 次——同一批店在輪班' });
+  }
+  /* 自述的東西一定要標「你說的」,不能混進「發票證據」 */
+  if (s.saidRadius !== null)
+    L.push({ e:ic('ruler'), t:'你說週末的活動範圍大約 ' + radTxt(s.saidRadius) + '（這是你說的，不是發票量的）' });
+  L.push({ e:ic('sparkle'), t: s.trips
+    ? '刷載具去過 ' + s.trips + ' 個新地方——這個有算進分數'
+    : '還沒用載具在新地方留下一張發票' });
   return L.slice(0, EV_MAX);
 }
 
@@ -1372,22 +1302,23 @@ function socRow(p) {
 var SPOTS = [
   { k:'linpark',  src:'local', emoji:'🌳', icon:'tree', name:'府中商圈 · 林本源園邸', km:1.3, q:'林本源園邸',
     tags:['私房景點','慢旅'],
-    why:function(s){ return '1.3 公里，比你週末的 ' + radTxt(s.radius) + '多一點——今天先破這個'; } },
+    why:function(s){ return radOf(s) === null ? '1.3 公里——最近的那個，今天先破這個'
+      : '1.3 公里，比你說的 ' + radTxt(radOf(s)) + '多一點——今天先破這個'; } },
   { k:'nancun',   src:'local', emoji:'🏘️', icon:'house', name:'四四南村',             km:7.6, q:'四四南村',
     tags:['老屋咖啡','打卡景點'],
     why:function(s){ return '走完等於你這個月的移動總量'; } },
   { k:'ntcart',   src:'gov',   emoji:'🖼️', icon:'art', name:'新北市美術館（鶯歌）', km:8.0, q:'新北市美術館',
     tags:['網美景點','打卡景點'],
-    why:function(s){ return '新店嘗試 ' + s.newShops + ' 家。這裡連館都是新的'; } },
+    why:function(s){ return '你的清單裡沒有美術館。這裡連館都是新的'; } },
   { k:'dadaocheng',src:'gov',  emoji:'🏮', icon:'lantern', name:'大稻埕',               km:8.5, q:'大稻埕',
     tags:['老屋咖啡','慢旅'],
     why:function(s){ return '官方票選出來的地方,你 90 天內一張發票都沒留在那'; } },
   { k:'hushan',   src:'local', emoji:'⛰️', icon:'mountain', name:'虎山親山步道',         km:9.5, q:'虎山親山步道',
     tags:['山系生活','免費景點'],
-    why:function(s){ return '外送員這個月見你 ' + s.deliv + ' 次，山一次都沒見過你'; } },
+    why:function(s){ return '你的 ' + s.shops + ' 家店裡沒有一座山'; } },
   { k:'songshan', src:'gov',   emoji:'🎨', icon:'palette', name:'松山文創園區',         km:12.0, q:'松山文創園區',
     tags:['打卡景點','老屋咖啡'],
-    why:function(s){ return '你的圓是 ' + radTxt(s.radius) + '，這裡 12 公里。捷運就到'; } },
+    why:function(s){ return '12 公里，捷運就到'; } },
   { k:'maokong',  src:'gov',   emoji:'🍃', icon:'leaf', name:'貓空',                 km:16.0, q:'貓空纜車', sq:'貓空',
     tags:['慢旅','私房景點'],
     why:function(s){ return '纜車上去,連走路都不用——你連這樣都不去?'; } },
@@ -1396,7 +1327,7 @@ var SPOTS = [
     why:function(s){ return '24 公里。你這個月的移動總量還不到它的一半'; } },
   { k:'wulai',    src:'gov',   emoji:'🚞', icon:'tram', name:'烏來台車',             km:28.0, q:'烏來台車', sq:'烏來',
     tags:['野溪溫泉','慢旅'],
-    why:function(s){ return '你的紀錄是 ' + radTxt(s.radius) + '。28 公里,一次作廢'; } }
+    why:function(s){ return '28 公里。你的 ' + s.shops + ' 家店都在市區'; } }
 ];
 
 /* 傳給 UK.poi 的字典(kit 的 bind 介面不動,只在 init 呼叫一次) */
@@ -1415,9 +1346,10 @@ function spotsSorted() { return SPOTS.slice().sort(function (a, b) { return a.km
    圓外不足 3 個才用圓內的補(遠的先),沒有人會被擋掉。 */
 function featured(s) {
   var all = spotsSorted();
-  var out = all.filter(function (p) { return p.km * 1000 > s.radius; });
+  var rs = radSort(s);
+  var out = all.filter(function (p) { return p.km * 1000 > rs; });
   if (out.length >= 3) return out.slice(0, 3);
-  var inside = all.filter(function (p) { return p.km * 1000 <= s.radius; })
+  var inside = all.filter(function (p) { return p.km * 1000 <= rs; })
                   .sort(function (a, b) { return b.km - a.km; });   /* 圓內的話,遠的先 */
   return out.concat(inside).slice(0, 3);
 }
@@ -1487,7 +1419,7 @@ function openRoute() {
   UK.track('plan_route', { n:list.length });
   /* 0729 主訊號:真的點了導航。刷載具只是輔助(發票有時間落差,不能當即時或必要條件) */
   UK.track('bored_map_click', { n:list.length, km:Math.round(list.reduce(function (a, p) { return a + p.km; }, 0) * 10) / 10,
-                                radius:stats().radius, score:score });
+                                radius:radOf(stats()), score:score });
   /* 0731:原本是 window.open(...,'_blank'),在發票載具 TestFlight 的 WKWebView 裡
      回 null 並且完全靜默——按了什麼都不會發生(Robert 回報)。改走 UK.openExternal,
      開不了新視窗就退成同視窗導航,App 原生返回鍵可以回來。 */
@@ -1547,7 +1479,7 @@ function showChk() {
   document.getElementById('chk').classList.add('on');
   try { history.pushState({ uk: 1 }, ''); } catch (e) {}
   UK.track('bored_checkin_view', { score:after, prev:before, drop:before - after,
-                                   trips:ST.trips, radius:stats().radius });
+                                   trips:ST.trips, radius:radOf(stats()) });
   return true;
 }
 function closeChk() {
@@ -1574,7 +1506,7 @@ function planHTML(s) {
     + '<ol>' + list.map(function (p) {
         return '<li><b>' + p.name + '</b>　' + p.km + ' 公里</li>'; }).join('') + '</ol>'
     + '<div class="tot">' + list.length + ' 站 · 直線距離合計 ' + (Math.round(tot * 10) / 10)
-    + ' 公里 · 你的半徑是 ' + radTxt(s.radius) + '</div>'
+    + (radOf(s) === null ? '' : ' · 你說的半徑是 ' + radTxt(radOf(s))) + '</div>'
     + '<div class="chain">到了之後:結帳報手機條碼 → 發票自動歸戶 → 下次進來這裡的數字會動。'
     + '<br>這就是我們要的那條鏈:出門 → 消費 → 發票 → 再被戳一次。</div>'
     + '</div>'
@@ -1604,21 +1536,21 @@ function renderRx(s) {
       }).join('')
     : list.map(function (p) { return spotHTML(p, s); }).join('');
   /* 圓外幾個就講幾個,不要一律說「都在圓外」——半徑大的人會抓到這句是假的 */
-  var outN = list.filter(function (p) { return p.km * 1000 > s.radius; }).length;
+  var outN = list.filter(function (p) { return p.km * 1000 > radSort(s); }).length;
   document.querySelector('#rxLead small').textContent =
       RXMODE === 'mine' ? (mine.length ? '排了 ' + mine.length + ' 個地方。走不走是你的事。' : '還沒排任何地方')
     : RXMODE === 'all'  ? all.length + ' 個地方,自己挑'
-    : '半徑 ' + radTxt(s.radius) + ' · ' + (outN === list.length
+    : (radOf(s) === null ? '' : '你說的半徑 ' + radTxt(radOf(s)) + ' · ') + (outN === list.length
         ? '這 ' + list.length + ' 個都在圓外' : outN + ' 個在圓外');
 }
 function showRx() {
   var s = applyDims();
   document.getElementById('rxLeadT').textContent = push();
   renderRx(s);
-  nav.show('v4'); UK.track('rx_view', { radius:s.radius, mode:RXMODE });
+  nav.show('v4'); UK.track('rx_view', { radius:radOf(s), mode:RXMODE });
   /* 0729 成功訊號:看到推薦清單(主訊號是 map/save,這個是分母) */
   UK.track('bored_reco_view', { mode:RXMODE, n:document.querySelectorAll('#rxList .spot').length,
-                                radius:s.radius, score:score });
+                                radius:radOf(s), score:score });
 }
 /* 「全部」不再是獨立頁,是 v4 的一個模式(留這支是為了外部呼叫不斷掉) */
 function showAll() { RXMODE = 'all'; markMode('all'); showRx(); }
@@ -1627,7 +1559,7 @@ function showAll() { RXMODE = 'all'; markMode('all'); showRx(); }
 function card() {
   var s = stats();
   return {
-    theme: 'bored', emoji: '😶', sub: '無聊值 ' + score + '／100', tint: '生活半徑 ' + radTxt(s.radius),
+    theme: 'bored', emoji: '😶', sub: '無聊值 ' + score + '／100', tint: radOf(s) === null ? (s.shops + ' 家店') : ('你說的半徑 ' + radTxt(radOf(s))),
     score: score, unitTxt: '/100',
     /* 0731 Robert:數字旁邊並排一顆同樣大的分級表情,/100 後面掛小字「無聊值」。
        tierIcon 用 tierOf() —— 跟結果頁的戳章同一套,兩邊講的話才對得上。
@@ -1643,13 +1575,15 @@ function card() {
     head: '無聊快篩',
     /* 圖上那句用「照你這個X法,你很快就要Y了」的句型(Robert 0728 指定的形狀)。
        主題要對得上這顆單元——這裡量的是無聊,不是花錢,所以不寫「照你這個花法」。 */
-    punch: score >= 85 ? '照你這個活法，你很快就要跟沙發長在一起了'
-         : score >= 70 ? '照你這個活法，下週的你跟這週一模一樣'
-         :               '照你這個活法，至少還有得救',
+    /* 0731:原本三句都是「照你這個活法…」——箭頭指著使用者。
+       改成講那隻樹,笑點一樣但不傷人(Robert:bad intention joke)。 */
+    punch: score >= 85 ? '牠已經跟沙發長在一起了'
+         : score >= 70 ? '牠今天也沒打算出門'
+         :               '牠好像真的站起來了',
     stamp: score >= 85 ? '可預測' : (score >= 70 ? '超穩定' : (score >= 50 ? '有點悶' : '還有救')),
     qrHint: '掃碼，驗你自己的圓',
     title: '我的無聊快篩',
-    text: '我的無聊值 ' + score + '，生活半徑 ' + radTxt(s.radius) + '。'
+    text: '我的無聊值 ' + score + '。'
           + (EVH[COPY.evh] || EVH[0])(s) + ' 你呢？' + dlLine(),
     url: location.origin + location.pathname
   };
@@ -1709,7 +1643,6 @@ paintIcons();
 UK.bindExternalLinks(document);
 applyDims();
 entryRender();
-initDiag();
 /* ?dl=1 → 落地頁當根,不是 v0。用 nav.reset 而不是 nav.show,這樣返回鍵
    不會退到一個他沒看過的入口頁。 */
 if (isDlLanding()) {
