@@ -183,7 +183,7 @@ function urlOf(u){
   /* 用 location.hostname,不要寫死 localhost。
      手機從 LAN IP 開這個殼時,localhost 指的是「手機自己」→ 一定連線被拒。
      跟著殼被開啟的位址走:localhost 開就是 localhost,192.168.x.x 開就是同一台。 */
-  if (SRC === 'local') return './' + u.slug + '/?v=95030bdb';   /* 靜態發佈版:同層資料夾 + 破快取 */
+  if (SRC === 'local') return './' + u.slug + '/?v=5ba04c68';   /* 靜態發佈版:同層資料夾 + 破快取 */
   return 'https://ailab-dev.cmoney.tw/' + (u.devSlug || u.slug);
 }
 

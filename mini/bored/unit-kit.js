@@ -810,9 +810,10 @@
         y += 24 + bh;
       }
       /* ④ 一句說明 */
+      var punchBase = y + 60;
       if (d.punch) {
         ctx.fillStyle = T.sub2; fit(d.punch, '700', 36, CW - 120);
-        ctx.fillText(d.punch, cx, y + 60);
+        ctx.fillText(d.punch, cx, punchBase);
       }
       /* ⑤ 主視覺角色:被內卡下緣裁掉,裁切感=有設計過 */
       var fs = 400;
@@ -822,7 +823,15 @@
       var hImg = (d.heroImg && d.heroImg.complete && d.heroImg.naturalWidth) ? d.heroImg : null;
       if (hImg) {
         var HW = 400, HH = Math.round(HW * hImg.naturalHeight / hImg.naturalWidth);
-        ctx.drawImage(hImg, cx - HW / 2, CY1 + 76 - HH, HW, HH);
+        /* ⚠️ 不能照 emoji 那樣用「底部對齊 CY1+76」定位。
+           emoji 在 400px 下字身高只有約 320,所以頂端落在 CY1-244(=874),
+           剛好在說明句(基線 747)下面。但吉祥物圖是 400x472,同樣底部對齊
+           會讓頂端跑到 CY1-396(=722)—— 比說明句還高 25px,直接壓在字上。
+           Robert 截圖回報的就是這個。
+           改成**錨在說明句下面**:top = 說明句基線 + 34。這樣文案多長都不會被壓到。
+           再用 CY1-130 當下限,保證角色至少露出 130px,不會被推到看不見。 */
+        var heroTop = Math.min((d.punch ? punchBase + 34 : y + 40), CY1 - 130);
+        ctx.drawImage(hImg, cx - HW / 2, heroTop, HW, HH);
       } else {
         ctx.font = fs + 'px sans-serif'; ctx.fillText(d.emoji || '', cx, CY1 + 76);
       }
