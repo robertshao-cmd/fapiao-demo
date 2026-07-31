@@ -23,8 +23,8 @@
   }
 })();
 </script>
-<script src="qrcode.min.js?v=80c922db"></script>
-<script src="unit-kit.js?v=80c922db"></script>
+<script src="qrcode.min.js?v=0d318324"></script>
+<script src="unit-kit.js?v=0d318324"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--mut:#7A8494;--line:#F0E0E1;--bg:#FFF6F5}
@@ -201,6 +201,26 @@
             line-height:1.6;max-height:190px;overflow:auto;white-space:pre-wrap;word-break:break-all}
   .diagOpen{font-size:11px;color:#8B96A3;text-decoration:underline;text-underline-offset:3px;
             padding:12px 6px;min-height:44px;display:block;margin:2px auto 0}
+  /* ── 掃完載具的打卡卡(0731)────────────────────────────────
+     整顆單元的敘事收尾:那隻在雷達裡一直被拉回沙發的人,這次真的走掉了。 */
+  .chk{position:fixed;inset:0;z-index:9500;display:none;align-items:center;justify-content:center;
+       background:rgba(15,20,30,.55);padding:20px}
+  .chk.on{display:flex}
+  .chk .box{background:#fff;border-radius:20px;padding:20px 18px 14px;width:min(340px,100%);
+            text-align:center;box-shadow:0 18px 40px rgba(31,36,48,.28)}
+  .chk .stage{position:relative;height:58px;overflow:hidden}
+  .chk .sofa2{position:absolute;left:6px;bottom:6px;font-size:30px;line-height:1}
+  .chk .walk{position:absolute;left:46px;bottom:8px;font-size:28px;line-height:1;
+             animation:walkOff 2.8s cubic-bezier(.4,0,.6,1) .3s infinite}
+  /* 這組 keyframes 刻意跟 .radar 的 tryRun 相反:那一隻走兩步就被拉回原地,
+     這一隻走出畫面。人家真的出門刷了載具,動畫還把他拉回來就是在打自己的臉。 */
+  @keyframes walkOff{
+    0%{transform:translateX(0);opacity:0}
+    14%{opacity:1}
+    88%{opacity:1}
+    100%{transform:translateX(212px);opacity:0}}
+  .chk .chkT{font-size:14.5px;font-weight:900;color:#5A0E14}
+  .chk .chkU{font-size:11.5px;font-weight:700;color:var(--mut);margin-top:-3px}
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -313,6 +333,20 @@
   <!-- v8 下載落地頁(?dl=1):分享文字裡的下載連結會落到這裡。
        刻意不自動轉址 —— 自動轉的話事件只能在 onload 送,就分不出「社群預抓」
        與「真人點擊」。多一次點擊換乾淨的數字(見上面 DL_URL 那段註解)。 -->
+  <!-- 掃完載具的打卡卡。不是 nav 的 view(它是浮層,蓋在任何一頁上),
+       所以不進 VIEWS,改用 nav 的 sheets 契約讓返回鍵先關它。 -->
+  <div class="chk" id="chk">
+    <div class="box">
+      <div class="stage"><span class="sofa2">🛋️</span><span class="walk">🚶</span></div>
+      <div class="chkT">你真的出門了</div>
+      <div class="big-score" style="margin-top:4px"><b id="chkN">&mdash;</b><span>/100</span></div>
+      <div class="chkU">現在的無聊值</div>
+      <div class="cause" id="chkCause"></div>
+      <button class="btn p" onclick="chkNext()">再排下一站</button>
+      <div class="sec"><button onclick="closeChk()">關掉</button></div>
+    </div>
+  </div>
+
   <div id="v8" style="display:none">
     <div class="hero"><div class="big">🧾</div>
       <h1>發票載具</h1><p>結帳報手機條碼，發票自動歸戶——不用拍、不用存</p></div>
@@ -760,7 +794,10 @@ var nav = UK.nav.create({
   },
   /* 不傳 onHome:嵌在殼/App 裡 kit 會 postMessage 關 webview,單機直開會導回載具首頁。
      這裡寫 toast 反而會把閉環變成死路。 */
-  sheets: function () { return [function () { return UK.closeTopSheet(); }]; }
+  /* 打卡卡排在 kit 的浮層前面:它會蓋在條碼浮層上(掃完才出現),
+     所以返回鍵要先關它。back() 依序呼叫、第一個回 truthy 就停。 */
+  sheets: function () { return [function () { return closeChk(); },
+                               function () { return UK.closeTopSheet(); }]; }
 });
 
 /* 回訪者直接看上次的結果(沒有重新測)。
@@ -1152,8 +1189,42 @@ function openRoute() {
 }
 function planCarrier() {
   UK.carrier.open({ from:'plan', onDone: function () {
-    UK.toast('這筆會進你的載具——下次進來無聊值就會動');
+    /* 有分數就給打卡卡(帶數字);還沒測過就退回原本那句 toast */
+    if (!showChk()) UK.toast('這筆會進你的載具——下次進來無聊值就會動');
   } });
+}
+/* ══ 掃完載具的打卡卡(0731 Robert)═══════════════════════════════
+   原本掃完只有一句 toast「這筆會進你的載具——下次進來無聊值就會動」。
+   Robert 要在掃完當下就看到無聊值,配上那隻走掉的人。
+
+   ⚠️ 只顯示**現在**的無聊值,不顯示「掃完之後的新分數」。
+      發票從結帳到歸戶有幾小時到幾天的落差,掃完那一刻中台根本還沒有新資料。
+      0729 已經拍板過同一件事:「不承諾具體掉幾分(那要真發票回來才算得出來),
+      只講因果方向」。編一個「掉了 3 分」給他看,下次回來發現數字沒動,
+      這個分數就再也不可信 —— 一次性的爽感換掉整個產品的可信度,不划算。
+
+   為什麼不做成 view:它要能蓋在 v3(結果)或 v4(好去處)任何一頁上,
+   關掉之後回到原本那一頁。做成 view 會把使用者原本的位置弄丟。 */
+function showChk() {
+  if (typeof score !== 'number') return false;      /* 還沒測過,沒有數字可給 */
+  document.getElementById('chkN').textContent = score;
+  document.getElementById('chkCause').textContent =
+    '這筆發票進來之後,這個數字會往下掉。回來看它掉多少。';
+  document.getElementById('chk').classList.add('on');
+  try { history.pushState({ uk: 1 }, ''); } catch (e) {}
+  UK.track('bored_checkin_view', { score:score, radius:stats().radius });
+  return true;
+}
+function closeChk() {
+  var m = document.getElementById('chk');
+  if (!m || !m.classList.contains('on')) return false;   /* 回 false 才不會吃掉真正的返回 */
+  m.classList.remove('on');
+  UK.track('sheet_close', { sheet:'checkin' });
+  return true;
+}
+function chkNext() {
+  UK.track('bored_checkin_next', { score:score });
+  closeChk(); RXMODE = 'mine'; markMode('mine'); showRx();
 }
 function planHTML(s) {
   var list = pickedSpots();
