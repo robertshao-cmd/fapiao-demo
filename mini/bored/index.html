@@ -23,8 +23,8 @@
   }
 })();
 </script>
-<script src="qrcode.min.js?v=fcb64bf1"></script>
-<script src="unit-kit.js?v=fcb64bf1"></script>
+<script src="qrcode.min.js?v=80c922db"></script>
+<script src="unit-kit.js?v=80c922db"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--mut:#7A8494;--line:#F0E0E1;--bg:#FFF6F5}
@@ -310,6 +310,21 @@
     <div class="sec"><button onclick="goCarrier()">看我的手機條碼</button></div>
   </div>
 
+  <!-- v8 下載落地頁(?dl=1):分享文字裡的下載連結會落到這裡。
+       刻意不自動轉址 —— 自動轉的話事件只能在 onload 送,就分不出「社群預抓」
+       與「真人點擊」。多一次點擊換乾淨的數字(見上面 DL_URL 那段註解)。 -->
+  <div id="v8" style="display:none">
+    <div class="hero"><div class="big">🧾</div>
+      <h1>發票載具</h1><p>結帳報手機條碼，發票自動歸戶——不用拍、不用存</p></div>
+    <div class="card"><b style="font-size:13px">裝了之後</b>
+      <div style="font-size:12.5px;line-height:2;margin-top:6px">
+        1️⃣ 結帳時報手機條碼，發票自動進來<br>
+        2️⃣ 中獎自動對獎、自動通知<br>
+        3️⃣ 官方小程序都在裡面（你朋友分享給你的就是其中一顆）</div></div>
+    <button class="btn p" id="dlBtn" onclick="dlGo()">⬇️ 下載發票載具</button>
+    <div class="sec"><button onclick="dlSkip()">先看看無聊快篩 &rsaquo;</button></div>
+  </div>
+
 </div>
 <script>
 /* ==============================================================
@@ -564,6 +579,47 @@ function initDiag() {
    ═══════════════════════════════════════════════════════════ */
 var COPY = { push: 0, evh: 0, liar: 0 };
 
+/* ══ 發票載具下載頁(0731 Robert:分享文字要帶下載連結,而且要追得到)═════
+   ⚠️ 等 Robert 給官網下載頁網址,填進 DL_URL 就開通。
+      留空 = 分享文字**不會**出現下載那一行、v8 的鈕會 disabled ——
+      寧可少一行,也不要放一個連到不存在的頁面的連結給使用者。
+
+   為什麼不直接把官網網址貼在分享文字裡:那樣完全追不到。改成先進我們自己的
+   /bored/?dl=1 落地頁,送完事件再導出去,「有幾個人從分享連結去下載」就是
+   我們自己量的,不依賴商店後台或別人的 GA。
+
+   ⚠️ 兩個事件的意義不一樣,報表要用對:
+     bored_dl_view  = 落地頁被開啟。LINE／FB／Slack 會預抓連結產生預覽,
+                      這個數字**會被預抓灌水**,只能當上限看。
+     bored_dl_click = 使用者真的按了下載鈕 → 這才是真人。要看成效看這個。
+   所以刻意不做「自動轉址」:自動轉的話事件只能在 onload 送,就永遠分不出
+   預抓與真人。多一次點擊換到乾淨的數字,而且落地頁自己也能講清楚要下載什麼。 */
+var DL_URL = '';
+function uaPlat() {
+  var u = navigator.userAgent || '';
+  return /iPhone|iPad|iPod/i.test(u) ? 'ios' : (/Android/i.test(u) ? 'android' : 'other');
+}
+function dlSrc() {
+  try { return new URLSearchParams(location.search).get('utm_source') || 'direct'; }
+  catch (e) { return 'direct'; }
+}
+function isDlLanding() {
+  try { return new URLSearchParams(location.search).get('dl') === '1'; } catch (e) { return false; }
+}
+/* 分享文字裡放的連結:指回我們自己的落地頁,帶 utm 讓 GA4 認得來源 */
+function dlShareURL() {
+  if (!DL_URL) return '';
+  return location.origin + location.pathname
+       + '?dl=1&utm_source=bored&utm_medium=share&utm_campaign=share_card';
+}
+function dlGo() {
+  UK.track('bored_dl_click', { plat: uaPlat(), src: dlSrc() });   /* ← 真人才會有 */
+  if (!DL_URL) { UK.toast('下載頁網址還沒設定'); return; }
+  UK.openExternal(DL_URL, { kind: 'app_download' });
+}
+/* 落地頁不能是死路:讓他也能順手進來玩一下(這條也是導流,要埋) */
+function dlSkip() { UK.track('bored_dl_skip', { src: dlSrc() }); nav.reset('v0'); }
+
 /* -- 兩題的答案:每一個選項都真的改分數(不是裝飾) -- */
 var Q1 = {                                   /* 週末人在哪 → 生活半徑 */
   home:     { label: '家裡，躺著',     radius: 300  },
@@ -647,6 +703,14 @@ function stats() {
   };
 }
 function radTxt(r) { return r >= 1000 ? (Math.round(r / 100) / 10) + ' 公里' : r + ' 公尺'; }
+/* 分級表情＋戳章詞。結果頁的戳章與分享卡數字旁那顆用同一套(Robert 0731 指定),
+   所以抽成一支 —— 兩邊各寫一份遲早會分岔。 */
+function tierOf(s) {
+  return s >= 85 ? { i:'🛋️', t:'和沙發長在一起' }
+       : s >= 70 ? { i:'😶', t:'可預測' }
+       : s >= 50 ? { i:'🙃', t:'有點悶' }
+                 : { i:'🚶', t:'還有救' };
+}
 
 /* -- 五個分項:寫回 UK.data.POISON,總分仍由 UK.data.composite() 算。
       (kit 本來就設計成分項可被換掉——UK.data.load 接中台時做的是同一件事) -- */
@@ -683,7 +747,8 @@ function noShow() {
 }
 
 /* 返回堆疊:v2 過場、v7 空狀態不入堆疊(這是 kit 幫你處理好的坑) */
-var VIEWS = ['v0','v1','v2','v3','v4','v7'];   /* 原 v5「全部好去處」已併進 v4 的篩選條 */
+/* 原 v5「全部好去處」已併進 v4 的篩選條;v8 = 分享連結的下載落地頁 */
+var VIEWS = ['v0','v1','v2','v3','v4','v7','v8'];
 var nav = UK.nav.create({
   views: VIEWS,
   transient: ['v2','v7'],
@@ -793,7 +858,7 @@ function shareMeta() {
   var s = stats();
   return { title: '無聊快篩',
            text: (typeof score === 'number' ? '我的無聊值 ' + score + '，生活半徑 ' + radTxt(s.radius) + '。' : '')
-                 + (EVH[COPY.evh] || EVH[0])(s) };
+                 + (EVH[COPY.evh] || EVH[0])(s) + dlLine() };
 }
 
 /* -- 訪談:兩題都要答才能往下 -- */
@@ -892,10 +957,7 @@ function showResult() {
   var t = document.getElementById('trend'), html = UK.state.trendHTML(score, ST.prev);
   t.innerHTML = html; t.style.display = html ? '' : 'none';
   /* 分數旁邊那顆圖示 + 一個戳章詞:越無聊越像家具 */
-  var tier = score >= 85 ? { i:'🛋️', t:'和沙發長在一起' }
-           : score >= 70 ? { i:'😶', t:'可預測' }
-           : score >= 50 ? { i:'🙃', t:'有點悶' }
-                         : { i:'🚶', t:'還有救' };
+  var tier = tierOf(score);
   document.getElementById('stampT').textContent = tier.i + ' ' + tier.t;
   /* 沙發上那一坨:分數越高融得越快、越扁 */
   var couch = document.getElementById('couch');
@@ -1160,6 +1222,11 @@ function card() {
   return {
     theme: 'bored', emoji: '😶', sub: '無聊值 ' + score + '／100', tint: '生活半徑 ' + radTxt(s.radius),
     score: score, unitTxt: '/100',
+    /* 0731 Robert:數字旁邊並排一顆同樣大的分級表情,/100 後面掛小字「無聊值」。
+       tierIcon 用 tierOf() —— 跟結果頁的戳章同一套,兩邊講的話才對得上。
+       注意 70~84 分那一段 tierOf 回的是 😶,跟下緣的裁切角色(emoji)同一個圖案,
+       同一張卡上會出現兩次。要避開就把這裡改成 blob 那組(🫠/😪/🙂)。 */
+    tierIcon: tierOf(score).i, unitLabel: '無聊值',
     head: '😶 無聊快篩',
     /* 圖上那句用「照你這個X法,你很快就要Y了」的句型(Robert 0728 指定的形狀)。
        主題要對得上這顆單元——這裡量的是無聊,不是花錢,所以不寫「照你這個花法」。 */
@@ -1169,9 +1236,16 @@ function card() {
     stamp: score >= 85 ? '可預測' : (score >= 70 ? '超穩定' : (score >= 50 ? '有點悶' : '還有救')),
     qrHint: '掃碼，驗你自己的圓',
     title: '我的無聊快篩',
-    text: '我的無聊值 ' + score + '，生活半徑 ' + radTxt(s.radius) + '。' + (EVH[COPY.evh] || EVH[0])(s) + ' 你呢？',
+    text: '我的無聊值 ' + score + '，生活半徑 ' + radTxt(s.radius) + '。'
+          + (EVH[COPY.evh] || EVH[0])(s) + ' 你呢？' + dlLine(),
     url: location.origin + location.pathname
   };
+}
+/* 分享文字最下面那一行下載連結。DL_URL 沒設就回空字串 —— 不放死連結。
+   連結指回 /bored/?dl=1(我們的落地頁),不是直接指官網,這樣才追得到。 */
+function dlLine() {
+  var u = dlShareURL();
+  return u ? '\n\n還沒裝發票載具？從這裡下載 → ' + u : '';
 }
 
 /* -- init -- */
@@ -1219,7 +1293,14 @@ UK.bindExternalLinks(document);
 applyDims();
 entryRender();
 initDiag();
-nav.reset('v0');
+/* ?dl=1 → 落地頁當根,不是 v0。用 nav.reset 而不是 nav.show,這樣返回鍵
+   不會退到一個他沒看過的入口頁。 */
+if (isDlLanding()) {
+  var _dlB = document.getElementById('dlBtn');
+  if (!DL_URL) { _dlB.textContent = '⬇️ 下載發票載具（網址待設定）'; _dlB.disabled = true; }
+  nav.reset('v8');
+  UK.track('bored_dl_view', { plat: uaPlat(), src: dlSrc() });   /* ⚠️ 含社群預抓,只能當上限 */
+} else nav.reset('v0');
 UK.applyDemoMode(document.body);
 /* 「從發票載具首頁進入」只對單機直開的人有意義。在 App webview 裡他人已經在
    載具裡了,再掛一條回首頁的橫幅是第三條 chrome,跟這次要修的重疊問題同一類。

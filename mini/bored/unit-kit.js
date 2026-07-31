@@ -685,12 +685,81 @@
       ctx.strokeStyle = T.line; ctx.lineWidth = 3; ctx.stroke();
       ctx.clip();                                   /* 之後畫的東西都被內卡裁切 */
 
-      /* ② 數字:實色、無光暈,亮底上才讀得清楚 */
-      ctx.fillStyle = T.accent; ctx.font = '900 150px ' + FONT;
-      ctx.fillText(String(d.score), cx, 316);
+      /* ② 數字:實色、無光暈,亮底上才讀得清楚。
+         0731 Robert:數字旁邊要並排一顆分級表情(d.tierIcon),而且「一樣大」。
+
+         ⚠️ 兩邊都寫 150px 是錯的 —— emoji 的字身比數字高很多(數字只佔到
+            cap height,emoji 幾乎撐滿整個 em box),同樣的名目字級看起來會
+            大一號。所以用 measureText 的 actualBoundingBox 量出兩者**實際**
+            字身高度,再回推 emoji 該用幾 px,讓「看起來」真的一樣高。
+            量完要重設 font 再量一次(字級變了,寬度也變了)。
+         ⚠️ 垂直對齊用字身中心,不是共用基線 —— emoji 有 descent,共用基線
+            會把它整顆壓到數字下面去。
+         沒給 tierIcon 的單元(解毒吧/幾歲破產)走 else,版面完全沒變。 */
+      /* 量的是「墨水」——真正畫到畫布上的像素範圍,不是 measureText 的字身框。
+         踩過:先用 actualBoundingBoxAscent/Descent 對齊,量出來兩邊都 116px、
+         看起來卻差一號。原因是 emoji 的字身框比它畫出來的圖案大一圈(字型本來
+         就留邊),照字身框縮放,實際墨水只有數字的 0.84 倍。
+         每顆 emoji、每個平台的留邊都不一樣,所以不能寫死係數,只能離屏畫一次
+         掃 alpha 量。回傳值是相對基線的,所以垂直對齊也一次算完。
+         只有分享卡開啟時才跑,兩張 420² 的離屏畫布,成本可以忽略。 */
+      function inkBox(txt, font) {
+        try {
+          var S = 420, c = document.createElement('canvas');
+          c.width = S; c.height = S;
+          var g = c.getContext('2d');
+          g.font = font; g.textAlign = 'center'; g.textBaseline = 'alphabetic';
+          g.fillText(txt, S / 2, S / 2);
+          var im = g.getImageData(0, 0, S, S).data, top = -1, bot = -1;
+          for (var yy = 0; yy < S; yy++) {
+            for (var xx = 0; xx < S; xx++) {
+              if (im[(yy * S + xx) * 4 + 3] > 12) { if (top < 0) top = yy; bot = yy; break; }
+            }
+          }
+          if (bot < 0) return null;
+          return { top: top - S / 2, bottom: bot - S / 2, h: bot - top + 1 };   /* 相對基線 */
+        } catch (e) { return null; }
+      }
+      var NS = 150, sTxt = String(d.score), NY = 316, NF = '900 ' + NS + 'px ' + FONT;
+      ctx.textAlign = 'center';
+      ctx.font = NF;
+      var wN = ctx.measureText(sTxt).width;
+      if (d.tierIcon) {
+        var PROBE = 100;
+        var bN = inkBox(sTxt, NF), bE = inkBox(d.tierIcon, PROBE + 'px sans-serif');
+        var es = NS, yE = NY;
+        if (bN && bE && bE.h > 0) {
+          var k = bN.h / bE.h;
+          es = Math.max(40, Math.round(PROBE * k));
+          /* 墨水中心對墨水中心(不是共用基線——emoji 有 descent,共用基線會被壓下去) */
+          yE = NY + (bN.top + bN.bottom) / 2 - (bE.top + bE.bottom) / 2 * k;
+        }
+        ctx.font = es + 'px sans-serif';
+        var wE = ctx.measureText(d.tierIcon).width;
+        var GAP = 26, x0 = cx - (wE + GAP + wN) / 2;
+        ctx.textAlign = 'left';
+        ctx.fillText(d.tierIcon, x0, yE);
+        ctx.fillStyle = T.accent; ctx.font = NF;
+        ctx.fillText(sTxt, x0 + wE + GAP, NY);
+        ctx.textAlign = 'center';
+      } else {
+        ctx.fillStyle = T.accent;
+        ctx.fillText(sTxt, cx, NY);
+      }
+      /* /100 後面可以再掛一個小標(d.unitLabel,例:「無聊值」)。
+         兩段當一組水平置中 —— 各自置中會讓 /100 偏左,看起來像沒對齊。 */
       if (d.unitTxt) {
-        ctx.fillStyle = T.mut; ctx.font = '700 32px ' + FONT;
-        ctx.fillText(d.unitTxt, cx, 362);
+        var uF = '700 32px ' + FONT, lF = '800 26px ' + FONT, uy = 362, LGAP = 12;
+        ctx.font = uF; var wU = ctx.measureText(d.unitTxt).width, wL = 0;
+        if (d.unitLabel) { ctx.font = lF; wL = ctx.measureText(d.unitLabel).width; }
+        var ux = cx - (wU + (wL ? LGAP + wL : 0)) / 2;
+        ctx.textAlign = 'left';
+        ctx.fillStyle = T.mut; ctx.font = uF; ctx.fillText(d.unitTxt, ux, uy);
+        if (d.unitLabel) {
+          ctx.fillStyle = T.sub2; ctx.font = lF;
+          ctx.fillText(d.unitLabel, ux + wU + LGAP, uy);
+        }
+        ctx.textAlign = 'center';
       }
       ctx.fillStyle = T.accent; rr(cx - 88, 386, 176, 7, 4); ctx.fill();
 
