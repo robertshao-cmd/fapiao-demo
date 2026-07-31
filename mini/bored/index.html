@@ -23,8 +23,8 @@
   }
 })();
 </script>
-<script src="qrcode.min.js?v=4b3f8408"></script>
-<script src="unit-kit.js?v=4b3f8408"></script>
+<script src="qrcode.min.js?v=fcb64bf1"></script>
+<script src="unit-kit.js?v=fcb64bf1"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--mut:#7A8494;--line:#F0E0E1;--bg:#FFF6F5}
@@ -416,6 +416,26 @@ try {
   if (_cidQ) _bc.fromCid = b64url(_cidQ);
 } catch (e) {}
 
+/* ══ 條碼浮層出示「他自己的」載具號(0731)═════════════════════════
+   在此之前浮層一直畫 kit 的 DEMO 字串 /AB12345,並在下面標「示範條碼」——
+   不是壞掉,是單元根本拿不到載具號,所以刻意不假裝(kit 註解就是這樣寫的)。
+
+   現在拿得到了:App 外開一定帶 cid,cid 就是 Base64URL 包起來的載具條碼,
+   解出來直接餵進 kit 早就留好的 UK.carrier.setCode()。
+   同一段程式在測試(ailab-dev)與正式(ailab-prod)都成立,因為兩邊 App 用的是
+   同一種外開格式 —— 不需要為正式版再改一次。
+
+   解不出合法條碼就不設(維持 DEMO + 「示範條碼」灰字),寧可誠實標示,
+   也不要拿一個猜的字串給店員掃 —— 掃不出來比沒有更糟。
+
+   ⚠️ 個資:條碼**顯示在他自己的手機上是這個功能的目的**(要給店員掃),
+      但不可以外流。已確認:
+        · carrier_open / carrier_done 兩個事件只帶 from,沒有條碼
+        · 分享圖卡與圖內 QR 用 location.origin + pathname,不含 cid
+        · UK.ga.cleanUrl 已把 cid/phone 從 page_location 剝掉
+        · 不寫 localStorage、不寫 console */
+if (validBc(_bc.fromCid)) UK.carrier.setCode(_bc.fromCid);
+
 var _diagOn = false;
 function toggleDiag() { _diagOn = !_diagOn; renderDiag(); UK.track('bored_diag_toggle', { on: _diagOn }); }
 function dRow(k, v, cls) {
@@ -439,7 +459,12 @@ function diagRows() {
     + dRow('App 帶的 cid', _bc.fromCid
              ? (maskBc(_bc.fromCid) + (validBc(_bc.fromCid) ? ' ✓ 解出合法條碼' : ' ✗ 解不出合法條碼'))
              : '沒有 —— 這次不是從 App 外開進來的',
-           _bc.fromCid ? (validBc(_bc.fromCid) ? 'ok' : 'bad') : 'warn');
+           _bc.fromCid ? (validBc(_bc.fromCid) ? 'ok' : 'bad') : 'warn')
+    /* 「我的手機條碼」浮層到底出示誰的號碼 —— 這一行就是驗收點 */
+    + dRow('條碼浮層', UK.carrier.isReal()
+             ? '出示你自己的載具號 ' + maskBc(UK.carrier.code()) + ' ✓'
+             : '示範條碼 ' + UK.carrier.DEMO + '（App 沒帶 cid，或 cid 解不出合法條碼）',
+           UK.carrier.isReal() ? 'ok' : 'warn');
   if (_bc.typed) {
     h += dRow('你輸入的', maskBc(_bc.typed) + (validBc(_bc.typed) ? ' ✓ 格式正確' : ' ✗ 格式不對（要 / 開頭共 8 碼）'),
               validBc(_bc.typed) ? 'ok' : 'bad')
