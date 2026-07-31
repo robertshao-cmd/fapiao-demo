@@ -599,8 +599,13 @@
     THEME: {
       detox:  { bg:'#FFF1EC', bg2:'#FFDCD0', card:'#FFFBF9', ink:'#2A1416', accent:'#E4001A',
                 head:'#C8321F', mut:'#96777B', sub2:'#6B4A4E', brand:'#B09296', line:'#F2CFC6' },
-      bored:  { bg:'#EEF3FF', bg2:'#D8E4FF', card:'#FBFCFF', ink:'#101A33', accent:'#2E5BE0',
-                head:'#2E5BE0', mut:'#7C88A6', sub2:'#44547A', brand:'#98A3BE', line:'#D3DEF7' },
+      /* 0731:無聊快篩整顆換成發票載具 App 的視覺語言,分享卡也要跟上,
+         不然分享出去的圖跟 App 裡看到的是兩個品牌。色票直接取 App 素材站的 CSS 變數:
+           green100 #E6F7F6 / green200 #B0E6E2 / green600 #01AFA2 / green800 #017C73
+           black1000 #262626 / black700 #8C8C8C / black800 #595959 / black600 #BFBFBF
+         只動 bored 這一組 —— 解毒吧與幾歲破產的卡片配色不受影響。 */
+      bored:  { bg:'#E6F7F6', bg2:'#B0E6E2', card:'#FFFFFF', ink:'#262626', accent:'#01AFA2',
+                head:'#017C73', mut:'#8C8C8C', sub2:'#595959', brand:'#BFBFBF', line:'#B0E6E2' },
       wcheck: { bg:'#FFF8EA', bg2:'#FFE9BE', card:'#FFFDF8', ink:'#2B1F08', accent:'#C98A00',
                 head:'#A9720B', mut:'#9A8968', sub2:'#6B5A3C', brand:'#BCAD8E', line:'#F3E2BF' }
     },
@@ -727,7 +732,24 @@
       ctx.textAlign = 'center';
       ctx.font = NF;
       var wN = ctx.measureText(sTxt).width;
-      if (d.tierIcon) {
+      /* d.tierImg(HTMLImageElement)優先於 d.tierIcon(emoji 字元)。
+         0731:無聊快篩把 emoji 全換成自製吉祥物 svg,而 canvas 的 fillText 畫不了 svg,
+         所以改成收一個已經載好的 Image 直接 drawImage。
+         沿用 APP_ICON 那一套防禦寫法(complete && naturalWidth):圖沒載好就退回文字路徑,
+         不會因為圖還在載就整張卡少一塊。 */
+      var tImg = (d.tierImg && d.tierImg.complete && d.tierImg.naturalWidth) ? d.tierImg : null;
+      if (tImg) {
+        var bNi = inkBox(sTxt, NF);
+        var ih = bNi ? bNi.h : NS * .74;
+        var iw = Math.round(ih * tImg.naturalWidth / tImg.naturalHeight);
+        var GAPi = 22, xi = cx - (iw + GAPi + wN) / 2;
+        var ceni = bNi ? NY + (bNi.top + bNi.bottom) / 2 : NY - ih / 2;
+        ctx.drawImage(tImg, xi, ceni - ih / 2, iw, ih);
+        ctx.textAlign = 'left';
+        ctx.fillStyle = T.accent; ctx.font = NF;
+        ctx.fillText(sTxt, xi + iw + GAPi, NY);
+        ctx.textAlign = 'center';
+      } else if (d.tierIcon) {
         var PROBE = 100;
         var bN = inkBox(sTxt, NF), bE = inkBox(d.tierIcon, PROBE + 'px sans-serif');
         var es = NS, yE = NY;
@@ -794,7 +816,16 @@
       }
       /* ⑤ 主視覺角色:被內卡下緣裁掉,裁切感=有設計過 */
       var fs = 400;
-      ctx.font = fs + 'px sans-serif'; ctx.fillText(d.emoji || '', cx, CY1 + 76);
+      /* 0731:同上,吉祥物是 svg,canvas 畫不了 → 收 d.heroImg 直接 drawImage。
+         位置照原本的邏輯:底部落在內卡下緣之外(CY1+76),被 ctx.clip() 裁掉,
+         裁切感就是設計的一部分。圖沒載好就退回原本的 emoji fillText。 */
+      var hImg = (d.heroImg && d.heroImg.complete && d.heroImg.naturalWidth) ? d.heroImg : null;
+      if (hImg) {
+        var HW = 400, HH = Math.round(HW * hImg.naturalHeight / hImg.naturalWidth);
+        ctx.drawImage(hImg, cx - HW / 2, CY1 + 76 - HH, HW, HH);
+      } else {
+        ctx.font = fs + 'px sans-serif'; ctx.fillText(d.emoji || '', cx, CY1 + 76);
+      }
       if (d.acc) { ctx.font = (fs * .34) + 'px sans-serif'; ctx.fillText(d.acc, cx + fs * .46, CY1 + 76 - fs * .58); }
       ctx.restore();                                 /* 解除裁切 */
 

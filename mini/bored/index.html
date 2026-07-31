@@ -23,8 +23,8 @@
   }
 })();
 </script>
-<script src="qrcode.min.js?v=4f59b415"></script>
-<script src="unit-kit.js?v=4f59b415"></script>
+<script src="qrcode.min.js?v=95030bdb"></script>
+<script src="unit-kit.js?v=95030bdb"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#262626;--red:#01AFA2;--mut:#8C8C8C;--line:#F0F0F0;--bg:#F5F5F5}
@@ -802,6 +802,9 @@ function stats() {
 function radTxt(r) { return r >= 1000 ? (Math.round(r / 100) / 10) + ' 公里' : r + ' 公尺'; }
 /* 分級表情＋戳章詞。結果頁的戳章與分享卡數字旁那顆用同一套(Robert 0731 指定),
    所以抽成一支 —— 兩邊各寫一份遲早會分岔。 */
+/* 分享卡的退路用:圖沒載好時 kit 會 fillText 這顆 emoji。
+   畫面上的 UI 已經全部不用 emoji 了,這裡純粹是 canvas 的 fallback。 */
+var TIER_EMOJI = { melt:'🫠', sleepy:'😶', yawn:'😪', walk:'🚶' };
 function tierOf(s) {
   return s >= 85 ? { m:'melt',   t:'和沙發長在一起' }
        : s >= 70 ? { m:'sleepy', t:'可預測' }
@@ -828,7 +831,7 @@ function tierOf(s) {
       build-public-demo.py 只複製 index.html + unit-kit.js + qrcode.min.js。
       多一個檔案不會被複製,公開 demo 會變成一堆破圖。 */
 
-function mascot(mood, px) {
+function mascot(mood, px, standalone) {
   var s = px || 64;
   var eyesOpen = '<circle cx="41" cy="47" r="8.5" fill="#fff"/><circle cx="59" cy="47" r="8.5" fill="#fff"/>'
                + '<circle cx="41" cy="47" r="4.2" fill="#257349"/><circle cx="59" cy="47" r="4.2" fill="#257349"/>';
@@ -884,8 +887,30 @@ function mascot(mood, px) {
     body = canopy + eyesShut + mouthFlat + trunk + pj + cap;
     extra = zzz;
   }
-  return '<svg class="msc" viewBox="0 0 100 118" width="' + s + '" height="' + Math.round(s * 1.18)
-       + '" role="img" aria-label="無聊快篩吉祥物">' + body + extra + '</svg>';
+  /* standalone = 這張 svg 要被當成圖檔載入(給 canvas 用)。
+     ⚠️ 這時候**不能**引用外部的 url(#tgrad) —— 用 Image 載入的 svg 是獨立文件,
+        解析不到本文件的 <defs>,漸層會整片變黑。所以 defs 得內嵌,xmlns 也要補。
+        踩這個坑的成本很高:畫面上看起來好好的,只有分享卡是黑的。 */
+  var defs = standalone
+    ? '<defs><linearGradient id="tgrad" x1="0" y1="0" x2=".85" y2="1">'
+      + '<stop offset="0" stop-color="#3EBD7A"/><stop offset="1" stop-color="#257349"/>'
+      + '</linearGradient></defs>'
+    : '';
+  return '<svg ' + (standalone ? 'xmlns="http://www.w3.org/2000/svg" ' : '')
+       + 'class="msc" viewBox="0 0 100 118" width="' + s + '" height="' + Math.round(s * 1.18)
+       + '" role="img" aria-label="無聊快篩吉祥物">' + defs + body + extra + '</svg>';
+}
+
+/* 吉祥物 → HTMLImageElement,給分享卡的 canvas drawImage 用。
+   同一個 mood 只做一次(_mimg 當快取),不然每次開分享卡都重新解析一張 svg。
+   用 encodeURIComponent 而不是 btoa:btoa 遇到中文(aria-label)會直接丟例外。 */
+var _mimg = {};
+function mascotImg(mood) {
+  if (_mimg[mood]) return _mimg[mood];
+  var im = new Image();
+  im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(mascot(mood, 300, true));
+  _mimg[mood] = im;
+  return im;
 }
 
 /* 小圖示:24x24 線條圖,吃 currentColor。對照 App 的 tab_icon_*.svg 風格。 */
@@ -1608,8 +1633,14 @@ function card() {
        tierIcon 用 tierOf() —— 跟結果頁的戳章同一套,兩邊講的話才對得上。
        注意 70~84 分那一段 tierOf 回的是 😶,跟下緣的裁切角色(emoji)同一個圖案,
        同一張卡上會出現兩次。要避開就把這裡改成 blob 那組(🫠/😪/🙂)。 */
-    tierIcon: tierOf(score).i, unitLabel: '無聊值',
-    head: '😶 無聊快篩',
+    /* 0731:分享卡改用吉祥物圖(canvas 畫不了 svg,所以傳已載好的 Image)。
+       tierIcon/emoji 留著當退路 —— 圖沒載好時 kit 會退回文字路徑,不會整塊空掉。
+       ⚠️ 上一輪我把 tierOf() 從 {i,t} 改成 {m,t},卻忘了這裡還在讀 .i,
+          結果 tierIcon 變 undefined、數字旁的圖整個消失(截圖比對才發現)。
+          現在兩條路都給:tierImg 走圖、tierIcon 走 emoji。 */
+    tierImg: mascotImg(tierOf(score).m), heroImg: mascotImg('sleepy'),
+    tierIcon: TIER_EMOJI[tierOf(score).m], unitLabel: '無聊值',
+    head: '無聊快篩',
     /* 圖上那句用「照你這個X法,你很快就要Y了」的句型(Robert 0728 指定的形狀)。
        主題要對得上這顆單元——這裡量的是無聊,不是花錢,所以不寫「照你這個花法」。 */
     punch: score >= 85 ? '照你這個活法，你很快就要跟沙發長在一起了'
@@ -1672,6 +1703,9 @@ window.addEventListener('scroll', function () {
 /* 頁面上寫死的 <a target="_blank">(「看名單」那些官方來源連結)在 App webview 裡
    跟 window.open 是同一個毛病,委派給 UK.openExternal 統一處理 */
 paintIcons();
+/* 預載四張吉祥物圖 —— 分享卡是同步 render 的,等到按下分享才開始載會來不及,
+   第一次開會退成 emoji。 */
+['melt','sleepy','yawn','walk'].forEach(mascotImg);
 UK.bindExternalLinks(document);
 applyDims();
 entryRender();
