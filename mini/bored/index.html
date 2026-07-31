@@ -23,8 +23,8 @@
   }
 })();
 </script>
-<script src="qrcode.min.js?v=e3fb48f4"></script>
-<script src="unit-kit.js?v=e3fb48f4"></script>
+<script src="qrcode.min.js?v=4b3f8408"></script>
+<script src="unit-kit.js?v=4b3f8408"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--mut:#7A8494;--line:#F0E0E1;--bg:#FFF6F5}
@@ -165,6 +165,24 @@
   /* 外層已經有自己的標題列/返回鍵時(App webview、測試殼),把本單元那條收掉,
      不然兩條返回鍵疊在一起(0731 Robert 回報)。判斷在下面的 hostChrome()。 */
   html.nochrome .top{display:none}
+  /* ── App 返回 banner 的讓位(0731 Robert:每一頁上方都被擋住)──────────
+     那條 banner 是**蓋在** webview 上面的,不是排在它上面 —— 所以我們自己的
+     標題列一拿掉,內容就直接被壓在它底下。原本 .top 有 env(safe-area-inset-top)
+     順便把這段撐開了,現在得自己補回來。
+
+     用一個空的 spacer 而不是 body padding,原因有兩個:
+       ① 它在 .wrap 最上面,六個 view(v0~v7)全都在 .wrap 裡面,補一次就全中,
+          不用每頁各自處理。
+       ② 它是真的元素,JS 量得到實高 → 直接餵給 --topH,篩選條(.fbar)才會
+          剛好黏在 banner 下緣,不會捲上去躲進 banner 裡面。
+
+     高度為什麼寫成 env() + 56px:這樣兩種 webview 擺法都會對。
+       · webview 貼到螢幕最上面(含狀態列)→ env 回 47~59,合計 ~103~115,
+         剛好是 狀態列 + 導覽列 的高度
+       · webview 從狀態列下面才開始 → env 回 0,合計 56,剛好是一條導覽列
+     真機上還是差幾 px 的話,用 ?top=NN 直接指定(px),不用改程式重部署。 */
+  #hostpad{height:0}
+  html.nochrome #hostpad{height:var(--hostTop, calc(env(safe-area-inset-top, 0px) + 56px))}
   /* ── 🔧 連線自檢(只有測試環境/開發參數/連點五下臉才出現,正式使用者看不到)── */
   .diag{background:#141A24;color:#D7E0EE;border-radius:14px;padding:13px;margin-top:12px;
         font-size:12px;line-height:1.75;text-align:left}
@@ -194,6 +212,9 @@
   <button onclick="shareNow()" aria-label="分享">&ctdot;</button>
 </div>
 <div class="wrap">
+  <!-- 給 App 返回 banner 讓位的 spacer。六個 view 都在 .wrap 裡,所以補這一個就夠。
+       沒有 .nochrome 時高度是 0(單機直開有自己的標題列,不需要讓位) -->
+  <div id="hostpad"></div>
 
   <!-- v0 入口:一頁只有一個主 CTA。不放說明文字、不放隱私長註(0724 定調) -->
   <div id="v0">
@@ -359,7 +380,16 @@ function hostChrome() {
   return /fapiao|invoice|cmoney/i.test(navigator.userAgent || '');
 }
 var HOST_CHROME = hostChrome();
-if (HOST_CHROME) document.documentElement.classList.add('nochrome');
+if (HOST_CHROME) {
+  document.documentElement.classList.add('nochrome');
+  /* ?top=NN 現場微調 banner 讓位高度(px)。真機上量出來差幾 px 的話用這個,
+     不用改程式重跑一次 CI。?top=0 = 完全不讓位(要看被擋成什麼樣時用)。 */
+  try {
+    var _t = new URLSearchParams(location.search).get('top');
+    if (_t !== null && _t !== '' && !isNaN(+_t))
+      document.documentElement.style.setProperty('--hostTop', Math.max(0, +_t) + 'px');
+  } catch (e) {}
+}
 
 /* ══ 🔧 發票 API 連線自檢(0731 Robert:要能在 TestFlight 測試機上驗)═════
    它只回答一個問題:這台機器上,單元到底有沒有真的拿到「你的」發票?
@@ -393,7 +423,14 @@ function dRow(k, v, cls) {
 }
 function diagRows() {
   var inv = UK.data.INV, plat = UK.data.source === 'platform';
+  var pad = document.getElementById('hostpad');
+  var padH = pad ? Math.round(pad.getBoundingClientRect().height) : 0;
   var h = dRow('環境', (location.hostname || '(本機檔案)') + (HOST_CHROME ? ' · 外層有標題列' : ''))
+    /* 真機上調 banner 讓位:看這個數字,不夠就 ?top=NN 加大、太多就減小 */
+    + dRow('banner 讓位', HOST_CHROME
+             ? (padH + ' px（不夠或太多用 ?top=NN 調）·  篩選條吸附 '
+                + (getComputedStyle(document.documentElement).getPropertyValue('--topH') || '?').trim())
+             : '不需要（有自己的標題列）')
     + dRow('中台 apiBase', UK.apiBase || '無 —— 這台不連中台,一定拿不到真發票',
            UK.apiBase ? 'ok' : 'warn')
     + dRow('資料來源', plat ? 'platform（真發票）' : 'demo（示範值，不是你的）', plat ? 'ok' : 'bad')
@@ -1131,7 +1168,14 @@ document.addEventListener('keydown', function (e) {   /* 列是 role=button,鍵�
    轉向或字級變化時重量一次。 */
 function syncTopH() {
   var t = document.querySelector('.top');
-  if (t) document.documentElement.style.setProperty('--topH', Math.round(t.getBoundingClientRect().height) + 'px');
+  /* 有自己的標題列 → 黏在它下面;標題列被收掉(App webview)→ 黏在讓位 spacer 下緣,
+     也就是 App 返回 banner 的下緣。用實測高度,不用寫死。 */
+  var h = (t && getComputedStyle(t).display !== 'none') ? t.getBoundingClientRect().height : 0;
+  if (!h) {
+    var p = document.getElementById('hostpad');
+    if (p) h = p.getBoundingClientRect().height;
+  }
+  document.documentElement.style.setProperty('--topH', Math.round(h) + 'px');
 }
 syncTopH();
 window.addEventListener('resize', syncTopH);
