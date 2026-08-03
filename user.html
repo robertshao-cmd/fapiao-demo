@@ -1635,7 +1635,7 @@ window.onerror=function(m,s,l,c){try{if(document.body&&document.body.classList.c
       <button class="tab on" onclick="go('home')"><span class="ic">🏠</span>首頁</button>
       <button class="tab" onclick="go('coupons')"><span class="ic">🎁</span>活動<span class="dot" id="cdot"></span></button>
       <button class="tab" onclick="toast('載具管理（示範）：手機條碼 · 悠遊卡 · 信用卡歸戶')"><span class="ic">👛</span>載具管理</button>
-      <button class="tab" onclick="toast('掃描對獎（示範）：紙本發票掃了就對')"><span class="ic">▣</span>掃描對獎</button>
+      <button class="tab" onclick="openHomeScanner()"><span class="ic">▣</span>掃描對獎</button>
       <button class="tab" onclick="toast('我的發票（示範）：本期 12 張明細')"><span class="ic">🧾</span>我的發票</button>
       <button class="tab" onclick="toast('個人（示範）：匯款帳戶 · 造型圖庫 · 設定')"><span class="ic">👤</span>個人</button>
     </div>
@@ -1901,7 +1901,12 @@ function vowHtml(){
 function bindCard(){ vow.cardBound = true; toast("🔒 已綁定信用卡擔保（示範 · 不會實際扣款）"); renderCheckout(); }
 function simNoShow(){ vow.noShow = VOW_LIMIT; toast("（示範）已模擬 2 次跑單 → 到店付款暫停"); renderCheckout(); }
 
-/* ================= 內用：掃桌碼綁定桌位(真相機掃描,jsQR 解碼;無相機權限/無函式庫才退回示範模擬) ================= */
+/* ================= 掃碼(真相機掃描,jsQR 解碼;無相機權限/無函式庫才退回示範模擬) =================
+   兩個入口共用同一套相機/解碼機制:
+   ① openScanner()  ——已經在某店頁面裡,內用模式下「掃桌碼綁定桌位」(s = 該店代號)
+   ② openHomeScanner()——首頁底部「掃描對獎」,還不知道是哪家店,掃到才從 QR 內容判斷(s = "__home__")
+   本 App 內建掃碼是主入口(對齊「開 App→用內建掃碼」的產品策略);手機原生相機掃同一顆 QR
+   也會走,因為 QR 內容本身就是完整網址——兩條路殊途同歸,不衝突。 */
 var TABLES = { nuan:["B4","B7","C2"], louisa:["A2","A5"], dtf:["12","15","21","23"] };
 var _scanT = null, _scanStream = null, _scanRAF = null, _scanStore = null;
 function openScanner(){
@@ -1910,6 +1915,16 @@ function openScanner(){
   $("scan-store").textContent = (BRAND[s] ? BRAND[s].n + " · " : "") + "掃描桌碼";
   $("scan-tip").textContent = "將框對準桌上的 QR Code";
   $("scan-sub").innerHTML = "綁定桌號後，商家會知道你坐哪一桌<br>內用餐點直接送到桌位";
+  $("scan-ok").classList.remove("show");
+  $("scan-mask").classList.add("show");
+  startCamera(s);
+}
+function openHomeScanner(){
+  var s = "__home__";
+  _scanStore = s;
+  $("scan-store").textContent = "掃描 QR Code";
+  $("scan-tip").textContent = "小程序入口、店家桌碼、發票都可以掃";
+  $("scan-sub").innerHTML = "掃到店家的桌碼會直接帶你進去點餐<br>掃到發票就走對獎";
   $("scan-ok").classList.remove("show");
   $("scan-mask").classList.add("show");
   startCamera(s);
@@ -1953,7 +1968,43 @@ function parseTableCode(s, text){
   raw = raw.replace(/^TABLE:/i, "").toUpperCase();
   return list.indexOf(raw) > -1 ? raw : null;
 }
+/* 首頁掃碼還不知道店家,先從 QR 內容(我們自己印的桌碼網址 ?store=..&table=..)判斷是哪家店 */
+function parseStoreTableUrl(text){
+  var raw = String(text || "");
+  var ms = raw.match(/[?&]store=([a-z]+)/i);
+  var store = ms ? ms[1].toLowerCase() : null;
+  if (!store || !BRAND[store]) return null;
+  var mt = raw.match(/[?&](?:table|t)=([^&]+)/i);
+  var table = null;
+  if (mt){
+    var tb = decodeURIComponent(mt[1]).toUpperCase();
+    var list = TABLES[store] || [];
+    if (list.indexOf(tb) > -1) table = tb;
+  }
+  return { store: store, table: table };
+}
+function launchStoreFromScan(store, table){
+  launchMini(store);
+  if (table){
+    cart.mode = "內用";
+    cart.table = table;
+    setTimeout(function(){
+      toast("🍽️ 已掃碼進入" + (BRAND[store] ? BRAND[store].n : "店家") + " · 桌號 " + table + " 已綁定");
+      if (BRAND[curScene]) renderBrandHome(curScene);
+    }, 900);
+  } else {
+    toast("📷 已掃碼進入" + (BRAND[store] ? BRAND[store].n : "店家"));
+  }
+}
 function onScanSuccess(s, text){
+  if (s === "__home__"){
+    var hit = parseStoreTableUrl(text);
+    stopCamera();
+    $("scan-mask").classList.remove("show");
+    if (hit) launchStoreFromScan(hit.store, hit.table);
+    else toast("掃描對獎（示範）：紙本發票掃了就對");
+    return;
+  }
   var tb = parseTableCode(s, text);
   if (!tb){
     toast("⚠️ 掃到的不是本店桌碼，再試一次");
@@ -1964,9 +2015,14 @@ function onScanSuccess(s, text){
   bindTable(s, tb);
 }
 function fallbackScan(s, note){
-  if (note){ $("scan-sub").innerHTML = note + "<br>綁定桌號後，商家會知道你坐哪一桌"; }
+  if (note){ $("scan-sub").innerHTML = note + (s === "__home__" ? "" : "<br>綁定桌號後，商家會知道你坐哪一桌"); }
   clearTimeout(_scanT);
   _scanT = setTimeout(function(){
+    if (s === "__home__"){
+      $("scan-mask").classList.remove("show");
+      toast("掃描對獎（示範）：紙本發票掃了就對");
+      return;
+    }
     var list = TABLES[s] || ["B4"];
     var tb = list[Math.floor(Math.random() * list.length)];
     bindTable(s, tb);
@@ -1995,10 +2051,11 @@ function stopCamera(){
   if (v){ v.pause(); v.srcObject = null; v.hidden = true; }
 }
 function cancelScan(){
+  var wasHome = (_scanStore === "__home__");
   clearTimeout(_scanT);
   stopCamera();
   $("scan-mask").classList.remove("show");
-  if (!cart.table) toast("尚未綁定桌號 · 內用送單前需先掃桌碼");
+  if (!wasHome && !cart.table) toast("尚未綁定桌號 · 內用送單前需先掃桌碼");
 }
 
 /* ================= 品牌小程序底部按鈕列（我的／折扣券／訂單） ================= */
