@@ -519,6 +519,7 @@ button:focus-visible,a:focus-visible{outline:3px solid #7FD1CC;outline-offset:2p
 /* 內用掃桌碼 */
 .scan-mask{position:absolute;top:0;right:0;bottom:0;left:0;background:#0B1220;display:none;z-index:70;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center}
 .scan-mask.show{display:flex}
+#scan-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
 .scan-title{font-size:13px;font-weight:800;margin-bottom:20px}
 .scan-frame{position:relative;width:214px;height:214px;border-radius:18px;box-shadow:0 0 0 2000px rgba(6,12,24,.55)}
 .scan-frame i{position:absolute;width:26px;height:26px;border:3px solid #35E0B8}
@@ -937,6 +938,7 @@ body.embed .statusbar{visibility:hidden}
 window.onerror=function(m,s,l,c){try{if(document.body&&document.body.classList.contains("embed")){return false;}var b=document.getElementById("errbox");if(!b){b=document.createElement("div");b.id="errbox";b.setAttribute("style","position:fixed;left:8px;right:8px;bottom:8px;z-index:99999;background:#7A1F1F;color:#fff;font:12px/1.6 Menlo,monospace;padding:10px 12px;border-radius:10px;white-space:pre-wrap;cursor:pointer");b.onclick=function(){try{b.remove();}catch(e){b.style.display="none";}};document.body.appendChild(b);}b.textContent="原型腳本異常（點擊關閉）："+m+"  @"+(l||"?")+":"+(c||"?");clearTimeout(b._h);b._h=setTimeout(function(){try{b.remove();}catch(e){b.style.display="none";}},8000);}catch(e){}return false;};
 </script>
 <noscript><div style="position:fixed;top:0;left:0;right:0;z-index:99999;background:#B8912F;color:#fff;font:13px/1.7 sans-serif;padding:12px 16px;text-align:center">此原型需要可執行 JavaScript 的瀏覽器：請用 Chrome／Edge／Safari 直接開啟本檔案；手機請改用部署後的網址體驗。</div></noscript>
+<script src="./jsQR.js"></script>
 
 <div class="stage">
   <div class="stage-head">
@@ -1647,10 +1649,12 @@ window.onerror=function(m,s,l,c){try{if(document.body&&document.body.classList.c
     <div class="sheet-mask" id="sheet-mask" onclick="closeSheet(event)"><div id="sheet-host" style="width:100%"></div></div>
     <div class="auth-mask" id="auth-mask"><div id="auth-host" style="width:100%;display:flex;justify-content:center"></div></div>
     <div class="scan-mask" id="scan-mask">
+      <video id="scan-video" playsinline muted hidden></video>
+      <canvas id="scan-canvas" hidden></canvas>
       <div class="scan-title" id="scan-store">掃描桌碼</div>
       <div class="scan-frame"><i></i><i></i><i></i><i></i><div class="scan-line"></div></div>
-      <div class="scan-tip">將框對準桌上的 QR Code</div>
-      <div class="scan-sub">綁定桌號後，商家會知道你坐哪一桌<br>內用餐點直接送到桌位</div>
+      <div class="scan-tip" id="scan-tip">將框對準桌上的 QR Code</div>
+      <div class="scan-sub" id="scan-sub">綁定桌號後，商家會知道你坐哪一桌<br>內用餐點直接送到桌位</div>
       <button class="scan-cancel" onclick="cancelScan()">取消</button>
       <div class="scan-ok" id="scan-ok"><div class="big">✓</div><div id="scan-okt">已綁定 桌號 B4</div></div>
     </div>
@@ -1897,36 +1901,100 @@ function vowHtml(){
 function bindCard(){ vow.cardBound = true; toast("🔒 已綁定信用卡擔保（示範 · 不會實際扣款）"); renderCheckout(); }
 function simNoShow(){ vow.noShow = VOW_LIMIT; toast("（示範）已模擬 2 次跑單 → 到店付款暫停"); renderCheckout(); }
 
-/* ================= 內用：掃桌碼綁定桌位 ================= */
+/* ================= 內用：掃桌碼綁定桌位(真相機掃描,jsQR 解碼;無相機權限/無函式庫才退回示範模擬) ================= */
 var TABLES = { nuan:["B4","B7","C2"], louisa:["A2","A5"], dtf:["12","15","21","23"] };
-var _scanT = null;
+var _scanT = null, _scanStream = null, _scanRAF = null, _scanStore = null;
 function openScanner(){
   var s = BRAND[curScene] ? curScene : (cart.store || lastStore);
+  _scanStore = s;
   $("scan-store").textContent = (BRAND[s] ? BRAND[s].n + " · " : "") + "掃描桌碼";
+  $("scan-tip").textContent = "將框對準桌上的 QR Code";
+  $("scan-sub").innerHTML = "綁定桌號後，商家會知道你坐哪一桌<br>內用餐點直接送到桌位";
   $("scan-ok").classList.remove("show");
   $("scan-mask").classList.add("show");
+  startCamera(s);
+}
+function startCamera(s){
+  if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) || typeof jsQR !== "function"){
+    return fallbackScan(s, "此瀏覽器不支援相機掃碼");
+  }
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(function(stream){
+    _scanStream = stream;
+    var v = $("scan-video");
+    v.srcObject = stream;
+    v.hidden = false;
+    v.play().catch(function(){});
+    scanLoop(s);
+  }).catch(function(err){
+    toast("📷 無法使用相機(" + ((err && err.name) || "拒絕授權") + ")，改用示範模擬");
+    fallbackScan(s, "相機不可用，以下為示範模擬");
+  });
+}
+function scanLoop(s){
+  var v = $("scan-video"), c = $("scan-canvas");
+  if (!$("scan-mask").classList.contains("show")) return; /* 掃描面板已關閉,停止迴圈 */
+  if (v.readyState !== v.HAVE_ENOUGH_DATA){ _scanRAF = requestAnimationFrame(function(){ scanLoop(s); }); return; }
+  c.width = v.videoWidth; c.height = v.videoHeight;
+  var ctx = c.getContext("2d");
+  ctx.drawImage(v, 0, 0, c.width, c.height);
+  var img;
+  try { img = ctx.getImageData(0, 0, c.width, c.height); } catch(e){ _scanRAF = requestAnimationFrame(function(){ scanLoop(s); }); return; }
+  var code = jsQR(img.data, img.width, img.height, { inversionAttempts: "dontInvert" });
+  if (code && code.data){ onScanSuccess(s, code.data); return; }
+  _scanRAF = requestAnimationFrame(function(){ scanLoop(s); });
+}
+function parseTableCode(s, text){
+  var list = TABLES[s] || [];
+  var raw = String(text || "").trim();
+  var m = raw.match(/[?&](?:table|t)=([^&]+)/i);
+  if (m) raw = decodeURIComponent(m[1]);
+  raw = raw.replace(/^TABLE:/i, "").toUpperCase();
+  return list.indexOf(raw) > -1 ? raw : null;
+}
+function onScanSuccess(s, text){
+  var tb = parseTableCode(s, text);
+  if (!tb){
+    toast("⚠️ 掃到的不是本店桌碼，再試一次");
+    _scanRAF = requestAnimationFrame(function(){ scanLoop(s); });
+    return;
+  }
+  stopCamera();
+  bindTable(s, tb);
+}
+function fallbackScan(s, note){
+  if (note){ $("scan-sub").innerHTML = note + "<br>綁定桌號後，商家會知道你坐哪一桌"; }
   clearTimeout(_scanT);
   _scanT = setTimeout(function(){
     var list = TABLES[s] || ["B4"];
     var tb = list[Math.floor(Math.random() * list.length)];
-    cart.table = tb;
-    $("scan-okt").textContent = "已綁定 桌號 " + tb;
-    $("scan-ok").classList.add("show");
-    _scanT = setTimeout(function(){
-      $("scan-mask").classList.remove("show");
-      if (s === "dtf" && dtfTicket){
-        dtfTicket = null;
-        toast("🎉 已就座 · 桌號 " + tb + "（取號單完成）· 送單後廚房開始製作");
-      } else {
-        toast("🍽️ 已綁定桌號 " + tb + " · 內用餐點將送至你的桌位");
-      }
-      if (BRAND[curScene]) renderBrandHome(curScene);
-      if (curScene === "checkout") renderCheckout();
-    }, 900);
+    bindTable(s, tb);
   }, 1500);
+}
+function bindTable(s, tb){
+  cart.table = tb;
+  $("scan-okt").textContent = "已綁定 桌號 " + tb;
+  $("scan-ok").classList.add("show");
+  setTimeout(function(){
+    $("scan-mask").classList.remove("show");
+    if (s === "dtf" && dtfTicket){
+      dtfTicket = null;
+      toast("🎉 已就座 · 桌號 " + tb + "（取號單完成）· 送單後廚房開始製作");
+    } else {
+      toast("🍽️ 已綁定桌號 " + tb + " · 內用餐點將送至你的桌位");
+    }
+    if (BRAND[curScene]) renderBrandHome(curScene);
+    if (curScene === "checkout") renderCheckout();
+  }, 900);
+}
+function stopCamera(){
+  if (_scanRAF){ cancelAnimationFrame(_scanRAF); _scanRAF = null; }
+  if (_scanStream){ _scanStream.getTracks().forEach(function(t){ t.stop(); }); _scanStream = null; }
+  var v = $("scan-video");
+  if (v){ v.pause(); v.srcObject = null; v.hidden = true; }
 }
 function cancelScan(){
   clearTimeout(_scanT);
+  stopCamera();
   $("scan-mask").classList.remove("show");
   if (!cart.table) toast("尚未綁定桌號 · 內用送單前需先掃桌碼");
 }

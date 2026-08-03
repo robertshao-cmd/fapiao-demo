@@ -192,6 +192,7 @@ function mount(i){
   var ifr = document.createElement("iframe");
   ifr.src = SRC[i];
   ifr.setAttribute("title", TITLES[i]);
+  ifr.setAttribute("allow", "camera"); /* 用戶端預覽的掃桌碼要用真相機,iframe 預設擋權限 */
   ifr.onload = function(){ var l = $("l"+i); if (l) l.style.display = "none"; };
   setTimeout(function(){ var l = $("l"+i); if (l) l.style.display = "none"; }, 4500);
   $("f"+i).appendChild(ifr);
