@@ -49,7 +49,7 @@ merchant.html(殼:一個主帳號,登入一次)
 
 | # | 事 | 卡誰 | 對 demo 開發的意義 |
 |---|---|---|---|
-| 1 | `INTEGRATION_API_KEY` 未生效(dev 探針 0728 仍 503) | Nero/Adam(k8s secret,可能還缺 rollout restart) | 「自店真數據」串不了;demo 繼續用假資料+(示範)標記 |
+| 1 | ~~`INTEGRATION_API_KEY` 未生效~~(0803 覆核:dev 已不是 503,改回 401 = 伺服器 env 已生效,只是我們探針用的是 dummy key)——**還缺的只剩真 key 本身跟 shopId** | 真 key:Nero/Adam;shopId:Robert 到店 | 「自店真數據」現在只差 shopId + 真 key 就能跑,不再是 env 沒生效 |
 | 2 | 暖暖窩 shopId(點到 Shop UUID)待到店取得 | Robert | 用戶端「暖暖窩」深連結還不能直達真店 |
 | 3 | 店家 `enableInvoice` toggle | 暖暖窩老闆 | 關著的話載具不進點到 DB,carrier join 永遠空 |
 | 4 | 商圈統編名單(發票 rawdata 沒有地理欄位,只能用 `seller_ban` 自組商圈) | 沒人盤(不卡權限) | 「商圈聚合」那半的真資料來源;demo 先用假數 |
