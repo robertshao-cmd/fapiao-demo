@@ -3024,7 +3024,27 @@ go("home");
 /* ===== v5.9：embed 模式 ＋ 品牌店直達（供商家工作台嵌入） ===== */
 if (/[?&]embed=1/.test(location.search)) document.body.classList.add("embed");
 var _gxStore = location.search.match(/[?&]store=([a-z]+)/);
-if (_gxStore && BRAND[_gxStore[1]]) setTimeout(function(){ try{ launchMini(_gxStore[1]); }catch(e){} }, 550);
+/* 桌碼 QR 印的就是這個網址(?store=..&table=..)——任何手機相機掃了都直接開瀏覽器落地，
+   不用先開我們的 App、不需要用到 in-app 掃描器；in-app 掃描器(openScanner)是另一條路，
+   給「已經在點餐、想換桌/沒事先掃到」的人用，兩條路吃同一個 table 格式，互不衝突 */
+var _gxTable = location.search.match(/[?&]table=([^&]+)/i);
+if (_gxStore && BRAND[_gxStore[1]]) setTimeout(function(){
+  try{
+    launchMini(_gxStore[1]);
+    if (_gxTable){
+      var _tb = decodeURIComponent(_gxTable[1]).toUpperCase();
+      var _list = TABLES[_gxStore[1]] || [];
+      if (_list.indexOf(_tb) > -1){
+        cart.mode = "內用";
+        cart.table = _tb;
+        setTimeout(function(){
+          toast("🍽️ 已掃碼綁定桌號 " + _tb + " · 內用餐點將送至你的桌位");
+          if (BRAND[curScene]) renderBrandHome(curScene);
+        }, 900);
+      }
+    }
+  }catch(e){}
+}, 550);
 
 </script>
 </body>
