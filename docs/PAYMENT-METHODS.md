@@ -63,13 +63,49 @@ Adam 確認點到自己就有串金流(街口支付/LINE Pay,token 式設定,暖
 策略題(A)vs(B)基本上已經有答案——**是(A)**,不用再問 Melon 要不要碰金流本身,
 要問的問題**升級成更精確的技術題**,見下一節。
 
+## 0803 追加:實測發現——AILab 平台本來就有街口/LinePay 的代理服務
+
+Adam 給了兩組測試機連結,我實際打開驗證過(不是只看連結,兩邊都是真的能連上的服務):
+
+| 服務 | Base URL | 說明(原文照抄) |
+|---|---|---|
+| `jko-pay-service` | `https://xlab-test.cmoney.tw/JkoPay` | 「JKOPay OnlinePay 整合服務(stateless proxy)。賣家自帶 X-Jkos-Api-Key / Secret / Store-Id headers;service 不存任何憑證或訂單。」 |
+| `line-pay-service` | `https://xlab-test.cmoney.tw/LinePay` | 「LINE Pay v3 沙盒整合服務。無狀態認證——賣家每次請求自帶 X-LinePay-Channel-Id / X-LinePay-Channel-Secret。」 |
+
+兩個都是**無狀態代理**——不存商家憑證,呼叫端(點到,或未來的我們)每次請求自己帶
+Store/Channel 的 Api-Key/Secret。這解釋了 Adam 截圖裡點到後台「街口支付設定」欄位
+(Store ID/Secret/API Key)是要餵給誰用的——兩者是同一套機制,點到很可能就是呼叫這個代理服務。
+
+關鍵端點:
+- `POST /JkoPay/payments`、`GET /JkoPay/payments/{platformOrderId}`(**查付款狀態**)、
+  `POST /JkoPay/payments/{platformOrderId}/refund`
+- `POST /LinePay/payments`、`GET /LinePay/payments/{transactionId}`、
+  `POST /LinePay/payments/{transactionId}/confirm`(LINE Pay 導回後要 confirm 一次)、退款同上
+
+兩邊都附了可以互動測試的 sandbox demo 頁:https://ailab-test.cmoney.tw/JkoPayWeb/ 、
+https://ailab-test.cmoney.tw/LinePayWeb/
+
+**demo 頁自己寫的警語(原文照抄,不是我加的)**:
+> 「⚠️ Demo only——此頁面把 secret 放瀏覽器,正式 caller 必須從自己後端 server-to-server 呼叫 service。」
+
+**這條警語直接限制我們能不能把 demo 接成真的**:`fapiao-demo` 現在是純前端靜態頁(零後端),
+架構上沒有地方能安全存 Secret——要接這個代理服務,不能像現在 `user.html` 的 JS 那樣直接呼叫,
+一定要先有一個後端(哪怕是輕量的 serverless function)幫忙擋 Secret,不然就是把商家的
+金流密鑰攤在瀏覽器原始碼裡。**這是「demo 結帳按下去變成真的走 sandbox 付款」這件事,
+唯一的架構前提,順序要對:先有後端,才能接。**
+
+對 Min 那題的更新:CMoney 內部有沒有既有支付串接團隊/供應商——**答案已經有一半了**:
+至少街口/LinePay 這兩軌,AILab/xlab 平台本來就有現成的無狀態代理服務可以掛,不用重新選型;
+信用卡目前沒看到對應服務,大概就是點到那邊「即將推出」卡住的原因。
+
 ## 四、既然是(A),兩側各要問誰(0803 更新版問題)
 
 | 側 | 要問誰 | 問什麼 |
 |---|---|---|
-| 商家端 | **Adam / Clark(點到團隊)** | 客人用街口支付/LINE Pay 線上付款成功後,**付款狀態/金額有沒有進到 MR!93 那支唯讀訂單 API**?現在只回訂單/品項,沒有金流細節——這是現在最關鍵的技術問題 |
+| 商家端 | **Adam / Clark(點到團隊)** | 客人用街口支付/LINE Pay 線上付款成功後,**付款狀態/金額有沒有進到 MR!93 那支唯讀訂單 API**?`GET /JkoPay/payments/{platformOrderId}` 這支既然能查狀態,點到是不是就是這樣查的,那能不能也回傳給我們? |
 | 商家端 | **Adam / Clark** | 用街口支付/LINE Pay 線上付款成功的訂單,**發票是不是還要店員手動在自己的設備上另開一次**?還是點到的金流整合已經連動開票?(「點到不開發票」那句話是讀舊版原始碼得出的,金流既然已經整合,這句話可能要更新) |
 | 商家端 | **Adam / Clark** | 暖暖窩目前信用卡「即將推出」——上線時程抓多久?這決定 demo 要不要現在就把信用卡選項拿掉,還是保留當「快上了」的展示 |
+| 工程 | **Min(Eng GL)** | 若真的要讓 demo 接 sandbox 付款(不是只改文案),我們需要一個能安全存 Secret 的輕量後端——這個由誰起、放哪裡(現有的中台/ailab,還是另開一個),不是我能自己決定的技術選型 |
 | 消費者端 | **Min(Eng GL)** | 結帳頁那三顆假鈕(LINE Pay/信用卡/Apple Pay)要改成對應點到真實支援的方式(街口支付+LINE Pay,信用卡標「即將推出」),不要展示假的支付方式清單 |
 
 ## 五、(B)已經不太可能發生,留著當歷史紀錄
