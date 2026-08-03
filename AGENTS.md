@@ -19,6 +19,9 @@
 | `mini/`, `b/`, `d/`, `app.html`, `user-nopay-*.html`, `real-home-v7.html` | **別的工作流的地盤,未被指派不要動** |  |
 | `checks/verify-demo.py` | 商家端驗收閘門 |  |
 | `docs/HANDOFF.md` | 產品決策、範圍、阻塞、後續候選 |  |
+| `docs/TEST-STEPS.md` | 逐步測試表 + 消費鏈路全圖(ASCII) |  |
+| `docs/PAYMENT-METHODS.md` | 付款方式整合現況/方法論/兩側該問誰 |  |
+| `jsQR.js` | 本地 vendor 的 QR 解碼庫(Apache-2.0,不走 CDN) |  |
 
 ## 跑起來
 
