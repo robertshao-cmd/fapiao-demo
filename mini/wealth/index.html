@@ -9,8 +9,8 @@
 <title>幾歲破產|發票載具</title>
 <!-- vendored / 共用層:不改。unit-kit 這裡只用到 UK.selfCheck()(唯讀機械自檢),
      nav/state/share 依 0726 決策維持本單元手寫版本。 -->
-<script src="qrcode.min.js?v=a0323860"></script>
-<script src="unit-kit.js?v=a0323860"></script>
+<script src="qrcode.min.js?v=725e0282"></script>
+<script src="unit-kit.js?v=725e0282"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--red-deep:#A50011;--gold:#FFD34D;--teal:#0E7C7B;--mut:#7A8494;--bg:#FFF6F5;--line:#F0E0E1}
@@ -125,9 +125,19 @@
     50%{box-shadow:0 4px 24px rgba(255,196,60,.85),0 0 42px rgba(255,210,90,.4)}}
   @keyframes coinShake{0%,84%,96%,100%{transform:rotate(0)}86%{transform:rotate(-1.8deg)}
     88%{transform:rotate(1.8deg)}90%{transform:rotate(-1.4deg)}93%{transform:rotate(1deg)}}
-  #secretBn .spark{position:absolute;font-size:13px;line-height:1;pointer-events:none;
+  #secretBn .spark,#smoneyBn .spark{position:absolute;font-size:13px;line-height:1;pointer-events:none;
     animation:twinkle 2.6s ease-in-out infinite}
   @keyframes twinkle{0%,100%{opacity:.2;transform:scale(.75)}50%{opacity:1;transform:scale(1.2)}}
+  /* 簡單記帳鈕(0806):跟財富小秘密同一套特效語彙——視覺權重一樣,才不會被忽略。
+     同週期(2.6s)但相位錯開一半,兩顆同屏不同步閃,不會打架也不會像警報器。
+     光暈換成 teal(鈕本身的色系),不搶金色的戲。reduced-motion 一樣全關。 */
+  #smoneyBn{position:relative;overflow:hidden;
+    animation:tealGlow 2.6s ease-in-out infinite -1.3s, coinShake 2.6s ease-in-out infinite -1.3s}
+  #smoneyBn::after{content:'';position:absolute;top:0;left:0;width:46%;height:100%;pointer-events:none;
+    background:linear-gradient(105deg,transparent 8%,rgba(255,255,255,.5) 50%,transparent 92%);
+    transform:translateX(-130%);animation:coinShine 2.6s ease-in-out infinite -1.3s}
+  @keyframes tealGlow{0%,100%{box-shadow:0 4px 14px rgba(14,124,123,.35)}
+    50%{box-shadow:0 4px 24px rgba(47,169,140,.8),0 0 42px rgba(47,169,140,.4)}}
   .lesson{font-size:12.5px;font-weight:700;color:#5A4548;line-height:1.9;padding:7px 0;border-bottom:1px dashed var(--line)}
   .lesson:last-child{border-bottom:none}
   .lesson b{color:#8A6210}
@@ -249,7 +259,7 @@
          兩張卡假設不同,不合併。 -->
     <div class="card"><b style="font-size:13.5px;color:#5A0E14">知道要省什麼了,剩下的是記不記得</b>
       <div style="font-size:12.5px;color:#3A4560;line-height:1.7;margin-top:6px">上面那張處方,靠自己手動記三天就會忘。簡單記帳綁你的發票載具,發票進來就自動記一筆,不用手動輸入。</div>
-      <button class="btn t" style="margin-top:12px" onclick="goApp('smoney')">📝 打開簡單記帳,把處方變成習慣</button></div>
+      <button class="btn t" id="smoneyBn" style="margin-top:12px" onclick="goApp('smoney')">📝 打開簡單記帳,把處方變成習慣<span class="spark" aria-hidden="true" style="top:6px;left:12px">✨</span><span class="spark" aria-hidden="true" style="top:9px;right:14px;animation-delay:-2.2s">📒</span><span class="spark" aria-hidden="true" style="bottom:6px;left:20%;animation-delay:-3.1s">💰</span><span class="spark" aria-hidden="true" style="bottom:8px;right:24%;animation-delay:-1.7s">✨</span></button></div>
     <!-- 0728 v3:識讀區塊收進「好奇鈕」——預設只有一顆挑釁的按鈕,點開才亮牌。
          內容資料化(SECRETS/APPS 兩個陣列),之後要加秘密或加 App 都是加一列的事。
          好笑但用語是真的:術語(複利/本金/資產配置/長期持有)是通識教育不是建議,
