@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>D2 活動頁面 mockup｜憑發票贈雞球/洋蔥圈（暖暖窩）</title>
+<style>
+  :root{
+    --black100:#FFFFFF;--black300:#F5F5F5;--black400:#F0F0F0;--black500:#D9D9D9;
+    --black700:#8C8C8C;--black1000:#262626;
+    --green100:#E6F7F6;--green300:#8ADAD4;--green600:#01AFA2;--green700:#019F93;
+    --orange100:#FFF5E9;--orange300:#FFD09A;--orange600:#FF9924;--orange700:#E88B21;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;font-family:"PingFang TC","Noto Sans TC","SF Pro",-apple-system,sans-serif;
+    background:#ddd;padding:24px;display:flex;flex-wrap:wrap;gap:24px;justify-content:center;
+  }
+  .note{width:100%;max-width:960px;background:#fffbe6;border:1px solid #f0c419;border-radius:8px;
+    padding:12px 16px;font-size:13px;color:#5c4a00;line-height:1.6;}
+  .note b{color:#a35b00;}
+  .phone{width:375px;background:var(--black300);border-radius:28px;overflow:hidden;
+    box-shadow:0 8px 24px rgba(0,0,0,0.25);border:6px solid #111;}
+  .status{height:24px;background:var(--black100);}
+  .col-title{font-size:12px;color:var(--black700);text-align:center;padding:4px 0;background:#333;color:#fff;}
+
+  /* ===== 畫面 A：活動 tab 裡的推薦活動卡（.act-promo 規格） ===== */
+  .nav{height:44px;display:flex;align-items:center;justify-content:center;background:var(--black100);
+    font-size:17px;font-weight:600;color:var(--black1000);position:relative;}
+  .nav .h{position:absolute;left:16px;font-size:13px;color:var(--green700);}
+  .scr{background:var(--black300);min-height:520px;padding-bottom:24px;}
+  .sec{padding:20px 16px 0;}
+  .sec-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+  .sec-h .t{font-size:16px;font-weight:700;color:var(--black1000);}
+  .sec-h .m{font-size:13px;color:var(--green700);}
+  .promo{height:86px;border-radius:12px;overflow:hidden;background:#fff;display:flex;align-items:stretch;
+    box-shadow:0 1px 3px rgba(0,0,0,0.08);}
+  .promo .ph{width:86px;flex-shrink:0;background:linear-gradient(135deg,var(--orange100),var(--orange300));
+    display:flex;align-items:center;justify-content:center;font-size:34px;}
+  .promo .body{flex:1;padding:10px 12px;display:flex;flex-direction:column;justify-content:center;gap:4px;min-width:0;}
+  .promo .tag{align-self:flex-start;background:var(--orange100);color:var(--orange700);font-size:11px;
+    font-weight:700;padding:1px 8px;border-radius:6px;}
+  .promo .ti{font-size:14px;font-weight:700;color:var(--black1000);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .promo .sub{font-size:12px;color:var(--black700);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .promo.other{margin-top:10px;opacity:0.55;}
+
+  /* ===== 畫面 B：活動詳情頁 ===== */
+  .hero{height:200px;background:linear-gradient(135deg,var(--orange100) 0%,#fff 55%,var(--orange100) 100%);
+    display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;position:relative;
+    border-bottom:1px solid var(--black400);}
+  .hero .big{font-size:64px;}
+  .hero .ph-label{font-size:11px;color:var(--orange700);background:#fff;border:1px dashed var(--orange600);
+    border-radius:20px;padding:3px 10px;}
+  .detail-body{padding:16px;}
+  .store{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+  .store .logo{width:36px;height:36px;border-radius:8px;background:var(--green600);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}
+  .store .name{font-size:14px;font-weight:700;color:var(--black1000);}
+  .store .addr{font-size:12px;color:var(--black700);}
+  h1.act-title{font-size:20px;font-weight:700;color:var(--black1000);margin:0 0 6px;line-height:1.4;}
+  .act-desc{font-size:14px;color:var(--black800,#595959);line-height:1.7;margin:0 0 18px;}
+  .card{background:#fff;border-radius:12px;padding:16px;margin-bottom:14px;}
+  .card h3{font-size:14px;font-weight:700;color:var(--black1000);margin:0 0 10px;display:flex;align-items:center;gap:6px;}
+  .step{display:flex;gap:10px;margin-bottom:12px;}
+  .step:last-child{margin-bottom:0;}
+  .step .n{width:22px;height:22px;border-radius:50%;background:var(--green600);color:#fff;font-size:12px;
+    font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .step .t{font-size:13px;color:var(--black1000);line-height:1.6;padding-top:1px;}
+  .tos{font-size:12px;color:var(--black700);line-height:1.9;margin:0;padding-left:16px;}
+  .tos li{margin-bottom:2px;}
+  .tos .tbd{color:var(--orange700);font-weight:700;background:var(--orange100);padding:0 4px;border-radius:4px;}
+  .cta{margin:18px 16px 20px;background:var(--green600);color:#fff;text-align:center;padding:14px;
+    border-radius:12px;font-size:15px;font-weight:700;}
+  .cta .s{display:block;font-size:11px;font-weight:400;opacity:0.85;margin-top:2px;}
+</style>
+</head>
+<body>
+
+<div class="note">
+  <b>這是內部審核用的 mockup，不是最終畫面。</b>D2「確認活動內容與畫面（憑發票贈雞球/洋蔥圈），給老闆娘過目」——
+  視覺、字級、間距、色碼全部照發票載具 APP 真實 design system 做（<code>invoicemanager-screens-dev</code>，
+  Green #01AFA2 / Orange #FF9924 / 卡片 12px 圓角等 token 直接沿用），內容部分還沒有真的接上任何系統。
+  <br><br>
+  <b>這個活動實際會出現在 App 的哪裡，目前還沒定案</b>——這裡先假設放在既有的「活動」分頁 → 「推薦活動」區塊
+  （這是 App 裡本來就有的一個位置，不是我們新開的），因為它是既有結構裡最合理的位置，但正式位置要等產品/工程確認。
+  <br><br>
+  <b>橘色虛線框的圖都是佔位符，不是真的照片。</b>我查了暖暖窩的 Facebook（
+  <a href="https://www.facebook.com/eva1216eve0529/" target="_blank">4.7K followers</a>）跟 Instagram（
+  <a href="https://www.instagram.com/sweethome_2014/" target="_blank">@sweethome_2014，902 followers</a>），
+  沒有登入的狀態下抓不到雞球/洋蔥圈的實際餐點照片——這兩張圖建議 D2 當面請老闆娘提供，或到店拍。
+  文案語氣有照他們粉專自介的用詞（用愛烹調、溫暖、家）去對齊。
+</div>
+
+<div>
+  <div class="col-title">畫面 A · 活動分頁「推薦活動」區塊會看到的卡片</div>
+  <div class="phone">
+    <div class="status"></div>
+    <div class="nav">活動中心</div>
+    <div class="scr">
+      <div class="sec">
+        <div class="sec-h"><div class="t">推薦活動</div></div>
+        <div class="promo">
+          <div class="ph">🧅</div>
+          <div class="body">
+            <span class="tag">暖暖窩限定</span>
+            <div class="ti">用餐即贈｜洋蔥圈或雞球任選一份</div>
+            <div class="sub">板橋・暖暖窩義式廚房</div>
+          </div>
+        </div>
+        <div class="promo other">
+          <div class="ph" style="background:linear-gradient(135deg,#E6F7F6,#8ADAD4);">🎁</div>
+          <div class="body">
+            <span class="tag" style="background:var(--green100);color:var(--green700);">品牌加碼獎</span>
+            <div class="ti">（其他商家活動，示意用）</div>
+            <div class="sub">－</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div>
+  <div class="col-title">畫面 B · 點進去的活動詳情頁</div>
+  <div class="phone">
+    <div class="status"></div>
+    <div class="nav"><span class="h">‹ 返回</span>活動詳情</div>
+    <div class="scr" style="padding-bottom:0;">
+      <div class="hero">
+        <div class="big">🧅🍗</div>
+        <div class="ph-label">真實照片待補（雞球／洋蔥圈擇一實拍）</div>
+      </div>
+      <div class="detail-body">
+        <div class="store">
+          <div class="logo">暖</div>
+          <div>
+            <div class="name">暖暖窩義式廚房</div>
+            <div class="addr">板橋區文化路一段286巷16號・近新埔站</div>
+          </div>
+        </div>
+
+        <h1 class="act-title">用心料理的溫暖，這次多送你一份</h1>
+        <p class="act-desc">
+          暖暖窩用二十多年的手藝，把每一道菜都當成給家人的料理。這次想讓第一次認識我們的你，
+          多帶一份「洋蔥圈」或「雞球」回家——選一份就好，慢慢吃，不用急。
+        </p>
+
+        <div class="card">
+          <h3>🎯 怎麼兌換</h3>
+          <div class="step"><div class="n">1</div><div class="t">在暖暖窩用餐消費（內用／外帶皆可，依現場公告為準）</div></div>
+          <div class="step"><div class="n">2</div><div class="t">結帳時出示這個畫面給店員看</div></div>
+          <div class="step"><div class="n">3</div><div class="t">店員核銷後，現場兌換洋蔥圈或雞球一份（兩選一）</div></div>
+        </div>
+
+        <div class="card">
+          <h3>📋 活動須知</h3>
+          <ul class="tos">
+            <li>每筆消費限兌換一次，兩款贈品擇一，不可加購變兩份</li>
+            <li>活動期間：<span class="tbd">［待老闆娘確認起訖日期］</span></li>
+            <li>每日兌換名額：<span class="tbd">［待老闆娘確認上限，避免現場備料不夠］</span></li>
+            <li>是否限內用／外帶／預訂：<span class="tbd">［待確認，見 BD 手稿的產能限制備註］</span></li>
+            <li>不可與其他優惠券併用（若老闆娘允許併用，這條要拿掉）</li>
+            <li>贈品實際樣式以店家提供為準，圖片僅供參考</li>
+          </ul>
+        </div>
+      </div>
+      <div class="cta">
+        帶我去暖暖窩
+        <span class="s">板橋文化路一段286巷16號・近新埔站</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
