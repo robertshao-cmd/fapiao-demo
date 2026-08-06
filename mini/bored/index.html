@@ -23,8 +23,8 @@
   }
 })();
 </script>
-<script src="qrcode.min.js?v=06837a5f"></script>
-<script src="unit-kit.js?v=06837a5f"></script>
+<script src="qrcode.min.js?v=723bab99"></script>
+<script src="unit-kit.js?v=723bab99"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#262626;--red:#01AFA2;--mut:#8C8C8C;--line:#F0F0F0;--bg:#F5F5F5}
@@ -511,7 +511,11 @@ function b64url(s) {                       /* Base64URL(RFC 4648):-_ 要換回 +
 function validBc(b) { return /^\/[0-9A-Z.+\-]{7}$/.test(b || ''); }   /* 手機條碼 = / + 7 碼,共 8 碼 */
 try {
   var _cidQ = new URLSearchParams(location.search).get('cid');
-  if (_cidQ) _bc.fromCid = b64url(_cidQ);
+  /* App 深連結給的 cid 是 Base64URL 包過的條碼;但 FCM 分眾推播的 {barcode}
+     動態變數換出來的是條碼原文(/XXXXXXX),不是包過的。先檢查是不是已經是
+     合法條碼原文,是的話直接用,不然才照舊當 Base64URL 解——兩種來源都吃,
+     互不影響。 */
+  if (_cidQ) _bc.fromCid = validBc(_cidQ) ? _cidQ : b64url(_cidQ);
 } catch (e) {}
 
 /* ══ 條碼浮層出示「他自己的」載具號(0731)═════════════════════════

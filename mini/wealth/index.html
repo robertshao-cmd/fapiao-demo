@@ -9,8 +9,8 @@
 <title>幾歲破產|發票載具</title>
 <!-- vendored / 共用層:不改。unit-kit 這裡只用到 UK.selfCheck()(唯讀機械自檢),
      nav/state/share 依 0726 決策維持本單元手寫版本。 -->
-<script src="qrcode.min.js?v=06837a5f"></script>
-<script src="unit-kit.js?v=06837a5f"></script>
+<script src="qrcode.min.js?v=723bab99"></script>
+<script src="unit-kit.js?v=723bab99"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--red-deep:#A50011;--gold:#FFD34D;--teal:#0E7C7B;--mut:#7A8494;--bg:#FFF6F5;--line:#F0E0E1}
@@ -226,6 +226,13 @@
     <div class="card"><b style="font-size:13.5px;color:var(--teal)">省錢處方</b>
       <div id="rx"></div>
       <div class="allin" id="allin"></div></div>
+    <!-- 0806:兩條出口分工,不是重複的兩個投資鈕——這張卡是「知道要省什麼了,
+         但記不住/懶得手動記」的人:簡單記帳綁發票載具會自動同步,不用手動記。
+         財富小秘密牌底的籌碼K線,是另一種人(手上有餘裕想讓錢長大)。
+         兩張卡假設不同,不合併。 -->
+    <div class="card"><b style="font-size:13.5px;color:#5A0E14">知道要省什麼了,剩下的是記不記得</b>
+      <div style="font-size:12.5px;color:#3A4560;line-height:1.7;margin-top:6px">上面那張處方,靠自己手動記三天就會忘。簡單記帳綁你的發票載具,發票進來就自動記一筆,不用手動輸入。</div>
+      <button class="btn t" style="margin-top:12px" onclick="goApp('smoney')">📝 打開簡單記帳,把處方變成習慣</button></div>
     <!-- 0728 v3:識讀區塊收進「好奇鈕」——預設只有一顆挑釁的按鈕,點開才亮牌。
          內容資料化(SECRETS/APPS 兩個陣列),之後要加秘密或加 App 都是加一列的事。
          好笑但用語是真的:術語(複利/本金/資產配置/長期持有)是通識教育不是建議,
@@ -541,7 +548,17 @@ function platform(){
 var APPS=[
   {k:'chips', nm:'籌碼K線',
    android:'https://play.google.com/store/apps/details?id=com.cmoney.chipk&hl=zh_TW',
-   ios:'https://apps.apple.com/tw/app/%E8%82%A1%E5%B8%82%E7%B1%8C%E7%A2%BCk%E7%B7%9A-%E5%BF%AB%E9%80%9F%E6%89%BE%E5%87%BA%E4%B8%BB%E5%8A%9B%E7%B1%8C%E7%A2%BC%E9%A3%86%E8%82%A1/id981360113'}
+   ios:'https://apps.apple.com/tw/app/%E8%82%A1%E5%B8%82%E7%B1%8C%E7%A2%BCk%E7%B7%9A-%E5%BF%AB%E9%80%9F%E6%89%BE%E5%87%BA%E4%B8%BB%E5%8A%9B%E7%B1%8C%E7%A2%BC%E9%A3%86%E8%82%A1/id981360113'},
+  /* 0806:兩條出口分工——籌碼K線=手上有餘裕想讓錢長大(藏在財富小秘密牌底);
+     簡單記帳=省錢處方看完但記不住/懶得手動記(直接放在處方卡下面,不用挖)。
+     連結是實測過、確認是 CMoney 官方在架版本才放進來的:
+     Android com.money.smoney_android / iOS id1525674363,兩邊 title 都是
+     「簡單記帳-天天掌握生活收支」,開發者 MONEY & CMoney Inc.。
+     目前先接商店連結(跟籌碼K線同款);真正的「已安裝直接喚醒 App」要等
+     對方團隊給官方 Universal Link/App Link,那條是另一件事,別搞混。 */
+  {k:'smoney', nm:'簡單記帳',
+   android:'https://play.google.com/store/apps/details?id=com.money.smoney_android&hl=zh_TW',
+   ios:'https://apps.apple.com/tw/app/id1525674363'}
 ];
 function appUrl(a){ return platform()==='ios' ? (a.ios||a.android) : (a.android||a.ios); }
 function goApp(k){
