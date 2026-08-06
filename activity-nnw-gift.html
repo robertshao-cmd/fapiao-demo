@@ -72,6 +72,31 @@
   .cta{margin:18px 16px 20px;background:var(--green600);color:#fff;text-align:center;padding:14px;
     border-radius:12px;font-size:15px;font-weight:700;}
   .cta .s{display:block;font-size:11px;font-weight:400;opacity:0.85;margin-top:2px;}
+
+  /* ===== 畫面 C：商家端核銷 ===== */
+  .merch-body{padding:16px;}
+  .counter{background:#fff;border-radius:12px;padding:18px;text-align:center;margin-bottom:14px;}
+  .counter .num{font-size:36px;font-weight:700;color:var(--green700);line-height:1;}
+  .counter .lbl{font-size:12px;color:var(--black700);margin-top:4px;}
+  .redeem-btn{background:var(--green600);color:#fff;text-align:center;padding:16px;border-radius:12px;
+    font-size:16px;font-weight:700;margin-bottom:14px;}
+  .log{background:#fff;border-radius:12px;padding:4px 16px;}
+  .log-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;
+    border-bottom:1px solid var(--black400);font-size:12px;color:var(--black700);}
+  .log-row:last-child{border-bottom:none;}
+  .log-row .id{font-family:monospace;color:var(--black1000);}
+  .log-row .new{background:var(--orange100);color:var(--orange700);font-size:10px;font-weight:700;
+    padding:1px 6px;border-radius:6px;margin-left:6px;}
+
+  /* ===== 衡量機制卡片 ===== */
+  .spec{width:100%;max-width:960px;background:#fff;border-radius:12px;padding:20px 24px;font-size:13px;
+    color:var(--black1000);line-height:1.8;}
+  .spec h2{font-size:16px;margin:0 0 4px;}
+  .spec h3{font-size:14px;margin:16px 0 6px;color:var(--green700);}
+  .spec code{background:var(--black300);padding:2px 6px;border-radius:4px;font-size:12px;}
+  .spec table{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px;}
+  .spec th,.spec td{border:1px solid var(--black400);padding:6px 10px;text-align:left;}
+  .spec th{background:var(--black300);}
 </style>
 </head>
 <body>
@@ -89,6 +114,15 @@
   <a href="https://www.instagram.com/sweethome_2014/" target="_blank">@sweethome_2014，902 followers</a>），
   沒有登入的狀態下抓不到雞球/洋蔥圈的實際餐點照片——這兩張圖建議 D2 當面請老闆娘提供，或到店拍。
   文案語氣有照他們粉專自介的用詞（用愛烹調、溫暖、家）去對齊。
+  <br><br>
+  <b>0806 更新（老闆娘/你已確認）：僅限內用，一桌限兌換一份。</b>畫面 B 已改成這個規則，
+  外帶／預訂那條 TBD 已拿掉。同桌多人重複出示的防呆，這輪先靠店員現場判斷（跟紙本優惠券一樣），
+  不做技術防重複——規模這麼小，做一套桌號辨識機制不划算，見下方衡量機制的說明。
+  <br><br>
+  <b>新增：怎麼知道這個活動帶來多少人、成效好不好。</b>畫面 C 是商家端核銷畫面，每次核銷都會記一筆
+  {活動ID、店家ID、會員載具ID、核銷時間}——這樣我們才能算「核銷次數」「去重會員數」「新客占比」
+  這三個 Sales Kit 已經定義過的試辦期指標（核銷率 ≥15%、可歸因來客數 ≥10 位），不是核銷完就沒了。
+  詳細規格見下方衡量機制卡片。
 </div>
 
 <div>
@@ -147,18 +181,18 @@
 
         <div class="card">
           <h3>🎯 怎麼兌換</h3>
-          <div class="step"><div class="n">1</div><div class="t">在暖暖窩用餐消費（內用／外帶皆可，依現場公告為準）</div></div>
-          <div class="step"><div class="n">2</div><div class="t">結帳時出示這個畫面給店員看</div></div>
-          <div class="step"><div class="n">3</div><div class="t">店員核銷後，現場兌換洋蔥圈或雞球一份（兩選一）</div></div>
+          <div class="step"><div class="n">1</div><div class="t">在暖暖窩<b>內用</b>消費（不含外帶／預訂自取）</div></div>
+          <div class="step"><div class="n">2</div><div class="t">結帳時由一位客人出示這個畫面給店員看即可，不用同桌每個人都出示</div></div>
+          <div class="step"><div class="n">3</div><div class="t">店員在核銷畫面（見畫面 C）點一下核銷，現場兌換洋蔥圈或雞球一份（兩選一）</div></div>
         </div>
 
         <div class="card">
           <h3>📋 活動須知</h3>
           <ul class="tos">
-            <li>每筆消費限兌換一次，兩款贈品擇一，不可加購變兩份</li>
+            <li><b>僅限內用</b>，每桌限兌換一份（不論幾位同行，一桌只送一份）</li>
+            <li>兩款贈品擇一，不可加購變兩份</li>
             <li>活動期間：<span class="tbd">［待老闆娘確認起訖日期］</span></li>
             <li>每日兌換名額：<span class="tbd">［待老闆娘確認上限，避免現場備料不夠］</span></li>
-            <li>是否限內用／外帶／預訂：<span class="tbd">［待確認，見 BD 手稿的產能限制備註］</span></li>
             <li>不可與其他優惠券併用（若老闆娘允許併用，這條要拿掉）</li>
             <li>贈品實際樣式以店家提供為準，圖片僅供參考</li>
           </ul>
@@ -170,6 +204,52 @@
       </div>
     </div>
   </div>
+</div>
+
+<div>
+  <div class="col-title">畫面 C · 商家端核銷（給店員用，解決「怎麼知道帶來多少人」）</div>
+  <div class="phone">
+    <div class="status"></div>
+    <div class="nav">核銷｜洋蔥圈/雞球活動</div>
+    <div class="scr merch-body" style="padding-bottom:16px;">
+      <div class="counter">
+        <div class="num">7</div>
+        <div class="lbl">本活動累計核銷次數（≈到店桌數）</div>
+      </div>
+      <div class="redeem-btn">📷 掃描客人畫面上的兌換碼</div>
+      <div class="log">
+        <div class="log-row"><span>今天 19:42</span><span class="id">會員 …3f2c</span><span class="new">新客</span></div>
+        <div class="log-row"><span>今天 19:15</span><span class="id">會員 …8a91</span></div>
+        <div class="log-row"><span>今天 18:50</span><span class="id">會員 …3f2c</span><span class="new">新客</span></div>
+        <div class="log-row"><span>今天 12:30</span><span class="id">會員 …c710</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="spec">
+  <h2>衡量機制：核銷完之後，怎麼知道這個活動帶來多少人、值不值得推進</h2>
+  <p>對應 Sales Kit「試辦期閘門」已經定義過的兩個指標（核銷率 ≥15%、可歸因來客數 ≥10 位）——
+  這裡講清楚「這些數字從哪裡來」，不是核銷完就沒了。</p>
+
+  <h3>① 每次核銷要記一筆什麼</h3>
+  <p><code>{ activityId, shopId, memberId（載具唯一識別碼，不是手機或Email）, redeemedAt }</code></p>
+  <p>memberId 從客人畫面 B 顯示的兌換碼帶出來，店員用畫面 C 掃碼或手動輸入核銷——
+  不存個資，跟目前發票載具「只產出 memberId 不含個資」的原則一致。</p>
+
+  <h3>② 由這筆紀錄可以算出的指標</h3>
+  <table>
+    <tr><th>指標</th><th>算法</th><th>看什麼</th></tr>
+    <tr><td>核銷次數</td><td>紀錄總筆數</td><td>≈到店桌數（因一桌一份）</td></tr>
+    <tr><td>去重會員數</td><td>memberId 去重後的數量</td><td>避免同一人被算很多次，這才是「帶來多少人」的下限</td></tr>
+    <tr><td>新客占比</td><td>此 memberId 在 carrier-join 歷史資料裡，是否本來就有暖暖窩消費紀錄</td><td>證明是活動吸引來的，不是本來就會來的人（呼應 Sales Kit 反對意見①的答法）</td></tr>
+    <tr><td>核銷率</td><td>核銷次數 ÷ 活動詳情頁（畫面 B）被打開次數</td><td>需要在畫面 B 加一個「查看」埋點，目前 mockup 還沒做這個埋點</td></tr>
+  </table>
+
+  <h3>③ 老實說，這輪還沒做到的</h3>
+  <p>「新客占比」要靠 carrier-join 的歷史資料才能查（見 nest-integration 那條資料橋），現在還沒打通；
+  「核銷率」要先在畫面 B 加曝光埋點才有分母。這兩件事列進下一輪要補的工程項目，
+  這次 D2 先能拿到「核銷次數」跟「去重會員數」這兩個最基本的數字。</p>
 </div>
 
 </body>
