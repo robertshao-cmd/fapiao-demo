@@ -9,8 +9,8 @@
 <title>幾歲破產|發票載具</title>
 <!-- vendored / 共用層:不改。unit-kit 這裡只用到 UK.selfCheck()(唯讀機械自檢),
      nav/state/share 依 0726 決策維持本單元手寫版本。 -->
-<script src="qrcode.min.js?v=723bab99"></script>
-<script src="unit-kit.js?v=723bab99"></script>
+<script src="qrcode.min.js?v=1c9dba6d"></script>
+<script src="unit-kit.js?v=1c9dba6d"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--red-deep:#A50011;--gold:#FFD34D;--teal:#0E7C7B;--mut:#7A8494;--bg:#FFF6F5;--line:#F0E0E1}
@@ -169,8 +169,9 @@
       <div class="chips" data-q="goal">
         <button class="chip" data-action="pick" data-d="4">有,存頭期款</button><button class="chip" data-action="pick" data-d="0">隨緣存</button><button class="chip" data-action="pick" data-d="-5">月光,別問</button></div>
       <div class="q">Q3 · 最想砍哪類花費?</div>
-      <div class="chips" data-q="cut">
-        <button class="chip" data-action="pick" data-d="2" data-k="drink">手搖/咖啡</button><button class="chip" data-action="pick" data-d="2" data-k="deliv">外送</button><button class="chip" data-action="pick" data-d="1" data-k="sub">訂閱</button><button class="chip" data-action="pick" data-d="-3">都不想砍</button></div>
+      <!-- 0806:選項改由 JS 從 LEAKS(動態前三大)長出來,不再寫死——
+           漏財點換人,這裡的選項要跟著換,寫死就會問到不存在的類別 -->
+      <div class="chips" data-q="cut" id="cutChips"></div>
       <!-- 年齡從結果頁搬到這裡:先問再算,「以 N 歲起算」才不會變成事後補問 -->
       <div class="q">Q4 · 你現在幾歲?</div>
       <div class="a0" style="justify-content:flex-start">
@@ -277,12 +278,30 @@
 
 /* 漏財點是單一資料源:結果頁的漏財點、省錢處方、讓錢長大的金額全部從這裡長出來,
    所以三者的數字一定對得起來(舊版是三處各寫死一組)。
-   正式版:leak 由中台 /features/summary 的支出分項回填,save 由處方規則算。 */
-var LEAKS=[
+   0806 改動態:漏財點不再寫死三類,而是從消費類別目錄挑金額前三大。
+   原因是 7 月全月真實資料驗證(anya-query-agent/analyses/20260806_wealth漏財點_7月驗證.md):
+   固定的手搖/外送/訂閱只覆蓋 58%/17%/17% 用戶——大多數人打開會看到 $0,工具顯得與他無關。
+   正式版:CATS 由發票 join 通路分類表(trans_sellers_category,69 類)回填各類月加總,
+   前端邏輯不變,只是資料從真的來。 */
+var CATS=[
+  {k:'shop',  ic:'🛒', nm:'電商衝動下單',  leak:3600, save:1080, rx:'湊免運前,先在購物車躺 3 天', why:'算的是衝動那部分,不是全部'},
   {k:'drink', ic:'🧋', nm:'手搖+咖啡',    leak:2840, save:1420, rx:'第 3 杯的時候攔你', why:'沒叫你戒,只算少喝一半'},
   {k:'deliv', ic:'🛵', nm:'外送費+服務費', leak:1920, save:960,  rx:'改自取,省的是運費', why:'飯錢照付,運費不用'},
+  {k:'cvs',   ic:'🏪', nm:'超商順手拿',    leak:890,  save:445,  rx:'結帳區的零食走過就好', why:'順手那包才是漏,正餐不算'},
   {k:'sub',   ic:'📺', nm:'沒在看的訂閱',  leak:647,  save:647,  rx:'30 天沒開的列給你', why:'退了就整筆不再扣'}
 ];
+/* 前三大=你的漏財點。demo 數字下 shop/drink/deliv 會勝出——跟舊版固定三類不同,
+   這是刻意的:demo 本身就要演示「換一個人,前三名就換」。 */
+var LEAKS=CATS.slice().sort(function(a,b){ return b.leak-a.leak; }).slice(0,3);
+/* Q3 的歲數調整量從漏的大小導出(砍越大條,歲數往後拖越多),
+   不再逐類手填——類別是動態的,手填的 d 會跟不上 */
+function cutD(L){ return Math.max(1, Math.min(3, Math.round(L.leak/1000))); }
+function renderCutChips(){
+  var box=document.getElementById('cutChips'); if(!box) return;
+  box.innerHTML=LEAKS.map(function(L){
+    return '<button class="chip" data-action="pick" data-d="'+cutD(L)+'" data-k="'+L.k+'">'+L.ic+' '+L.nm+'</button>';
+  }).join('')+'<button class="chip" data-action="pick" data-d="-3">都不想砍</button>';
+}
 var UK_SLUG = 'wealth';                  /* 給 UK.exitToHome 的 postMessage 帶身分,殼才知道是誰要回首頁 */
 /* 起算年齡。0727 Melon 定調:改「自由填寫」,不用區間——部分使用者對區間敏感。
    ⚠️ 排序待對齊:7/24 的說法是改區間、7/27 的說法是自由填寫,已排回問 Melon。
@@ -620,7 +639,7 @@ function share(){ track('wc_share'); UK.share.open(card); }
 
 /* init */
 STACK=['v0']; CUR='v0';
-resetAns(); entryRender(); rxRender();
+renderCutChips(); resetAns(); entryRender(); rxRender();
 UK.homeHint();          /* 單機直開時顯示「從發票載具首頁進入」的正規路徑 */
 track('wc_view');
 /* 交付前在 console 打 UK.selfCheck() 做機械自檢(觸控尺寸/橫向捲動/死按鈕) */
