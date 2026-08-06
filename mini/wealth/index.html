@@ -9,8 +9,8 @@
 <title>幾歲破產|發票載具</title>
 <!-- vendored / 共用層:不改。unit-kit 這裡只用到 UK.selfCheck()(唯讀機械自檢),
      nav/state/share 依 0726 決策維持本單元手寫版本。 -->
-<script src="qrcode.min.js?v=6d542183"></script>
-<script src="unit-kit.js?v=6d542183"></script>
+<script src="qrcode.min.js?v=4092183c"></script>
+<script src="unit-kit.js?v=4092183c"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--red-deep:#A50011;--gold:#FFD34D;--teal:#0E7C7B;--mut:#7A8494;--bg:#FFF6F5;--line:#F0E0E1}
@@ -296,9 +296,30 @@ var CATS_DEFAULT=[
    只收「類別名+金額」,不含條碼與任何身分——金額本身不指向任何人。
    沒給 rx/save 的類別用通用處方墊底(save=漏額三成,保守不虛報)。
    正式版由中台回填時走同一個入口,前端邏輯零改動。 */
+/* 0806:內建測試 profile(?profile=p1)。?cats= 的長 JSON URL 在通訊軟體裡
+   一貼就斷(中文+引號+方括號,連結只會被認到第一個括號前),斷了又因為
+   silent fallback 看起來像「沒生效」。短別名連結怎麼貼都不會斷。
+   內容=真實 7 月類別加總(去識別:只有類別名與金額,無條碼無身分)。 */
+var PROFILES={
+  p1:[ /* 真實樣本 A(7月,11類) */
+    {nm:'百貨公司',ic:'🏬',leak:7274},{nm:'購物商場',ic:'🛍️',leak:2428},
+    {nm:'藥妝美妝',ic:'💄',leak:2414},{nm:'中台式料理',ic:'🍜',leak:1929},
+    {nm:'速食炸物',ic:'🍟',leak:1682},{nm:'電信網路',ic:'📶',leak:1298},
+    {nm:'電商平台',ic:'🛒',leak:1196},{nm:'訂閱/數位內容',ic:'📺',leak:1110},
+    {nm:'日式料理',ic:'🍣',leak:890},{nm:'手搖咖啡',ic:'🧋',leak:752},
+    {nm:'連鎖超市',ic:'🧺',leak:520}],
+  p2:[ /* 真實樣本 B(7月,漏財三類幾乎全空的反例) */
+    {nm:'電商平台',ic:'🛒',leak:13236},{nm:'百貨公司',ic:'🏬',leak:12644},
+    {nm:'家具生活',ic:'🛋️',leak:6424},{nm:'大型量販',ic:'🏭',leak:6038},
+    {nm:'麵包烘焙',ic:'🥐',leak:2976},{nm:'健身運動',ic:'🏋️',leak:2576},
+    {nm:'連鎖超市',ic:'🧺',leak:2418},{nm:'便利商店',ic:'🏪',leak:1606},
+    {nm:'藥妝美妝',ic:'💄',leak:914},{nm:'手搖咖啡',ic:'🧋',leak:188}]
+};
 function parseCats(){
   try{
-    var q=new URLSearchParams(location.search).get('cats');
+    var sp=new URLSearchParams(location.search);
+    var p=sp.get('profile');
+    var q=(p&&PROFILES[p])?JSON.stringify(PROFILES[p]):sp.get('cats');
     if(!q) return null;
     var arr=JSON.parse(q);
     if(!Array.isArray(arr)||!arr.length) return null;
