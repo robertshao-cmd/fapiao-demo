@@ -9,8 +9,8 @@
 <title>幾歲破產|發票載具</title>
 <!-- vendored / 共用層:不改。unit-kit 這裡只用到 UK.selfCheck()(唯讀機械自檢),
      nav/state/share 依 0726 決策維持本單元手寫版本。 -->
-<script src="qrcode.min.js?v=1c9dba6d"></script>
-<script src="unit-kit.js?v=1c9dba6d"></script>
+<script src="qrcode.min.js?v=6d542183"></script>
+<script src="unit-kit.js?v=6d542183"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--red-deep:#A50011;--gold:#FFD34D;--teal:#0E7C7B;--mut:#7A8494;--bg:#FFF6F5;--line:#F0E0E1}
@@ -283,13 +283,37 @@
    固定的手搖/外送/訂閱只覆蓋 58%/17%/17% 用戶——大多數人打開會看到 $0,工具顯得與他無關。
    正式版:CATS 由發票 join 通路分類表(trans_sellers_category,69 類)回填各類月加總,
    前端邏輯不變,只是資料從真的來。 */
-var CATS=[
+var CATS_DEFAULT=[
   {k:'shop',  ic:'🛒', nm:'電商衝動下單',  leak:3600, save:1080, rx:'湊免運前,先在購物車躺 3 天', why:'算的是衝動那部分,不是全部'},
   {k:'drink', ic:'🧋', nm:'手搖+咖啡',    leak:2840, save:1420, rx:'第 3 杯的時候攔你', why:'沒叫你戒,只算少喝一半'},
   {k:'deliv', ic:'🛵', nm:'外送費+服務費', leak:1920, save:960,  rx:'改自取,省的是運費', why:'飯錢照付,運費不用'},
   {k:'cvs',   ic:'🏪', nm:'超商順手拿',    leak:890,  save:445,  rx:'結帳區的零食走過就好', why:'順手那包才是漏,正餐不算'},
   {k:'sub',   ic:'📺', nm:'沒在看的訂閱',  leak:647,  save:647,  rx:'30 天沒開的列給你', why:'退了就整筆不再扣'}
 ];
+/* 0806:?cats= 真資料測試通道(仿 detox 的 ?personal=1)。
+   把某人的實際類別月加總灌進來,驗證動態前三大在真實 profile 上的長相:
+     ?cats=[{"nm":"百貨公司","ic":"🏬","leak":7274},...]  (URL-encode 後的 JSON)
+   只收「類別名+金額」,不含條碼與任何身分——金額本身不指向任何人。
+   沒給 rx/save 的類別用通用處方墊底(save=漏額三成,保守不虛報)。
+   正式版由中台回填時走同一個入口,前端邏輯零改動。 */
+function parseCats(){
+  try{
+    var q=new URLSearchParams(location.search).get('cats');
+    if(!q) return null;
+    var arr=JSON.parse(q);
+    if(!Array.isArray(arr)||!arr.length) return null;
+    var out=arr.map(function(c,i){
+      var leak=Math.max(0, Math.round(+c.leak||0));
+      return { k:String(c.k||('c'+i)), ic:String(c.ic||'💸'), nm:String(c.nm||'').slice(0,12),
+               leak:leak,
+               save:Math.max(0, Math.round(+c.save || leak*0.3)),
+               rx:String(c.rx||'打開清單,一筆一筆看上個月買了什麼'),
+               why:String(c.why||'看見它,是砍它的第一步') };
+    }).filter(function(c){ return c.leak>0 && c.nm; });
+    return out.length?out:null;
+  }catch(e){ return null; }
+}
+var CATS=parseCats()||CATS_DEFAULT;
 /* 前三大=你的漏財點。demo 數字下 shop/drink/deliv 會勝出——跟舊版固定三類不同,
    這是刻意的:demo 本身就要演示「換一個人,前三名就換」。 */
 var LEAKS=CATS.slice().sort(function(a,b){ return b.leak-a.leak; }).slice(0,3);
