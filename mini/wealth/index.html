@@ -19,6 +19,12 @@
   }
 })();
 </script>
+<!-- 0808:來源追蹤(entry_source / campaign_id / visit_index)。
+     必須在 unit-kit.js 之前載入——它靠包裝 UK.track 把來源參數併進事件裡。
+     Rebecca 上架時 小樹 與 BN 兩個入口會掛不同的 entry_source,
+     GA4 才切得出「哪個版位帶來的人」;沒有這個就只能看總量。
+     與 bored 同一支腳本(識別碼改成 wealth 的,storage key 不共用)。 -->
+<script src="visit-index-tracking.js"></script>
 <!-- vendored / 共用層:不改。unit-kit 這裡只用到 UK.selfCheck()(唯讀機械自檢),
      nav/state/share 依 0726 決策維持本單元手寫版本。 -->
 <script src="qrcode.min.js"></script>
@@ -1247,7 +1253,14 @@ STACK=['v0']; CUR='v0';
 (function(){ var m=document.getElementById('treeMasterImg'), h=document.getElementById('heroTreeImg');
   if(m && h) h.src=m.src; })();
 renderCutChips(); resetAns(); entryRender(); rxRender();
-UK.homeHint();          /* 單機直開時顯示「從發票載具首頁進入」的正規路徑 */
+/* 0808 上線走查抓到:UK.homeHint() 只判斷「有沒有嵌在殼裡」,沒判斷環境。
+   在 ailab 用瀏覽器直開(Rebecca、測試者、任何拿到連結的人都會這樣開)時,
+   它會長出一條固定在畫面底部的橫幅,而且:
+     · 連結是 UK.HOME → 這台主機的 :5180 埠(ailab-dev.cmoney.tw:5180),
+       正式環境根本沒有那個服務 = 死連結
+     · position:fixed 蓋住底部的「把漏洞堵起來」CTA
+   這條橫幅本來就只是給本機開發用的引導,正式環境不該出現——與內部測試區同一道閘門。 */
+if(!gaShouldSend()) UK.homeHint();
 track('wc_view');
 /* 交付前在 console 打 UK.selfCheck() 做機械自檢(觸控尺寸/橫向捲動/死按鈕) */
 </script>
