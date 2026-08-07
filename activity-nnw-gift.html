@@ -117,30 +117,55 @@
     border-radius:13px;font-size:15px;font-weight:700;box-shadow:0 4px 12px rgba(1,175,162,0.28);}
   .cta .s{display:block;font-size:11px;font-weight:400;opacity:0.9;margin-top:2px;}
 
-  /* ===== 四隻毛孩貼圖（貼在手機畫面「內」，從邊緣探頭，超出部分被手機框裁掉） ===== */
+  /* ===== 四隻毛孩：縮小成「區塊角落」的小圖示，不壓內容 ===== */
   .frame .scr{position:relative;}
-  .sticker{position:absolute;width:56px;height:56px;z-index:5;
-    filter:drop-shadow(0 4px 10px rgba(90,60,30,0.32));}
-  .sticker img{width:100%;height:100%;display:block;}
-  /* 位置全部在手機框內，且以程式掃過「零文字遮擋」的空位：hero 左、贈品列左右、兩張卡片之間 */
-  .s1{top:44px;left:4px;animation:bob1 3.4s ease-in-out infinite;}
-  .s2{top:192px;right:4px;animation:bob2 3.9s ease-in-out infinite;}
-  .s3{top:192px;left:4px;animation:bob3 4.3s ease-in-out infinite;}
-  .s4{top:476px;right:4px;animation:bob4 3.1s ease-in-out infinite;}
+  .dogc{position:absolute;width:36px;height:36px;z-index:5;pointer-events:none;
+    filter:drop-shadow(0 2px 6px rgba(90,60,30,0.3));}
+  .dogc img{width:100%;height:100%;display:block;}
+  /* 各自貼在所屬區塊的角落（父層 position:relative） */
+  .d-hero{right:8px;bottom:8px;animation:bob1 3.4s ease-in-out infinite;}
+  .d-gift{top:-11px;right:-5px;animation:bob2 3.9s ease-in-out infinite;}
+  .d-step{top:-12px;right:-6px;animation:bob3 4.3s ease-in-out infinite;}
+  .d-tos{top:-12px;right:-6px;animation:bob4 3.1s ease-in-out infinite;}
+  .gift-row,.card{position:relative;}
   @keyframes bob1{0%,100%{transform:translateY(0) rotate(-7deg);}50%{transform:translateY(-11px) rotate(3deg);}}
   @keyframes bob2{0%,100%{transform:translateY(0) rotate(6deg);}50%{transform:translateY(-13px) rotate(-4deg);}}
   @keyframes bob3{0%,100%{transform:translateY(0) rotate(-4deg);}50%{transform:translateY(-10px) rotate(6deg);}}
   @keyframes bob4{0%,100%{transform:translateY(0) rotate(5deg);}50%{transform:translateY(-12px) rotate(-6deg);}}
-  .bubble{position:absolute;top:10px;left:8px;z-index:6;background:#fff;border:2px solid var(--coral);
-    color:#D5604C;font-size:12px;padding:5px 11px;border-radius:14px;white-space:nowrap;
-    box-shadow:0 3px 9px rgba(90,60,30,0.2);animation:pop 3.4s ease-in-out infinite;}
-  .bubble::after{content:'';position:absolute;bottom:-7px;left:26px;width:10px;height:10px;
-    background:#fff;border-right:2px solid var(--coral);border-bottom:2px solid var(--coral);
-    transform:rotate(45deg);}
-  @keyframes pop{0%,100%{transform:translateY(0) scale(1);}50%{transform:translateY(-5px) scale(1.04);}}
   @media (prefers-reduced-motion:reduce){
-    .sticker,.bubble{animation:none;}
+    .dogc{animation:none;}
   }
+
+  /* ===== 畫面 B2：顧客核銷頁（出示給店員看） ===== */
+  .redeem-hero{padding:28px 20px 8px;text-align:center;}
+  .redeem-hero .rt{font-size:13px;color:var(--ink2);margin-bottom:2px;}
+  .redeem-hero .rn{font-size:17px;font-weight:700;color:var(--ink);}
+  .qr-card{background:#fff;border-radius:18px;margin:14px 20px;padding:20px;text-align:center;
+    box-shadow:0 4px 14px rgba(90,60,30,0.12);border:1px solid var(--line);}
+  .qr-card img{width:168px;height:168px;display:block;margin:0 auto;}
+  .qr-card .code{font-family:monospace;font-size:13px;color:var(--ink2);margin-top:10px;letter-spacing:1px;}
+  .qr-card .hint{font-size:12px;color:var(--ink2);margin-top:6px;}
+  .qr-status{display:inline-flex;align-items:center;gap:5px;background:var(--green100);color:var(--green700);
+    font-size:12px;font-weight:700;padding:4px 12px;border-radius:14px;margin:0 20px 14px;}
+  .qr-status .dot{width:7px;height:7px;border-radius:50%;background:var(--green600);animation:blink 1.6s ease-in-out infinite;}
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+  .redeem-rule{margin:0 20px;font-size:11.5px;color:var(--ink2);line-height:1.7;text-align:center;}
+
+  /* ===== 畫面 C2：商家核銷確認 ===== */
+  .scan-result{background:#fff;border-radius:16px;margin:16px;padding:20px;text-align:center;
+    box-shadow:0 4px 14px rgba(90,60,30,0.12);border:1px solid var(--line);}
+  .scan-result .ok{width:52px;height:52px;border-radius:50%;background:var(--green600);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 10px;}
+  .scan-result .name{font-size:16px;font-weight:700;color:var(--ink);}
+  .scan-result .meta{font-size:12px;color:var(--ink2);margin-top:4px;}
+  .pick-row{display:flex;gap:10px;margin:16px;}
+  .pick{flex:1;border:2px solid var(--line);border-radius:14px;padding:14px 8px;text-align:center;
+    background:var(--card);}
+  .pick.sel{border-color:var(--green600);background:var(--green100);}
+  .pick svg{width:44px;height:36px;display:block;margin:0 auto 4px;}
+  .pick .gname{font-size:13px;color:var(--brown);}
+  .confirm-btn{margin:4px 16px 16px;background:var(--green600);color:#fff;text-align:center;padding:14px;
+    border-radius:14px;font-size:15px;font-weight:700;box-shadow:0 4px 12px rgba(1,175,162,0.28);}
 
   /* ===== 畫面 C：商家端核銷 ===== */
   .merch-body{padding:16px;}
@@ -194,6 +219,18 @@
   <b>要給老闆娘確認：</b>①委託插畫與毛孩貼圖用於活動主視覺的授權（跟同意提供社群照片是兩回事）
   ②洋蔥圈／雞球實拍照 ③毛孩名字（露比媽媽／財寶／序耶／小米，照插畫上標的）是否正確。
   <br>（0807 移除：原本的「老闆娘的話」引用卡已依指示拿掉。）
+  <br><br>
+  <b>0807 五版，針對你最新兩點回饋：</b>
+  <br>① <b>補上顧客／商家的核銷頁面</b>——之前確實漏掉了，只做了「活動介紹頁」跟「商家看板」，
+  沒有畫「客人到底憑什麼被核銷、店員掃碼後看到什麼」這兩個真正的核銷動作本身。這次新增：
+  <b>畫面 B2（顧客核銷頁）</b>——客人在畫面 B 按「出示兌換碼給店員」後看到的畫面，QR code
+  是真的用 <code>qrcode</code> 套件產生的圖（示範用假碼 <code>NNW-DEMO-A7K2-3F2C</code>，不是能真的核銷的碼），
+  帶 5 分鐘倒數失效的概念，避免被客人截圖重複使用；
+  <b>畫面 C2（商家核銷確認）</b>——店員在畫面 C 按「掃描」後看到的畫面，顯示掃到哪個會員、
+  這桌沒核銷過、讓店員點選客人要洋蔥圈還是雞球後才送出核銷，不是掃了就直接算數。
+  <br>② <b>毛孩圖示改成貼在區塊角落，不再蓋住主要內容</b>——上一版四隻狗用大貼圖飄在畫面正中央，
+  會擋到活動內文，這次縮到 36px，各自貼在自己所屬區塊的角落（主視覺右下角／贈品卡片右上角／
+  兌換步驟卡右上角／須知卡右上角），角色更像「頁面裝飾角標」而不是蓋版元素。
 </div>
 
 <!-- ========== 畫面 0 ========== -->
@@ -253,7 +290,7 @@
 
 <!-- ========== 畫面 B ========== -->
 <div class="frame">
-  <div class="col-title">畫面 B · 活動詳情頁（毛孩貼圖會動）</div>
+  <div class="col-title">畫面 B · 活動詳情頁（毛孩縮成角落小圖示，不擋內容）</div>
   <div class="phone">
     <div class="status"></div>
     <div class="nav"><span class="h">‹ 返回</span>活動詳情</div>
@@ -268,9 +305,11 @@
             <div class="a">板橋文化路一段286巷16號・近新埔站</div>
           </div>
         </div>
+        <div class="dogc d-hero"><img src="assets/nnw-activity/dog-mi.png" alt="小米"></div>
       </div>
 
       <div class="gift-row">
+        <div class="dogc d-gift"><img src="assets/nnw-activity/dog-caibao.png" alt="財寶"></div>
         <div class="g">
           <!-- 手繪風洋蔥圈：半徑刻意不等、外框粗細有變化 -->
           <svg viewBox="0 0 62 50" role="img" aria-label="洋蔥圈">
@@ -321,6 +360,7 @@
         </p>
 
         <div class="card">
+          <div class="dogc d-step"><img src="assets/nnw-activity/dog-xuye.png" alt="序耶"></div>
           <h3>🎯 怎麼兌換</h3>
           <div class="step"><div class="n">1</div><div class="t">在暖暖窩<b>內用</b>消費</div></div>
           <div class="step"><div class="n">2</div><div class="t">結帳時一位客人出示這個畫面就好</div></div>
@@ -328,6 +368,7 @@
         </div>
 
         <div class="card">
+          <div class="dogc d-tos"><img src="assets/nnw-activity/dog-ruby.png" alt="露比媽媽"></div>
           <h3>📋 活動須知</h3>
           <ul class="tos">
             <li><b>僅限內用</b>，一桌一份（不論幾位同行）；兩款擇一</li>
@@ -337,19 +378,37 @@
         </div>
       </div>
       <div class="cta">
-        帶我去暖暖窩
-        <span class="s">板橋文化路一段286巷16號・近新埔站</span>
+        出示兌換碼給店員
+        <span class="s">下一步：畫面 B2</span>
       </div>
-
-      <!-- 四隻毛孩貼圖：貼在手機畫面內，從左右邊緣探頭 -->
-      <div class="bubble hand">快來找我玩！</div>
-      <div class="sticker s1"><img src="assets/nnw-activity/dog-mi.png" alt="小米"></div>
-      <div class="sticker s2"><img src="assets/nnw-activity/dog-caibao.png" alt="財寶"></div>
-      <div class="sticker s3"><img src="assets/nnw-activity/dog-xuye.png" alt="序耶"></div>
-      <div class="sticker s4"><img src="assets/nnw-activity/dog-ruby.png" alt="露比媽媽"></div>
     </div>
   </div>
   <div class="len">內容高度 732px（實測）· 需捲動約一屏</div>
+</div>
+
+<!-- ========== 畫面 B2：顧客核銷頁 ========== -->
+<div>
+  <div class="col-title">畫面 B2 · 顧客核銷頁（出示給店員看，你之前問的「顧客核銷頁面在哪」）</div>
+  <div class="phone">
+    <div class="status"></div>
+    <div class="nav"><span class="h">‹ 返回</span>出示給店員</div>
+    <div class="scr" style="height:376px;">
+      <div class="redeem-hero">
+        <div class="rt">暖暖窩義式廚房・用餐即贈</div>
+        <div class="rn hand">洋蔥圈 或 雞球</div>
+      </div>
+      <div class="qr-card">
+        <img src="assets/nnw-activity/redeem-qr.png" alt="兌換 QR code">
+        <div class="code">NNW · A7K2 · 3F2C</div>
+        <div class="hint">請把這個畫面完整拿給店員掃描</div>
+      </div>
+      <div style="text-align:center;">
+        <span class="qr-status"><span class="dot"></span>尚未核銷・5:00 後失效</span>
+      </div>
+      <p class="redeem-rule">兌換碼綁定你這次的到店，核銷後即失效；一桌只需一人出示。</p>
+    </div>
+  </div>
+  <div class="len">高度 456px（實測）· 一屏內</div>
 </div>
 
 <!-- ========== 畫面 C ========== -->
@@ -372,6 +431,38 @@
     </div>
   </div>
   <div class="len">高度 456px（實測）· 一屏內</div>
+</div>
+
+<!-- ========== 畫面 C2：商家核銷確認 ========== -->
+<div>
+  <div class="col-title">畫面 C2 · 商家掃碼後的確認畫面（你之前問的「商家核銷頁面在哪」）</div>
+  <div class="phone">
+    <div class="status"></div>
+    <div class="nav"><span class="h">‹ 取消</span>確認核銷</div>
+    <div class="scr merch-body" style="height:376px;">
+      <div class="scan-result">
+        <div class="ok">✓</div>
+        <div class="name">會員 …3f2c</div>
+        <div class="meta">掃碼成功・這桌尚未核銷過</div>
+      </div>
+      <div class="pick-row">
+        <div class="pick sel">
+          <svg viewBox="0 0 62 50"><g stroke="#8A5A2B" stroke-width="2" fill="#F0A64A" fill-rule="evenodd" stroke-linejoin="round">
+            <path d="M20,10 C29,9 37,15 38,24 C39,33 32,41 22,41 C13,41 6,35 6,26 C6,17 12,11 20,10 Z
+                     M21,20 C17,20 14,23 14,26 C14,30 17,32 21,32 C25,32 29,29 29,25 C29,22 25,20 21,20 Z"/></g></svg>
+          <div class="gname">洋蔥圈</div>
+        </div>
+        <div class="pick">
+          <svg viewBox="0 0 62 50"><g stroke="#8A5A2B" stroke-width="2" stroke-linejoin="round">
+            <path d="M17,20 C23,18 29,22 30,28 C31,35 26,41 19,41 C12,41 7,36 7,30 C7,24 11,21 17,20 Z" fill="#F0A64A"/>
+            <path d="M44,18 C51,17 57,22 57,29 C57,36 51,41 44,41 C37,41 32,36 33,29 C33,23 38,19 44,18 Z" fill="#EFA042"/></g></svg>
+          <div class="gname">雞　球</div>
+        </div>
+      </div>
+      <div class="confirm-btn">確認核銷（洋蔥圈）</div>
+    </div>
+  </div>
+  <div class="len">高度 456px（實測）· 一屏內 · 店員點選顧客想要的品項後確認</div>
 </div>
 
 <div class="spec">
