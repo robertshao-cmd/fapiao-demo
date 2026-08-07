@@ -244,6 +244,27 @@
     document.body.appendChild(a);
   };
 
+  /* 0807(wealth 本地補,未回流 _kit——_kit 已經有這支,是這份本地副本落後了):
+     App 的 WKWebView 裡 window.open() 常「靜默失敗」:回 null、不跳轉、
+     console 乾淨,畫面正常但功能是死的,只有實機才測得出來(SOP §2/§5 的
+     血淚坑)。這支先試 window.open,失敗才退回 location.href——
+     不是每次都跳走,是「跳不出去才跳走」,比原本 goApp() 純用 window.open()
+     (失敗就整顆按鈕死掉,使用者連反應都沒有)更接近使用者的期待。 */
+  UK.openExternal = function (url, meta) {
+    if (!url) return false;
+    meta = meta || {};
+    var w = null;
+    try { w = global.open(url, '_blank'); } catch (e) {}
+    if (w) {
+      try { w.opener = null; } catch (e) {}
+      meta.via = 'newtab'; UK.track('uk_external_open', meta);
+      return 'newtab';
+    }
+    meta.via = 'samewindow'; UK.track('uk_external_open', meta);
+    setTimeout(function () { global.location.href = url; }, 120);
+    return 'samewindow';
+  };
+
   /* ═══════════════ 4. TOAST ═══════════════ */
   UK.toast = function (msg) {
     msg = UK.dmText(msg);

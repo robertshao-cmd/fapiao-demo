@@ -5,6 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#E4001A">
 <title>幾歲破產|發票載具</title>
+<script>
+/* ══ 補結尾斜線(0807,搬自 bored 0731,必須放在所有 <script src> 之前)══════
+   App 外開單元的網址格式是 /<slug>?cid=...(沒有結尾斜線)。本檔的 script
+   用相對路徑,少一個斜線瀏覽器就會把 unit-kit.js 解析到上一層 → 404 →
+   UK undefined → 整支 JS 掛掉。bored 已實測:/bored 完全壞掉、/bored/ 正常——
+   這支還沒部署到 ailab-dev,先補上避免同一顆坑重踩一次。
+   判斷式:結尾沒斜線、且最後一段沒有副檔名才補,/index.html 直開不會誤動。 */
+(function () {
+  var p = location.pathname, last = p.split('/').pop();
+  if (!/\/$/.test(p) && !/\.[a-z0-9]+$/i.test(last)) {
+    location.replace(p + '/' + location.search + location.hash);
+  }
+})();
+</script>
 <!-- vendored / 共用層:不改。unit-kit 這裡只用到 UK.selfCheck()(唯讀機械自檢),
      nav/state/share 依 0726 決策維持本單元手寫版本。 -->
 <script src="qrcode.min.js"></script>
@@ -539,6 +553,13 @@ function applyCats(arr){
   CATS=cats;
   LEAKS=CATS.slice().sort(function(a,b){ return b.leak-a.leak; }).slice(0,3);
   if(ST.ans){ ST.ans.cutK=null; save(); }
+  /* 0807 修正(實測抓到的鬼狀態):換類別時 ANS.cutK/ANS.cut(使用者正在 v1
+     填、還沒送出的答案)也要一併失效——不清的話,如果換類別前後剛好用一樣的
+     index key(c0/c1/c2,?profile= 與真實條碼結果都是這樣編 key 的),使用者
+     沒有重選,畫面上 Q3 卻「巧合」對到一個他根本沒看過的新類別:chip 沒有任何
+     一顆顯示選中(renderCutChips 重建的新按鈕沒有 on class),但 ANS.cutK 仍是
+     舊值,會悄悄帶著這個沒人選過的答案繼續跑完問卷、寫進結果與分享卡。 */
+  if(ANS.cutK){ ANS.cutK=null; ANS.cut=0; }
   renderCutChips(); rxRender();
   /* 如果使用者已經在結果頁(v3),即時更新漏財點列表和分享卡,
      確保結果頁和問卷頁都拿到真實資料而不是 demo 數字。 */
@@ -886,9 +907,12 @@ function goApp(k){
   var a=APPS.filter(function(x){ return x.k===k; })[0]; if(!a) return;
   var url=appUrl(a);
   track('wc_go_app',{app:a.k, platform:platform()});
-  /* window.open(_blank) 不是 location.href:嵌在載具 App 的 webview 裡,
-     location.href 會把整個小程序導航掉,從商店返回時分數與訪談結果全部消失 */
-  if(url){ window.open(url, '_blank'); return; }
+  /* 0807 改用 UK.openExternal(SOP §2/§5 血淚坑):App 的 WKWebView 裡
+     window.open() 常「靜默失敗」——回 null、不跳轉、console 乾淨,只有實機
+     才測得出來。openExternal 先試 window.open(能開新分頁就不影響本頁的
+     訪談結果),失敗才退回 location.href——比純用 window.open()(失敗就整顆
+     按鈕死掉)更接近使用者的期待,不是每次都跳走本頁。 */
+  if(url){ UK.openExternal(url, {app:a.k}); return; }
   UK.toast(a.nm+'入口整合中,連結確認後開放');
 }
 
@@ -1011,11 +1035,11 @@ function copyShareLink(ch,label){
   track('wc_sharelink',{ch:ch});
   if(ch==='threads'){
     var txt=encodeURIComponent('我 '+age+' 歲那年存款歸零。你撐到幾歲？\n'+lk);
-    window.open('https://www.threads.net/intent/post?text='+txt,'_blank');
+    UK.openExternal('https://www.threads.net/intent/post?text='+txt, {app:'threads'});
     return;
   }
   if(ch==='facebook'){
-    window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(lk),'_blank');
+    UK.openExternal('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(lk), {app:'facebook'});
     return;
   }
   /* Instagram 沒有 web share intent:先複製連結再跳 IG */
@@ -1027,7 +1051,7 @@ function copyShareLink(ch,label){
   }catch(e){}
   if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(lk).catch(function(){});
   toast('連結已複製 ✓ 貼到 IG 限動！');
-  setTimeout(function(){ window.open('https://www.instagram.com/','_blank'); },200);
+  setTimeout(function(){ UK.openExternal('https://www.instagram.com/', {app:'instagram'}); },200);
 }
 function card(){
   return {
