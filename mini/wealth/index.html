@@ -540,6 +540,16 @@ function applyCats(arr){
   LEAKS=CATS.slice().sort(function(a,b){ return b.leak-a.leak; }).slice(0,3);
   if(ST.ans){ ST.ans.cutK=null; save(); }
   renderCutChips(); rxRender();
+  /* 如果使用者已經在結果頁(v3),即時更新漏財點列表和分享卡,
+     確保結果頁和問卷頁都拿到真實資料而不是 demo 數字。 */
+  if(CUR==='v3'){
+    var k=cutKey();
+    document.getElementById('leaks').innerHTML=ordered().map(function(L){
+      return '<div class="leak"><span class="nm">'+L.ic+' '+L.nm+(L.k===k?' <span class="tag">你說想砍這個</span>':'')+'</span>'
+        +'<span>月漏 <b>'+nt(L.leak)+'</b></span></div>';
+    }).join('');
+    renderCardHero();
+  }
   return true;
 }
 /* Q3 的歲數調整量從漏的大小導出(砍越大條,歲數往後拖越多),
@@ -561,6 +571,9 @@ var UK_SLUG = 'wealth';                  /* 給 UK.exitToHome 的 postMessage �
 var A0_DEFAULT=26, A0_MIN=18, A0_MAX=99;
 var age=43, ANS={income:null, incMed:false, goal:0, cut:0, cutK:null, age0:null};
 var MIN_INV=5;
+/* 條碼查詢狀態:bcTest() 啟動後供 scan() 等待,完成即清空。
+   條碼只活在 bcTest() 的區域變數裡,這裡只存 Promise 和遮罩過的顯示字串。 */
+var _bcPendingFetch=null;
 /* ?inv=abc → 0;?inv=-5 → 0(負數不該印在畫面上) */
 var INV=(function(){ try{ var q=new URLSearchParams(location.search).get('inv'); return q===null?47:Math.max(0,+q||0); }catch(e){ return 47; } })();
 var ST=(function(){ try{ return JSON.parse(localStorage.getItem('wc_state')||'{}')||{}; }catch(e){ return {}; } })();
@@ -710,7 +723,21 @@ function scan(){
   var stings=leaks.map(function(L){ return L.ic+' '+L.nm+'　每月噴 <b>'+nt(L.leak)+'</b>'; })
     .concat(['一年下來,噴了 <b>'+nt(leaks.reduce(function(s,L){return s+L.leak;},0)*12)+'</b>']);
   el.textContent=t[0]; stg.innerHTML=stings[0];
-  _t=setInterval(function(){ i++; if(i<t.length){ el.textContent=t[i]; stg.innerHTML=stings[i]||''; } else { skipScan(); } }, 620);
+  _t=setInterval(function(){
+    i++;
+    if(i<t.length){ el.textContent=t[i]; stg.innerHTML=stings[i]||''; }
+    else {
+      /* 如果條碼查詢還在跑,等它回來再進結果頁——
+         讓 Q3 和結果頁都能吃到真實發票資料,不要提早用 demo 數字渲染。 */
+      if(_bcPendingFetch){
+        clearInterval(_t); _t=null;
+        el.textContent='正在讀取你的真實發票…'; stg.innerHTML='';
+        _bcPendingFetch.then(function(){ skipScan(); }).catch(function(){ skipScan(); });
+      } else {
+        skipScan();
+      }
+    }
+  }, 620);
 }
 function skipScan(){
   if(_t){ clearInterval(_t); _t=null; }
@@ -1026,13 +1053,7 @@ function card(){
     ]
   };
 }
-function share(){
-  track('wc_share');
-  UK.share.open(card);
-  /* 0807:「分享這張圖」改為直接下載,不走 navigator.share(文件說要下載不是分享) */
-  var btn=document.querySelector('#uk-share .uk-btn-share');
-  if(btn) btn.onclick=function(){ UK.share.download(); };
-}
+function share(){ track('wc_share'); UK.share.open(card); }
 
 /* ══ 真資料測試區(0806,給 Melon 等內部走查)══════════════════════
    個資鐵律(同 bored 0731 的規矩):條碼只活在這個函式的區域變數裡——
@@ -1043,24 +1064,34 @@ function bcMask(b){ return b.slice(0,3)+'***'+b.slice(-2); }
 function bcTest(){
   var inp=document.getElementById('bcIn'), msg=document.getElementById('bcMsg'), btn=document.getElementById('bcBtn');
   var bc=(inp.value||'').trim().toUpperCase();
-  if(bc && bc.charAt(0)!=='/') bc='/'+bc;      /* 忘了打斜線的幫他補,不當作錯 */
+  if(bc && bc.charAt(0)!=='/') bc='/'+bc;
   if(!validBc(bc)){ msg.textContent='格式不對:/ 開頭共 8 碼(斜線可省略,系統會補)'; return; }
-  btn.disabled=true; msg.textContent='查詢中…約 30~60 秒(分五週掃,穩定但不快),不要離開這頁';
-  fetch('api/leaks',{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({bc:bc}) })
+  btn.disabled=true;
+  /* 非阻塞:送出條碼後馬上讓使用者繼續操作,不用在這頁等 30~60 秒。
+     _bcPendingFetch 讓 scan() 知道有查詢在跑,掃描動畫會自動等到它回來
+     再進結果頁——Q3 漏財點和結果卡都會拿到真實資料。 */
+  msg.innerHTML='⏳ 已送出 <b>'+bcMask(bc)+'</b> → <code>api/leaks</code>'
+    +'<br><span style="color:var(--teal)">可以先填答題,發票讀完 Q3 會自動更新！</span>';
+  _bcPendingFetch=fetch('api/leaks',{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({bc:bc}) })
     .then(function(r){ return r.json(); })
     .then(function(d){
-      btn.disabled=false;
-      if(!d.ok){ msg.textContent='查不到:'+(d.error||'稍後再試'); track('wc_bctest',{ok:0}); return; }
+      btn.disabled=false; _bcPendingFetch=null;
+      if(!d.ok){
+        msg.innerHTML='❌ <b>'+bcMask(bc)+'</b> → api/leaks → 查不到：'+(d.error||'稍後再試');
+        track('wc_bctest',{ok:0}); return;
+      }
       if(!d.cats||!d.cats.length){
-        msg.textContent='這個條碼 '+d.month+' 沒有可分類的發票';
+        msg.innerHTML='⚠️ <b>'+bcMask(bc)+'</b> → api/leaks ✓ → '+d.month+' 無可分類發票 (共 '+d.n+' 筆)';
         track('wc_bctest',{ok:1,n:d.n}); return;
       }
       applyCats(d.cats);
-      msg.innerHTML='✅ 已讀到 '+bcMask(bc)+' 的 <b>'+d.n+'</b> 筆發票('+d.month+'),下面測出來的就是你的真實漏財點'
-        +(d.uncat?'<br>另有 $'+d.uncat.toLocaleString()+' 未分類,不列入漏財點(誠實標示,不硬湊)':'');
-      track('wc_bctest',{ok:1,n:d.n});     /* 事件只帶筆數,不帶條碼 */
+      var top3=d.cats.slice(0,3).map(function(c){ return c.ic+' '+c.nm+'<b style="color:var(--red)"> $'+c.leak.toLocaleString()+'</b>'; }).join(' / ');
+      msg.innerHTML='✅ <b>'+bcMask(bc)+'</b> → api/leaks → <b>'+d.n+'</b> 筆 ('+d.month+')'
+        +'<br>Q3 已更新 → '+top3
+        +(d.uncat?'<br>另有 <b>$'+d.uncat.toLocaleString()+'</b> 未分類':'');
+      track('wc_bctest',{ok:1,n:d.n});
     })
-    .catch(function(){ btn.disabled=false; msg.textContent='連不到查詢服務——這個環境沒有接發票查詢'; });
+    .catch(function(){ btn.disabled=false; _bcPendingFetch=null; msg.textContent='連不到查詢服務——這個環境沒有接發票查詢'; });
 }
 /* 開頁探測 /api/health:只有 dev server 在的環境(本機/LAN)才顯示測試區。
    GitHub Pages / ailab 探測 404 → 區塊維持隱藏,一般使用者看不到。 */
