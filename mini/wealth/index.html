@@ -2,16 +2,13 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#E4001A">
 <title>幾歲破產|發票載具</title>
 <!-- vendored / 共用層:不改。unit-kit 這裡只用到 UK.selfCheck()(唯讀機械自檢),
      nav/state/share 依 0726 決策維持本單元手寫版本。 -->
-<script src="qrcode.min.js?v=87c57c10"></script>
-<script src="unit-kit.js?v=87c57c10"></script>
-<script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
+<script src="qrcode.min.js"></script>
+<script src="unit-kit.js"></script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--red-deep:#A50011;--gold:#FFD34D;--teal:#0E7C7B;--mut:#7A8494;--bg:#FFF6F5;--line:#F0E0E1}
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -44,21 +41,22 @@
   .lf{--du:3.4s;--dl:0s;--dx:0px;--dy:-70px;--rot:0deg;
     position:absolute;top:16%;left:50%;font-size:14px;line-height:1;
     animation:leafOut var(--du) ease-in infinite;animation-delay:var(--dl)}
-  .lf .lf-i{position:absolute;left:0;top:0;
-    animation-duration:var(--du);animation-delay:var(--dl);
-    animation-iteration-count:infinite;animation-timing-function:linear}
-  .lf .lf-leaf{animation-name:leafFade}
-  .lf .lf-coin{animation-name:coinFade;opacity:0}
   @keyframes leafOut{0%{transform:translate(0,0) rotate(0);opacity:0}
     8%{opacity:.9}90%{opacity:.85}
     100%{transform:translate(var(--dx),var(--dy)) rotate(var(--rot));opacity:0}}
-  @keyframes leafFade{0%,34%{opacity:1}44%,100%{opacity:0}}
-  @keyframes coinFade{0%,34%{opacity:0}44%,88%{opacity:1}100%{opacity:0}}
   .lf1{--du:3.2s;--dx:-52px;--dy:-66px;--rot:-160deg}
   .lf2{--du:3.6s;--dl:-.8s;--dx:14px;--dy:-78px;--rot:200deg}
   .lf3{--du:4s;--dl:-1.6s;--dx:56px;--dy:-58px;--rot:150deg}
   .lf4{--du:3.4s;--dl:-2.4s;--dx:-28px;--dy:-52px;--rot:-90deg}
   .lf5{--du:3.8s;--dl:-.4s;--dx:40px;--dy:-46px;--rot:120deg}
+  /* 哭泣的淚滴:從樹冠落下,小樹在哭 */
+  .tear{position:absolute;top:4%;left:50%;font-size:10px;opacity:0;
+    animation:tearFall var(--tu,1.8s) ease-in infinite;animation-delay:var(--td,0s)}
+  @keyframes tearFall{0%{opacity:0;transform:translateX(var(--tx,0px)) translateY(0)}
+    12%{opacity:.9}100%{opacity:0;transform:translateX(var(--tx,0px)) translateY(26px)}}
+  .t1{--tu:1.8s;--tx:-8px}
+  .t2{--tu:2.2s;--td:-.75s;--tx:4px}
+  .t3{--tu:1.5s;--td:-1.4s;--tx:-2px}
   .btn{display:block;width:100%;padding:14px;border-radius:13px;font-size:16px;font-weight:800;text-align:center;margin-top:10px}
   .btn.p{background:var(--red);color:#fff;box-shadow:0 4px 14px rgba(228,0,26,.3)}
   .btn.p:disabled{opacity:.42;box-shadow:none;cursor:default}
@@ -275,11 +273,14 @@
     <div class="hero">
       <div class="treeHero">
         <img id="heroTreeImg" class="heroTreeImg" alt="">
-        <span class="lf lf1"><span class="lf-i lf-leaf">🍃</span><span class="lf-i lf-coin">💵</span></span>
-        <span class="lf lf2"><span class="lf-i lf-leaf">🍃</span><span class="lf-i lf-coin">💰</span></span>
-        <span class="lf lf3"><span class="lf-i lf-leaf">🍃</span><span class="lf-i lf-coin">💸</span></span>
-        <span class="lf lf4"><span class="lf-i lf-leaf">🍃</span><span class="lf-i lf-coin">🪙</span></span>
-        <span class="lf lf5"><span class="lf-i lf-leaf">🍃</span><span class="lf-i lf-coin">💵</span></span>
+        <span class="tear t1">💧</span>
+        <span class="tear t2">💧</span>
+        <span class="tear t3">💧</span>
+        <span class="lf lf1">🍃</span>
+        <span class="lf lf2">🍃</span>
+        <span class="lf lf3">🍃</span>
+        <span class="lf lf4">🍃</span>
+        <span class="lf lf5">🍃</span>
       </div>
       <h1>照這個月的花法,<br>你的錢撐到 <em>幾歲</em>?</h1>
       <p>你的發票已經算好了,只是你不敢看</p></div>
@@ -980,17 +981,26 @@ function shLink(){ return location.origin + location.pathname.replace(/\/index\.
 function shareChLink(ch){ return shLink()+'?utm_source='+ch+'&utm_medium=social&utm_campaign=wealth_share'; }
 function copyShareLink(ch,label){
   var lk=shareChLink(ch);
-  function ok(){ toast('已複製 '+label+' 專用連結,貼過去就能追'); track('wc_sharelink',{ch:ch}); }
+  track('wc_sharelink',{ch:ch});
+  if(ch==='threads'){
+    var txt=encodeURIComponent('我 '+age+' 歲那年存款歸零。你撐到幾歲？\n'+lk);
+    window.open('https://www.threads.net/intent/post?text='+txt,'_blank');
+    return;
+  }
+  if(ch==='facebook'){
+    window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(lk),'_blank');
+    return;
+  }
+  /* Instagram 沒有 web share intent:先複製連結再跳 IG */
   try{
     var ta=document.createElement('textarea');
     ta.value=lk; ta.setAttribute('readonly',''); ta.style.position='fixed'; ta.style.opacity='0';
     document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0,lk.length);
-    var done=document.execCommand('copy'); document.body.removeChild(ta);
-    if(done){ ok(); return; }
+    document.execCommand('copy'); document.body.removeChild(ta);
   }catch(e){}
-  if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(lk).then(ok, function(){ toast('自動複製被擋——連結:'+lk); });
-  } else { toast('自動複製被擋——連結:'+lk); }
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(lk).catch(function(){});
+  toast('連結已複製 ✓ 貼到 IG 限動！');
+  setTimeout(function(){ window.open('https://www.instagram.com/','_blank'); },200);
 }
 function card(){
   return {
@@ -1016,7 +1026,13 @@ function card(){
     ]
   };
 }
-function share(){ track('wc_share'); UK.share.open(card); }
+function share(){
+  track('wc_share');
+  UK.share.open(card);
+  /* 0807:「分享這張圖」改為直接下載,不走 navigator.share(文件說要下載不是分享) */
+  var btn=document.querySelector('#uk-share .uk-btn-share');
+  if(btn) btn.onclick=function(){ UK.share.download(); };
+}
 
 /* ══ 真資料測試區(0806,給 Melon 等內部走查)══════════════════════
    個資鐵律(同 bored 0731 的規矩):條碼只活在這個函式的區域變數裡——
