@@ -538,7 +538,13 @@ var RX_BY_NM={
   '停車場':      {rx:'月租划算就辦,別每次都刷單次貴費率', why:'單次費率專坑趕時間的人'},
   '運動用品':    {rx:'買裝備前先問上一雙鞋穿了幾次',     why:'裝備不會幫你動起來,你自己會'},
   '書店':        {rx:'買書可以,先讀完櫃子裡那疊再買新的', why:'囤書的滿足感比讀書快多了'},
-  '3C家電':      {rx:'新品剛出先觀望,等第一波盤子踩完',   why:'半年後降價的是你,不是廠商'}
+  '3C家電':      {rx:'新品剛出先觀望,等第一波盤子踩完',   why:'半年後降價的是你,不是廠商'},
+  /* 0808:後端改用通路分類之後會吐出這三個新類別名,補上專屬處方,
+     不然像「外食」這種常常排前三的桶會落到嘲諷萬用句,浪費版位。
+     對照方式:掃 dev-api/invoice-live.js 的三張表,確認每個類別名都在這裡有一列。 */
+  '外食':        {rx:'一週挑三天自己煮,其他天照吃',       why:'不是叫你戒,是別餐餐都給別人賺'},
+  '服飾':        {rx:'買之前先想這件會不會變成第四件白T', why:'衣櫃裡已經有一件很像的了'},
+  '生活用品':    {rx:'家裡那罐用完再買,別囤',             why:'囤到過期等於用兩倍價錢買'}
 };
 /* 把任何來源(URL/內建 profile/真資料 API)的類別清單整形成 CATS 的完整型:
    缺 rx/save 的用通用處方墊底(save=漏額三成,保守不虛報)。
@@ -1182,37 +1188,74 @@ function share(){ track('wc_share'); UK.share.open(card); }
    (走 POST body,URL 會落 access log);畫面回饋一律遮罩(/WS***GQ)。 */
 function validBc(b){ return /^\/[0-9A-Z.+\-]{7}$/.test(b||''); }
 function bcMask(b){ return b.slice(0,3)+'***'+b.slice(-2); }
+
 /* 查詢本體抽出來共用:手動輸入(bcTest)與 App 深連結帶進來的 cid 都走這支。
    src 只記來源('input'/'cid'),不是條碼——可以安全進 track。 */
 function bcRun(bc, src){
   var msg=document.getElementById('bcMsg'), btn=document.getElementById('bcBtn');
   btn.disabled=true;
-  /* 非阻塞:送出條碼後馬上讓使用者繼續操作,不用在這頁等 30~60 秒。
-     _bcPendingFetch 讓 scan() 知道有查詢在跑,掃描動畫會自動等到它回來
-     再進結果頁——Q3 漏財點和結果卡都會拿到真實資料。 */
-  msg.innerHTML=(src==='cid' ? '⏳ 偵測到 App 帶進來的載具 <b>'+bcMask(bc)+'</b> → <code>api/leaks</code>'
-                             : '⏳ 已送出 <b>'+bcMask(bc)+'</b> → <code>api/leaks</code>')
-    +'<br><span style="color:var(--teal)">可以先填答題,發票讀完 Q3 會自動更新！</span>';
-  _bcPendingFetch=fetch('api/leaks',{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({bc:bc}) })
+  var t0=Date.now();
+  /* 非阻塞:送出條碼後馬上讓使用者繼續操作。_bcPendingFetch 讓 scan() 知道有
+     查詢在跑,掃描動畫會等到它回來再進結果頁——Q3 與結果卡都拿得到真實資料。 */
+  msg.innerHTML=(src==='cid' ? '⏳ 偵測到 App 帶進來的載具 <b>'+bcMask(bc)+'</b>'
+                             : '⏳ 查詢中 <b>'+bcMask(bc)+'</b>')
+    +' → <code>serviceadmin</code><br><span style="color:var(--teal)">可以先往下填答題,讀完 Q3 會自動更新</span>';
+  /* 後端代打 serviceadmin —— 前端直打會被擋:該 API 是 POST+application/json,
+     會觸發 CORS preflight,而它的 OPTIONS 回 405(實測)。
+     k = 走查權杖:這支端點會吐出消費分佈(個資),正式主機上沒帶對就回 404。
+     條碼走 POST body,不進 URL(URL 會落 access log)。 */
+  _bcPendingFetch=fetch('api/leaks',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({bc:bc, k:apiTestKey()})
+    })
     .then(function(r){ return r.json(); })
     .then(function(d){
+      if(!d.ok) throw new Error(d.error||'查詢失敗');
       btn.disabled=false; _bcPendingFetch=null;
-      if(!d.ok){
-        msg.innerHTML='❌ <b>'+bcMask(bc)+'</b> → api/leaks → 查不到：'+(d.error||'稍後再試');
-        track('wc_bctest',{ok:0,src:src}); return;
+      var ms=Date.now()-t0;
+      if(!d.n){
+        msg.innerHTML='⚠️ <b>'+bcMask(bc)+'</b> 在 '+d.month+' 沒有發票'
+          +'<br><span style="color:var(--mut)">確認一下這個載具當月有沒有消費紀錄</span>';
+        track('wc_bctest',{ok:1,n:0,src:src}); return;
       }
-      if(!d.cats||!d.cats.length){
-        msg.innerHTML='⚠️ <b>'+bcMask(bc)+'</b> → api/leaks ✓ → '+d.month+' 無可分類發票 (共 '+d.n+' 筆)';
+      if(!d.cats.length){
+        msg.innerHTML='⚠️ <b>'+bcMask(bc)+'</b> → '+d.month+' 有 '+d.n+' 筆發票,但一家都分不出類別';
         track('wc_bctest',{ok:1,n:d.n,src:src}); return;
       }
       applyCats(d.cats);
-      var top3=d.cats.slice(0,3).map(function(c){ return c.ic+' '+c.nm+'<b style="color:var(--red)"> $'+c.leak.toLocaleString()+'</b>'; }).join(' / ');
-      msg.innerHTML='✅ <b>'+bcMask(bc)+'</b> → api/leaks → <b>'+d.n+'</b> 筆 ('+d.month+')'
-        +'<br>Q3 已更新 → '+top3
-        +(d.uncat?'<br>另有 <b>$'+d.uncat.toLocaleString()+'</b> 未分類':'');
+      /* 測試區要讓人「核對得出對不對」,所以把可驗證的數字全列出來:
+         筆數/總額/商家數 可以跟載具 App 裡自己的紀錄對;
+         前三大列金額,才知道排序是不是合理。 */
+      var rows=d.cats.slice(0,3).map(function(c,i){
+        return '<div style="display:flex;justify-content:space-between;padding:3px 0">'
+          +'<span>'+(i+1)+'. '+c.ic+' '+c.nm+'</span>'
+          +'<b style="color:var(--red)">$'+c.leak.toLocaleString()+'</b></div>';
+      }).join('');
+      /* 對帳行:前三大 + 其餘類別 + 未分類 要能加回總額,走查的人才驗得下去 */
+      var top3sum=d.cats.slice(0,3).reduce(function(s,c){ return s+c.leak; },0);
+      var others=d.total-top3sum-(d.uncat||0);
+      msg.innerHTML='✅ <b>'+bcMask(bc)+'</b> · '+d.month+' · '+ms+'ms'
+        +'<div style="margin:6px 0;padding:8px;background:#F7F3EE;border-radius:8px">'
+        +'<div style="font-size:11px;color:var(--mut);margin-bottom:4px">'
+        +'發票 <b>'+d.n+'</b> 筆 · 消費 <b>$'+d.total.toLocaleString()+'</b> · 商家 <b>'+d.shops+'</b> 家 · 共 <b>'+(d.catCount||d.cats.length)+'</b> 類</div>'
+        +rows
+        +'<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:11px;color:var(--mut);border-top:1px dashed #DDD;margin-top:4px">'
+        +'<span>其餘 '+Math.max(0,(d.catCount||d.cats.length)-3)+' 類'+(d.uncat?' + 未分類':'')+'</span>'
+        +'<span>$'+(others+(d.uncat||0)).toLocaleString()+'</span></div>'
+        +'<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:11px;font-weight:800">'
+        +'<span>合計</span><span>$'+d.total.toLocaleString()+'</span></div>'
+        +'</div>'
+        +'<div style="font-size:11px;color:var(--teal)">Q3 選項與結果頁已換成上面這三類</div>';
       track('wc_bctest',{ok:1,n:d.n,src:src});
     })
-    .catch(function(){ btn.disabled=false; _bcPendingFetch=null; msg.textContent='連不到查詢服務——這個環境沒有接發票查詢'; });
+    .catch(function(e){
+      btn.disabled=false; _bcPendingFetch=null;
+      /* 誠實分辨「打不到」與「打到了但回錯」——兩者要修的地方完全不同 */
+      msg.innerHTML='❌ 查詢失敗：'+(e&&e.message||'未知')
+        +'<br><span style="font-size:11px;color:var(--mut)">若是網路錯誤,代表這台裝置連不到 serviceadmin（內網 API）——'
+        +'換公司網路再試，或改由後端代打。</span>';
+      track('wc_bctest',{ok:0,src:src});
+    });
 }
 function bcTest(){
   var inp=document.getElementById('bcIn'), msg=document.getElementById('bcMsg');
@@ -1231,19 +1274,34 @@ function bcTest(){
       (容器裡沒有 python、也沒有 Anya 授權)。
       加上 hostname 這道:ailab 一律不顯示,不管後端回什麼。
 
-   ⚠️ 已知落差(0808):?cid= 兩種格式都解得出來了,但真正把它換成「你的」
-      漏財點要靠 /api/leaks,而那支只活在這台開發機(Anya 授權在本機)。
-      ailab-dev 上沒有這個端點 → 帶 cid 進來的使用者仍然看到示範數字。
-      要讓 cid 在正式環境真的有用,得先有一支 production 的發票查詢 API,
-      那是中台的事,不是這支單元補得完的。 */
+   ✅ 0808 解掉了:改直接打 serviceadmin(免 VPN/免 Anya、CORS 是開的),
+      所以測試區在測試機、ailab-dev、本機都能用,不再綁在 Robert 那台機器上。
+
+   顯示規則(兩條路,都不會讓一般使用者看到):
+     · 本機/LAN:照舊探測 /api/health,dev server 在就顯示
+     · 測試機/ailab:要在網址加 ?apitest=1 才顯示 —— 這是給走查的人用的開關,
+       正式流量不會帶這個參數。cid 自動查也跟著這道閘門走,否則等於偷偷幫
+       每個真實使用者打一次內網 API。 */
+/* 走查開關兼權杖。?apitest=<權杖> 才會顯示測試區,也才打得到 /api/leaks。
+   ⚠️ 老實說:權杖就寫在這份 JS 裡,看原始碼就找得到——它擋的是「路過的人」,
+      不是真的資安。這是給一段有期限的走查用的,測完就把端點關掉
+      (SOP §3-2:測試檔期用完就關,不常駐)。 */
+var API_TEST_KEY='wc0808';
+function apiTestKey(){
+  try{ return new URLSearchParams(location.search).get('apitest')||''; }catch(e){ return ''; }
+}
+function apiTestOn(){ return apiTestKey()===API_TEST_KEY; }
 (function(){
-  if(gaShouldSend()) return;        /* 正式環境(ailab-dev / ailab-prod)一律不顯示內部測試區 */
-  try{
+  function open(){
+    document.getElementById('apiTest').style.display='';
+    /* App 深連結帶了 cid → 不用他自己再打一次,直接用他本人的發票算 */
+    if(_bcFromCid) bcRun(_bcFromCid,'cid');
+  }
+  if(apiTestOn()){ open(); return; }               /* 測試機:?apitest=1 直接開 */
+  if(gaShouldSend()) return;                        /* 正式環境沒帶參數 → 永遠不顯示 */
+  try{                                              /* 本機/LAN:dev server 在才開 */
     fetch('api/health').then(function(r){ return r.ok?r.json():null; }).then(function(d){
-      if(!d||!d.ok) return;
-      document.getElementById('apiTest').style.display='';
-      /* App 深連結帶了 cid → 不用他自己再打一次,直接用他本人的發票算 */
-      if(_bcFromCid) bcRun(_bcFromCid,'cid');
+      if(d&&d.ok) open();
     }).catch(function(){});
   }catch(e){}
 })();
