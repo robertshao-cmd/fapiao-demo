@@ -9,8 +9,8 @@
 <title>幾歲破產|發票載具</title>
 <!-- vendored / 共用層:不改。unit-kit 這裡只用到 UK.selfCheck()(唯讀機械自檢),
      nav/state/share 依 0726 決策維持本單元手寫版本。 -->
-<script src="qrcode.min.js?v=65093253"></script>
-<script src="unit-kit.js?v=65093253"></script>
+<script src="qrcode.min.js?v=1853377a"></script>
+<script src="unit-kit.js?v=1853377a"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--red-deep:#A50011;--gold:#FFD34D;--teal:#0E7C7B;--mut:#7A8494;--bg:#FFF6F5;--line:#F0E0E1}
@@ -147,6 +147,32 @@
      連手動複製連結那塊也搬進 kit 了,這裡整組變死碼。 */
   /* .act 第三行(purpose)字要比 App 名小一階 */
   .act span:not(.ic){font-size:9.5px;line-height:1.3}
+  /* ── 結果卡下緣的「睡路邊」動畫(0807)──
+     沙漏換成:流浪的人在打雷暴雨的街上來回走。全 CSS(卡片本體是靜態 canvas,
+     動畫用 DOM 疊在上面);pointer-events:none,點卡開分享的行為不受影響。
+     分享出去的整張卡不動——那是靜態圖,這場戲只演給結果頁看。
+     reduced-motion 的全域規則會把整場戲凍成靜態(人+雲還在,不動)。 */
+  .heroWrap{position:relative;display:inline-block;width:100%;max-width:330px}
+  .storm{position:absolute;left:3.5%;right:3.5%;bottom:2.5%;height:26%;overflow:hidden;
+    border-radius:0 0 12px 12px;pointer-events:none}
+  /* 雨:斜細線往下刷。刷的是 background-position,一條 keyframe 就夠 */
+  .storm .rain{position:absolute;inset:0;opacity:.5;
+    background:repeating-linear-gradient(115deg,rgba(96,125,180,.55) 0 2px,transparent 2px 16px);
+    animation:rainfall .6s linear infinite}
+  @keyframes rainfall{0%{background-position:0 0}100%{background-position:-24px 42px}}
+  /* 雷:整片閃兩下(悶雷+主雷),配合閃電符號同拍出現 */
+  .storm .flash{position:absolute;inset:0;background:#FFF;opacity:0;animation:thunder 5.2s linear infinite}
+  @keyframes thunder{0%,58%{opacity:0}60%{opacity:.5}61%{opacity:0}63%{opacity:.75}65%,100%{opacity:0}}
+  .storm .bolt{position:absolute;top:2%;left:56%;font-size:30px;opacity:0;animation:boltPop 5.2s linear infinite}
+  @keyframes boltPop{0%,58%{opacity:0;transform:scale(.6)}60%{opacity:1;transform:scale(1.15)}66%,100%{opacity:0}}
+  .storm .cloud{position:absolute;top:-4px;font-size:26px;animation:drift 9s ease-in-out infinite alternate}
+  @keyframes drift{0%{transform:translateX(-6px)}100%{transform:translateX(10px)}}
+  /* 流浪的人:沿著卡片下緣來回走,轉身用 scaleX 翻面;走路的顛簸感用小幅 bob */
+  .storm .walker{position:absolute;bottom:3px;left:8%;font-size:36px;
+    animation:wander 13s linear infinite, bob .55s ease-in-out infinite}
+  @keyframes wander{0%{left:8%;transform:scaleX(1)}46%{left:72%;transform:scaleX(1)}
+    50%{left:72%;transform:scaleX(-1)}96%{left:8%;transform:scaleX(-1)}100%{left:8%;transform:scaleX(1)}}
+  @keyframes bob{0%,100%{margin-bottom:0}50%{margin-bottom:2.5px}}
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -238,8 +264,19 @@
        主 CTA 換成分享;堵漏降為第二顆,漏財點細節退到卡片之下。 -->
   <div id="v3" style="display:none">
     <div class="card" style="text-align:center">
-      <canvas id="cardHero" onclick="share()" role="button" aria-label="分享這張結果卡"
-              style="width:100%;max-width:330px;border-radius:14px;box-shadow:0 6px 22px rgba(0,0,0,.16);cursor:pointer"></canvas>
+      <div class="heroWrap">
+        <canvas id="cardHero" onclick="share()" role="button" aria-label="分享這張結果卡"
+                style="width:100%;border-radius:14px;box-shadow:0 6px 22px rgba(0,0,0,.16);cursor:pointer"></canvas>
+        <!-- 沙漏換成「睡路邊」實況:流浪的人在雷雨街頭來回走(0807)。
+             疊在 canvas 上、pointer-events:none,點卡開分享不受影響 -->
+        <div class="storm" aria-hidden="true">
+          <span class="rain"></span><span class="flash"></span>
+          <span class="cloud" style="left:14%">🌧️</span>
+          <span class="cloud" style="left:62%;animation-delay:-4.5s">⛈️</span>
+          <span class="bolt">⚡</span>
+          <span class="walker">🚶</span>
+        </div>
+      </div>
       <!-- 年齡已在 Q4 問過,這裡只是把依據寫出來,不再事後補問 -->
       <div class="basis">以你填的 <b id="a0N">26</b> 歲起算</div>
       <div style="font-size:12px;color:var(--mut)" id="yrsLine"></div>
@@ -610,11 +647,16 @@ function showResult(){
    1132 = 內卡下緣(132+986)+邊框餘裕;kit 版面若改內卡尺寸,這裡要跟著對。
    畫兩次:APP_ICON 是 data URI,首載可能晚幾十 ms,晚一拍重畫。 */
 var HERO_CROP=1132;
+/* hero 版的卡不畫沙漏——那個位置現在由 DOM 動畫(流浪的人+雷雨)接手,
+   靜態沙漏墊在動畫底下會穿幫。分享浮層畫的整張卡仍然有沙漏。 */
+function heroCard(){ var d=card(); d.emoji=''; d.acc=''; return d; }
 function renderCardHero(){
   var cv=document.getElementById('cardHero'); if(!cv||!UK.share.renderTo) return;
   function draw(){
     var off=document.createElement('canvas');
-    UK.share.renderTo(off, card);
+    UK.share.renderTo(off, heroCard);
+    /* renderTo 會把 _get 換成 heroCard;分享浮層要的是完整卡,還回去 */
+    UK.share._get=card;
     cv.width=off.width; cv.height=Math.min(HERO_CROP, off.height);
     cv.getContext('2d').drawImage(off, 0,0,off.width,cv.height, 0,0,off.width,cv.height);
   }
