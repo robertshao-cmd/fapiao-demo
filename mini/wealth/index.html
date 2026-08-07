@@ -9,8 +9,8 @@
 <title>幾歲破產|發票載具</title>
 <!-- vendored / 共用層:不改。unit-kit 這裡只用到 UK.selfCheck()(唯讀機械自檢),
      nav/state/share 依 0726 決策維持本單元手寫版本。 -->
-<script src="qrcode.min.js?v=eb392b1a"></script>
-<script src="unit-kit.js?v=eb392b1a"></script>
+<script src="qrcode.min.js?v=786b1e0e"></script>
+<script src="unit-kit.js?v=786b1e0e"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--red-deep:#A50011;--gold:#FFD34D;--teal:#0E7C7B;--mut:#7A8494;--bg:#FFF6F5;--line:#F0E0E1}
@@ -167,19 +167,28 @@
   @keyframes boltPop{0%,58%{opacity:0;transform:scale(.6)}60%{opacity:1;transform:scale(1.15)}66%,100%{opacity:0}}
   .storm .cloud{position:absolute;top:-4px;font-size:26px;animation:drift 9s ease-in-out infinite alternate}
   @keyframes drift{0%{transform:translateX(-6px)}100%{transform:translateX(10px)}}
-  /* 小樹(0807,Robert:主角換成小樹,要有路邊風吹日曬的感覺):
-     外層 .walker 負責走位(left+折返翻面),內層 img 負責被風吹的搖擺(rotate,
-     軸心在樹根)——rotate 跟 scaleX 分兩層,才不會在同一個 transform 上打架。
+  /* 小樹安慰場景(0807 三修,Robert 指定):衣衫襤褸的人躺在樹下,
+     小樹規律地俯身安慰他。俯身(comfort)、安慰心(heartpop)、
+     人的呼吸起伏(breathe)、💤(zrise)共用 3.4s 週期,節拍才對得上:
+     樹彎下去(22~42%)→心浮出來(30~42%)→回正。
      素材=真實 App 的 img_tree_lv5.png(素材站拉的,88x96 data URI,風格原生)。 */
-  .storm .walker{position:absolute;bottom:3px;left:8%;
-    animation:wander 13s linear infinite, bob .55s ease-in-out infinite}
-  .storm .walker img{display:block;width:44px;height:48px;transform-origin:50% 100%;
-    animation:sway 1.7s ease-in-out infinite alternate;
+  .storm .tree{position:absolute;bottom:3px;left:54%}
+  .storm .tree img{display:block;width:46px;height:50px;transform-origin:50% 100%;
+    animation:comfort 3.4s ease-in-out infinite;
     filter:drop-shadow(0 2px 3px rgba(40,50,80,.25))}
-  @keyframes sway{0%{transform:rotate(-8deg)}100%{transform:rotate(5deg)}}
-  @keyframes wander{0%{left:8%;transform:scaleX(1)}46%{left:70%;transform:scaleX(1)}
-    50%{left:70%;transform:scaleX(-1)}96%{left:8%;transform:scaleX(-1)}100%{left:8%;transform:scaleX(1)}}
-  @keyframes bob{0%,100%{margin-bottom:0}50%{margin-bottom:2.5px}}
+  @keyframes comfort{0%,58%,100%{transform:rotate(0)}22%,42%{transform:rotate(-11deg)}}
+  /* 躺著的人:🧍 轉 90 度=躺平,呼吸起伏;衣衫襤褸感靠處境講,不靠像素 */
+  .storm .lying{position:absolute;bottom:1px;left:30%;font-size:29px;line-height:1;
+    transform:rotate(90deg);animation:breathe 2.6s ease-in-out infinite}
+  @keyframes breathe{0%,100%{transform:rotate(90deg) scale(1)}50%{transform:rotate(90deg) scale(1.06)}}
+  .storm .zzz{position:absolute;bottom:36px;left:32%;font-size:13px;opacity:0;
+    animation:zrise 3.4s linear infinite}
+  @keyframes zrise{0%{opacity:0;transform:translateY(6px)}25%{opacity:.9}
+    70%{opacity:0;transform:translateY(-14px)}100%{opacity:0;transform:translateY(-14px)}}
+  .storm .heart{position:absolute;bottom:32px;left:46%;font-size:12px;opacity:0;
+    animation:heartpop 3.4s ease-in-out infinite}
+  @keyframes heartpop{0%,24%{opacity:0;transform:scale(.5) translateY(4px)}
+    32%,42%{opacity:1;transform:scale(1.15) translateY(-3px)}58%,100%{opacity:0;transform:translateY(-12px)}}
   /* 風:兩片葉子橫飛過畫面,錯開節奏 */
   .storm .leaf{position:absolute;font-size:15px;opacity:0;animation:gust 4.6s linear infinite}
   .storm .leaf.l2{font-size:12px;animation-delay:-2.3s;top:38%}
@@ -287,7 +296,7 @@
           <span class="cloud" style="left:14%">🌧️</span>
           <span class="cloud" style="left:62%;animation-delay:-4.5s">⛈️</span>
           <span class="bolt">⚡</span>
-          <span class="leaf">🍃</span><span class="leaf l2">🍃</span><span class="walker"><img alt="" src="data:image/webp;base64,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"></span>
+          <span class="leaf">🍃</span><span class="leaf l2">🍃</span><span class="lying" aria-hidden="true">🧍</span><span class="zzz" aria-hidden="true">💤</span><span class="heart" aria-hidden="true">💛</span><span class="tree"><img alt="" src="data:image/webp;base64,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"></span>
         </div>
       </div>
       <!-- 年齡已在 Q4 問過,這裡只是把依據寫出來,不再事後補問 -->
@@ -398,17 +407,40 @@ var PROFILES={
     {nm:'連鎖超市',ic:'🧺',leak:2418},{nm:'便利商店',ic:'🏪',leak:1606},
     {nm:'藥妝美妝',ic:'💄',leak:914},{nm:'手搖咖啡',ic:'🧋',leak:188}]
 };
+/* 省錢處方對到「他真正花最多的類別」(0807,Robert:不要用「打開清單看
+   上個月」那句萬用句湊數)。常見類別各一句可執行的做法+為什麼,
+   沒對到的才退回通用句。跟 dev-api/leaks.py 的類別名一一對齊。 */
+var RX_BY_NM={
+  '百貨公司':    {rx:'等週年慶再進場,平日別逛',       why:'百貨的價格,檔期就是打折'},
+  '購物商場':    {rx:'進場前寫好要買什麼,買完就走',   why:'商場的動線是設計來讓你多待的'},
+  '藥妝美妝':    {rx:'補貨可以,新品等用完再試',       why:'囤起來的,一半不會用完'},
+  '電商平台':    {rx:'購物車先躺 3 天,還想要再結',    why:'衝動最怕的就是等待'},
+  '訂閱/數位內容':{rx:'30 天沒開的,退',               why:'退了就整筆不再扣'},
+  '大型量販':    {rx:'囤耐放的,鮮食買當週吃得完的',   why:'囤到過期=用兩倍價錢買'},
+  '便利商店':    {rx:'結帳區的零食走過就好',           why:'順手那包才是漏,正餐不算'},
+  '手搖咖啡':    {rx:'第 3 杯的時候攔你',             why:'沒叫你戒,只算少喝一半'},
+  '外送':        {rx:'改自取,省的是運費',             why:'飯錢照付,運費不用'},
+  '中台式料理':  {rx:'聚餐照去,一個人那餐自己煮',     why:'砍的是獨食外食,不是社交'},
+  '日式料理':    {rx:'聚餐照去,一個人那餐自己煮',     why:'砍的是獨食外食,不是社交'},
+  '速食炸物':    {rx:'一週留一次就好',                 why:'省錢順便救健檢報告'},
+  '連鎖超市':    {rx:'列好清單再進場',                 why:'超市的貨架順序是設計好的'},
+  '電信網路':    {rx:'約滿打去問續約優惠',             why:'老客戶不開口,就繼續用原價'},
+  '休閒娛樂':    {rx:'課金前先睡一覺',                 why:'明天還想要,再買'},
+  '家具生活':    {rx:'大件先量尺寸、比三家再下單',     why:'退貨運費比你想的貴'},
+  '健身運動':    {rx:'有在去就繼續,別退',             why:'這筆不算漏,身體是資產'}
+};
 /* 把任何來源(URL/內建 profile/真資料 API)的類別清單整形成 CATS 的完整型:
    缺 rx/save 的用通用處方墊底(save=漏額三成,保守不虛報)。 */
 function normCats(arr){
   if(!Array.isArray(arr)||!arr.length) return null;
   var out=arr.map(function(c,i){
     var leak=Math.max(0, Math.round(+c.leak||0));
-    return { k:String(c.k||('c'+i)), ic:String(c.ic||'💸'), nm:String(c.nm||'').slice(0,12),
+    var nm=String(c.nm||'').slice(0,12), known=RX_BY_NM[nm]||{};
+    return { k:String(c.k||('c'+i)), ic:String(c.ic||'💸'), nm:nm,
              leak:leak,
              save:Math.max(0, Math.round(+c.save || leak*0.3)),
-             rx:String(c.rx||'打開清單,一筆一筆看上個月買了什麼'),
-             why:String(c.why||'看見它,是砍它的第一步') };
+             rx:String(c.rx||known.rx||'打開清單,一筆一筆看上個月買了什麼'),
+             why:String(c.why||known.why||'看見它,是砍它的第一步') };
   }).filter(function(c){ return c.leak>0 && c.nm; });
   return out.length?out:null;
 }
@@ -785,6 +817,16 @@ function menuClose(){ UK.menu.close(); }
    數字只出現一次:kit 的版面 ② 是數字塊(score+unitTxt)、③ 是大字結論(sub+tint)。
    bored 在 sub 又寫一次「無聊值 94／100」,所以同一個數字出現兩遍;
    這裡 sub/tint 一律不帶數字,破產歲數只由 ② 呈現。 */
+/* 結果文案跟著使用者填的年齡走(0807):
+   30 前=青春 vs 錢、30-39=0728 定調的經典句、40-49=退休焦慮、50+=身體現實。
+   都是「照你這個花法」的下一句,語氣同一掛,只是刺的點不同。 */
+function tintByAge(){
+  var a=age0();
+  if(a<30) return '青春還在,錢先沒了';
+  if(a<40) return '你很快就要睡路邊了';
+  if(a<50) return '退休?先擔心下個月';
+  return '這把年紀,路邊很冷';
+}
 /* 從 location 推導,不寫死單元路徑:/wealth 或 /wealth-check 都對 */
 function shLink(){ return location.origin + location.pathname.replace(/\/index\.html$/,'').replace(/\/$/,''); }
 /* 三個社群的專用追蹤連結(0807):同一張卡、不同 utm_source,
@@ -812,7 +854,7 @@ function card(){
     head:'💸 幾歲破產',
     score:age, unitTxt:'歲・存款歸零',   /* ② 數字塊:整張卡唯一出現數字的地方 */
     sub:'照你這個花法',                  /* ③ 大字結論:不帶數字 */
-    tint:'你很快就要睡路邊了',           /* 0728 文案定調 */
+    tint:tintByAge(),                    /* 0807:同一句嚇法對 25 歲和 55 歲刺點不同 */
     punch:'情境試算・非財務預測',        /* ④ 說明行拿來擺法遵(kit 版式沒有獨立的免責欄位) */
     emoji:'⏳',
     stamp: age<=35 ? '快歸零' : (age<=45 ? '有點險' : (age<=60 ? '還算穩' : '很能撐')),
