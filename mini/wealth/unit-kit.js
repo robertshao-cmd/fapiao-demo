@@ -583,12 +583,19 @@
       return false;
     },
     isOpen: function () { var m = document.getElementById('uk-share'); return !!(m && m.classList.contains('on')); },
-    render: function () {
+    /* 0807(wealth 本地改):把卡畫到任意 canvas——結果頁要拿分享卡當主視覺
+       (同事走查:看到的當下就是能曬的圖,分享意願較高)。
+       不動原本的 modal 流程:render() 不帶參數時行為與過去完全相同。
+       ⚠️ 本地 kit 先行,尚未回流 _kit;同步共用層時要帶上這段。 */
+    renderTo: function (cv, getCard) { if (getCard) this._get = getCard; this.render(cv); },
+    render: function (targetCv) {
       var d = this._get && this._get(); if (!d) return;
       var p = this.SIZE, T = this.THEME[d.theme] || this.THEME.detox;
-      var cv = document.getElementById('uk-share-cv'); cv.width = p.w; cv.height = p.h;
+      var cv = targetCv || document.getElementById('uk-share-cv'); if (!cv) return;
+      cv.width = p.w; cv.height = p.h;
       var ctx = cv.getContext('2d'), cx = p.w / 2;
-      document.getElementById('uk-share-ttl').textContent = (d.title || '分享卡') + '・分享卡';
+      var ttl = document.getElementById('uk-share-ttl');
+      if (!targetCv && ttl) ttl.textContent = (d.title || '分享卡') + '・分享卡';
 
       /* ══ 分享卡版面(0727 v2 · 三支自營小程式共用) ══
          參考順豐年度報告卡。它看起來不擠不是因為字少,是因為分區:

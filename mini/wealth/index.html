@@ -9,8 +9,8 @@
 <title>幾歲破產|發票載具</title>
 <!-- vendored / 共用層:不改。unit-kit 這裡只用到 UK.selfCheck()(唯讀機械自檢),
      nav/state/share 依 0726 決策維持本單元手寫版本。 -->
-<script src="qrcode.min.js?v=725e0282"></script>
-<script src="unit-kit.js?v=725e0282"></script>
+<script src="qrcode.min.js?v=10e44218"></script>
+<script src="unit-kit.js?v=10e44218"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--red-deep:#A50011;--gold:#FFD34D;--teal:#0E7C7B;--mut:#7A8494;--bg:#FFF6F5;--line:#F0E0E1}
@@ -186,11 +186,15 @@
   <div id="v1" style="display:none">
     <div class="card">
       <div class="q">Q1 · 你的月收入大概落在?</div>
+      <!-- 0807:「不方便說」的基準從任意預設值(43)改成台灣月薪中位數——
+           中位數 NT$38,406 落在 3–5 萬那格,所以基準值跟那格同(41),
+           且下面標注清楚,不再是一個沒有出處的數字。 -->
       <div class="chips" data-q="income">
         <button class="chip" data-action="pick" data-age="41">3–5 萬</button>
         <button class="chip" data-action="pick" data-age="45">5–8 萬</button>
         <button class="chip" data-action="pick" data-age="52">8 萬以上</button>
-        <button class="chip" data-action="pick" data-age="43">不方便說</button></div>
+        <button class="chip" data-action="pick" data-age="41" data-med="1">不方便說</button></div>
+      <div class="hint">選「不方便說」也照樣能算:改用台灣受僱員工每月經常性薪資中位數 <b>NT$38,406</b> 當基準(主計總處,2025 年)</div>
       <div class="q">Q2 · 有存錢目標嗎?</div>
       <div class="chips" data-q="goal">
         <button class="chip" data-action="pick" data-d="4">有,存頭期款</button><button class="chip" data-action="pick" data-d="0">隨緣存</button><button class="chip" data-action="pick" data-d="-5">月光,別問</button></div>
@@ -229,22 +233,23 @@
     <div class="sec"><button onclick="skipScan()">跳過動畫 ›</button></div>
   </div>
 
+  <!-- 0807:結果頁改以分享卡為主體(同事走查回饋:算完看到的當下就是一張能曬的圖,
+       分享意願比「數字排版頁→另開分享浮層」高)。破產歲數不再排版第二次——卡上就是數字。
+       主 CTA 換成分享;堵漏降為第二顆,漏財點細節退到卡片之下。 -->
   <div id="v3" style="display:none">
     <div class="card" style="text-align:center">
-      <div style="font-size:11px;font-weight:800;color:#B8912F">情境試算 · 非財務預測(示範)</div>
-      <div class="age"><b id="ageN">43</b><span>歲那年,存款歸零</span></div>
-      <div style="font-size:12px;color:var(--mut)" id="yrsLine"></div>
+      <canvas id="cardHero" onclick="share()" role="button" aria-label="分享這張結果卡"
+              style="width:100%;max-width:330px;border-radius:14px;box-shadow:0 6px 22px rgba(0,0,0,.16);cursor:pointer"></canvas>
       <!-- 年齡已在 Q4 問過,這裡只是把依據寫出來,不再事後補問 -->
       <div class="basis">以你填的 <b id="a0N">26</b> 歲起算</div>
+      <div style="font-size:12px;color:var(--mut)" id="yrsLine"></div>
+      <div class="hint" id="medNote" style="display:none">收入未提供 → 以台灣受僱員工每月經常性薪資中位數 NT$38,406 為基準(主計總處,2025 年)</div>
     </div>
+    <button class="btn p" onclick="share()">📤 直接曬這張,看誰撐得久</button>
     <div class="card"><b style="font-size:13.5px;color:#5A0E14">💧 三大漏財點(來自發票)</b>
       <div id="leaks"></div></div>
     <!-- 0727:結果頁只留一條主路(省錢處方)。原本並列的「讓錢長大」已移除。 -->
     <button class="btn t" onclick="show('v4');rxRender();track('wc_path_save')">把漏洞堵起來<small>看能往後拖幾年</small></button>
-    <!-- 次要出口:放在兩條主路之下,不跟結果數字與主 CTA 搶第一屏 -->
-    <!-- 0728:籌碼K線出口從結果頁移除(兩處只留一處會重複;投資導流集中在 v4 文案),
-         次要動作只留分享 -->
-    <button class="btn l" onclick="share()">💸 曬破產倒數,看誰撐得久</button>
   </div>
 
   <!-- 0727:拿掉「啟用」三顆假開關(按了不會真的發生任何事)。
@@ -395,7 +400,7 @@ var UK_SLUG = 'wealth';                  /* 給 UK.exitToHome 的 postMessage �
    (同一個區間敏感度風險也在 Q1「月收入」的 3-5萬/5-8萬/8萬以上,這版先不動,等回覆一起處理) */
 /* 下限 18:發票載具是成年人的理財工具,原本 12 會算出「12 歲起算、54 歲破產、距今 42 年」這種鬼結果 */
 var A0_DEFAULT=26, A0_MIN=18, A0_MAX=99;
-var age=43, ANS={income:null, goal:0, cut:0, cutK:null, age0:null};
+var age=43, ANS={income:null, incMed:false, goal:0, cut:0, cutK:null, age0:null};
 var MIN_INV=5;
 /* ?inv=abc → 0;?inv=-5 → 0(負數不該印在畫面上) */
 var INV=(function(){ try{ var q=new URLSearchParams(location.search).get('inv'); return q===null?47:Math.max(0,+q||0); }catch(e){ return 47; } })();
@@ -493,7 +498,7 @@ function demoFill(){ INV=47; toast('(示範)已灌入近 90 天發票'); resetAn
 
 /* ── 三題:再點一次可取消並回中性值;Q1 沒選不放行(落差不靠預設值製造) ── */
 function resetAns(){
-  ANS={income:null, goal:0, cut:0, cutK:null, age0:null};
+  ANS={income:null, incMed:false, goal:0, cut:0, cutK:null, age0:null};
   document.querySelectorAll('#v1 .chip').forEach(function(c){ c.classList.remove('on'); });
   /* 回訪時把上次填的年齡帶回來,不用重打;沒填過就留空 */
   var el=document.getElementById('a0In'), err=document.getElementById('a0Err');
@@ -516,10 +521,10 @@ document.querySelectorAll('#v1 .chips').forEach(function(g){
     var q=g.getAttribute('data-q'), off=b.classList.contains('on');
     g.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('on'); });
     if(off){                                     /* 再點一次 = 取消,回中性值 */
-      if(q==='income') ANS.income=null; else { ANS[q]=0; if(q==='cut') ANS.cutK=null; }
+      if(q==='income'){ ANS.income=null; ANS.incMed=false; } else { ANS[q]=0; if(q==='cut') ANS.cutK=null; }
     } else {
       b.classList.add('on');
-      if(q==='income') ANS.income=parseInt(b.dataset.age,10);
+      if(q==='income'){ ANS.income=parseInt(b.dataset.age,10); ANS.incMed=!!b.dataset.med; }
       else { ANS[q]=parseInt(b.dataset.d,10)||0; if(q==='cut') ANS.cutK=b.dataset.k||null; }
     }
     gate(); track('wc_pick',{q:q, cleared:off});
@@ -550,7 +555,7 @@ function scan(){
 }
 function skipScan(){
   if(_t){ clearInterval(_t); _t=null; }
-  ST.age=age; ST.ans={income:ANS.income, goal:ANS.goal, cut:ANS.cut, cutK:ANS.cutK};
+  ST.age=age; ST.ans={income:ANS.income, incMed:ANS.incMed, goal:ANS.goal, cut:ANS.cut, cutK:ANS.cutK};
   ST.age0=(typeof ANS.age0==='number')?ANS.age0:A0_DEFAULT;   /* Q4 已是必填,這裡只是保險 */
   save(); entryRender(); showResult(); track('wc_result',{age:age});
 }
@@ -586,14 +591,24 @@ function a0Input(){
 }
 function showResult(){
   if(typeof ST.age==='number') age=ST.age;
-  document.getElementById('ageN').textContent=age;
   renderAge();
+  /* 收入用了中位數基準才顯示出處註記——沒用就不擺,不堆免責聲明 */
+  var mn=document.getElementById('medNote');
+  if(mn) mn.style.display=(ST.ans&&ST.ans.incMed)?'':'none';
   var k=cutKey();
   document.getElementById('leaks').innerHTML=ordered().map(function(L){
     return '<div class="leak"><span class="nm">'+L.ic+' '+L.nm+(L.k===k?' <span class="tag">你說想砍這個</span>':'')+'</span>'
       +'<span>月漏 <b>'+nt(L.leak)+'</b></span></div>';
   }).join('');
+  renderCardHero();
   show('v3');
+}
+/* 結果頁主視覺=分享卡本人(0807)。畫兩次:APP_ICON 是 data URI,首次載入
+   可能晚幾十 ms,晚一拍重畫,右下徽章才不會停在替代 emoji。 */
+function renderCardHero(){
+  var cv=document.getElementById('cardHero'); if(!cv||!UK.share.renderTo) return;
+  UK.share.renderTo(cv, card);
+  setTimeout(function(){ try{ UK.share.renderTo(cv, card); }catch(e){} }, 450);
 }
 /* ── 省錢處方:唯讀 ──
    0727:拿掉「啟用／已啟用」三顆開關。那是假的——按了不會真的設定任何東西,
