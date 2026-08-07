@@ -9,8 +9,8 @@
 <title>幾歲破產|發票載具</title>
 <!-- vendored / 共用層:不改。unit-kit 這裡只用到 UK.selfCheck()(唯讀機械自檢),
      nav/state/share 依 0726 決策維持本單元手寫版本。 -->
-<script src="qrcode.min.js?v=cc415488"></script>
-<script src="unit-kit.js?v=cc415488"></script>
+<script src="qrcode.min.js?v=527a06f3"></script>
+<script src="unit-kit.js?v=527a06f3"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--red-deep:#A50011;--gold:#FFD34D;--teal:#0E7C7B;--mut:#7A8494;--bg:#FFF6F5;--line:#F0E0E1}
@@ -172,20 +172,34 @@
      人的呼吸起伏(breathe)、💤(zrise)共用 3.4s 週期,節拍才對得上:
      樹彎下去(22~42%)→心浮出來(30~42%)→回正。
      素材=真實 App 的 img_tree_lv5.png(素材站拉的,88x96 data URI,風格原生)。 */
-  .storm .tree{position:absolute;bottom:3px;left:54%}
+  .storm .tree{position:absolute;bottom:3px;left:41%}
+  /* 小樹伸出的手(🍃):俯身那一拍朝人伸過去,跟 comfort 同週期 */
+  .storm .hand{position:absolute;bottom:16px;left:37%;font-size:13px;opacity:0;
+    animation:handreach 3.4s ease-in-out infinite}
+  @keyframes handreach{0%,20%{opacity:0;transform:translate(6px,2px) rotate(40deg)}
+    28%,42%{opacity:1;transform:translate(-4px,6px) rotate(-15deg)}
+    56%,100%{opacity:0;transform:translate(2px,2px)}}
+  /* 對話泡泡:俯身時說「沒事啦,省省錢撐過去」 */
+  .storm .bubble{position:absolute;bottom:56px;left:30%;max-width:64%;
+    background:#FFFDF8;border:1.5px solid #E3CFCF;border-radius:10px 10px 10px 2px;
+    padding:2px 7px;font-size:10px;font-weight:800;color:#5A4548;line-height:1.5;
+    opacity:0;animation:bubblepop 3.4s ease-in-out infinite}
+  @keyframes bubblepop{0%,22%{opacity:0;transform:translateY(5px) scale(.9)}
+    30%,54%{opacity:1;transform:translateY(0) scale(1)}
+    64%,100%{opacity:0;transform:translateY(-4px)}}
   .storm .tree img{display:block;width:46px;height:50px;transform-origin:50% 100%;
     animation:comfort 3.4s ease-in-out infinite;
     filter:drop-shadow(0 2px 3px rgba(40,50,80,.25))}
   @keyframes comfort{0%,58%,100%{transform:rotate(0)}22%,42%{transform:rotate(-11deg)}}
   /* 躺著的人:🧍 轉 90 度=躺平,呼吸起伏;衣衫襤褸感靠處境講,不靠像素 */
-  .storm .lying{position:absolute;bottom:1px;left:30%;font-size:29px;line-height:1;
+  .storm .lying{position:absolute;bottom:1px;left:26%;font-size:29px;line-height:1;
     transform:rotate(90deg);animation:breathe 2.6s ease-in-out infinite}
   @keyframes breathe{0%,100%{transform:rotate(90deg) scale(1)}50%{transform:rotate(90deg) scale(1.06)}}
-  .storm .zzz{position:absolute;bottom:36px;left:32%;font-size:13px;opacity:0;
+  .storm .zzz{position:absolute;bottom:36px;left:27%;font-size:13px;opacity:0;
     animation:zrise 3.4s linear infinite}
   @keyframes zrise{0%{opacity:0;transform:translateY(6px)}25%{opacity:.9}
     70%{opacity:0;transform:translateY(-14px)}100%{opacity:0;transform:translateY(-14px)}}
-  .storm .heart{position:absolute;bottom:32px;left:46%;font-size:12px;opacity:0;
+  .storm .heart{position:absolute;bottom:30px;left:38%;font-size:12px;opacity:0;
     animation:heartpop 3.4s ease-in-out infinite}
   @keyframes heartpop{0%,24%{opacity:0;transform:scale(.5) translateY(4px)}
     32%,42%{opacity:1;transform:scale(1.15) translateY(-3px)}58%,100%{opacity:0;transform:translateY(-12px)}}
@@ -195,10 +209,36 @@
   @keyframes gust{0%{left:-8%;top:30%;opacity:0;transform:rotate(0)}
     8%{opacity:.9}50%{top:52%}92%{opacity:.8}
     100%{left:104%;top:44%;opacity:0;transform:rotate(300deg)}}
-  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+  /* ── 背景飛錢(0807,Robert:整頁白色太單調,要有錢飛走的感覺)──
+     固定圖層墊在內容底下:鈔票斜著飄過畫面,低透明度不搶閱讀;
+     卡片是實色白底,錢只會在卡片間的縫隙與頁底出沒,像從口袋漏出去。
+     pointer-events:none 不擋任何點擊;reduced-motion 整層藏掉。 */
+  .moneybg{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+  .moneybg span{position:absolute;opacity:0;will-change:transform}
+  .moneybg .m1{font-size:26px;animation:flyA 11s linear infinite}
+  .moneybg .m2{font-size:20px;animation:flyB 14s linear infinite -4s}
+  .moneybg .m3{font-size:30px;animation:flyA 17s linear infinite -9s}
+  .moneybg .m4{font-size:17px;animation:flyC 12s linear infinite -6s}
+  .moneybg .m5{font-size:23px;animation:flyB 19s linear infinite -13s}
+  .moneybg .m6{font-size:15px;animation:flyC 15s linear infinite -2s}
+  @keyframes flyA{0%{left:-8%;top:78%;opacity:0;transform:rotate(0)}
+    6%{opacity:.22}94%{opacity:.22}
+    100%{left:104%;top:12%;opacity:0;transform:rotate(340deg)}}
+  @keyframes flyB{0%{left:104%;top:64%;opacity:0;transform:rotate(0)}
+    6%{opacity:.18}94%{opacity:.18}
+    100%{left:-8%;top:22%;opacity:0;transform:rotate(-300deg)}}
+  @keyframes flyC{0%{left:20%;top:106%;opacity:0;transform:rotate(0)}
+    7%{opacity:.16}93%{opacity:.16}
+    100%{left:70%;top:-8%;opacity:0;transform:rotate(280deg)}}
+  /* 內容墊在飛錢上面 */
+  .top,.wrap{position:relative;z-index:1}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}
+    .moneybg{display:none}}
 </style>
 </head>
 <body>
+<!-- 背景飛錢層:墊底、不擋點擊(0807) -->
+<div class="moneybg" aria-hidden="true"><span class="m1">💸</span><span class="m2">💵</span><span class="m3">💸</span><span class="m4">🪙</span><span class="m5">💸</span><span class="m6">💵</span></div>
 <!-- 頂部列:‹ 和 標題/icon 都是「回第一頁」,沒有例外。
      離開單元(回發票載具首頁)移到 ⋯ 選單,不佔用這條列——
      否則在第一頁按 ‹ 會把整個單元收掉,那不叫返回。 -->
@@ -296,7 +336,7 @@
           <span class="cloud" style="left:14%">🌧️</span>
           <span class="cloud" style="left:62%;animation-delay:-4.5s">⛈️</span>
           <span class="bolt">⚡</span>
-          <span class="leaf">🍃</span><span class="leaf l2">🍃</span><span class="lying" aria-hidden="true">🧍</span><span class="zzz" aria-hidden="true">💤</span><span class="heart" aria-hidden="true">💛</span><span class="tree"><img alt="" src="data:image/webp;base64,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"></span>
+          <span class="leaf">🍃</span><span class="leaf l2">🍃</span><span class="lying" aria-hidden="true">🧍</span><span class="zzz" aria-hidden="true">💤</span><span class="heart" aria-hidden="true">💛</span><span class="hand" aria-hidden="true">🍃</span><span class="bubble" aria-hidden="true">沒事啦,省省錢撐過去</span><span class="tree"><img alt="" src="data:image/webp;base64,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"></span>
         </div>
       </div>
       <!-- 年齡已在 Q4 問過,這裡只是把依據寫出來,不再事後補問 -->
@@ -834,7 +874,7 @@ function drawComfortScene(ctx, g){
   /* 雨雲兩朵 */
   ctx.font='64px sans-serif'; ctx.textAlign='center';
   ctx.fillText('🌧️', cx-250, cy-190);
-  ctx.fillText('⛈️', cx+250, cy-210);
+  ctx.fillText('⛈️', cx+300, cy-250);
   /* 斜雨線(輕,不搶戲) */
   ctx.save();
   ctx.strokeStyle='rgba(96,125,180,.38)'; ctx.lineWidth=3;
@@ -843,29 +883,48 @@ function drawComfortScene(ctx, g){
     ctx.beginPath(); ctx.moveTo(rx,ry); ctx.lineTo(rx-14,ry+40); ctx.stroke();
   }
   ctx.restore();
-  /* 躺著的人:🧍 轉 90 度(頭朝右),躺在樹左邊 */
+  /* 躺著的人:🧍 轉 90 度(頭朝右),緊靠在樹旁(0807:兩個 icon 距離拉近) */
   ctx.save();
-  ctx.translate(cx-150, cy-46);
+  ctx.translate(cx-115, cy-46);
   ctx.rotate(Math.PI/2);
   ctx.font='104px sans-serif'; ctx.textAlign='center';
   ctx.fillText('🧍', 0, 34);
   ctx.restore();
-  /* 💤 在人頭上、💛 在人與樹之間(安慰的那一拍) */
+  /* 💤 在人頭上、💛 在人與樹之間、🍃=小樹伸出的手(搭在人身上) */
   ctx.font='44px sans-serif';
-  ctx.fillText('💤', cx-40, cy-120);
+  ctx.fillText('💤', cx-165, cy-125);
+  ctx.font='38px sans-serif';
+  ctx.fillText('💛', cx-38, cy-105);
+  ctx.save();
+  ctx.translate(cx-42, cy-46);
+  ctx.rotate(-0.5);
   ctx.font='40px sans-serif';
-  ctx.fillText('💛', cx+16, cy-88);
-  /* 小樹:站人旁邊,微微向人傾(定格在「俯身安慰」那一拍) */
+  ctx.fillText('🍃', 0, 0);
+  ctx.restore();
+  /* 小樹:貼著人站,朝人傾(定格在「俯身安慰」那一拍) */
   var t=treeImg();
   if(t && t.complete && t.naturalWidth){
     ctx.save();
-    ctx.translate(cx+120, cy-4);            /* 樹根落點 */
-    ctx.rotate(-0.16);                       /* 約 -9 度,朝人傾 */
+    ctx.translate(cx+42, cy-4);             /* 樹根落點(拉近) */
+    ctx.rotate(-0.18);                       /* 約 -10 度,朝人傾 */
     ctx.drawImage(t, -72, -158, 144, 158);
     ctx.restore();
   } else {
-    ctx.font='120px sans-serif'; ctx.fillText('🌳', cx+120, cy-20);
+    ctx.font='120px sans-serif'; ctx.fillText('🌳', cx+42, cy-20);
   }
+  /* 對話泡泡:「沒事啦,省省錢撐過去」——結果頁動畫講的同一句 */
+  var msg='沒事啦,省省錢撐過去';
+  ctx.font='800 30px "PingFang TC","Noto Sans TC",sans-serif';
+  var tw=ctx.measureText(msg).width, bx=cx+52, by2=cy-210, pad=18;
+  ctx.save();
+  ctx.beginPath();
+  if(ctx.roundRect) ctx.roundRect(bx-tw/2-pad, by2-30, tw+pad*2, 48, [14,14,14,3]);
+  else ctx.rect(bx-tw/2-pad, by2-30, tw+pad*2, 48);
+  ctx.fillStyle='#FFFDF8'; ctx.fill();
+  ctx.strokeStyle='#E3CFCF'; ctx.lineWidth=3; ctx.stroke();
+  ctx.fillStyle='#5A4548'; ctx.textAlign='center';
+  ctx.fillText(msg, bx, by2+4);
+  ctx.restore();
 }
 
 /* 結果文案跟著使用者填的年齡走(0807):
