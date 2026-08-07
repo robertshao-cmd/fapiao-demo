@@ -614,6 +614,34 @@ var MIN_INV=5;
 /* 條碼查詢狀態:bcTest() 啟動後供 scan() 等待,完成即清空。
    條碼只活在 bcTest() 的區域變數裡,這裡只存 Promise 和遮罩過的顯示字串。 */
 var _bcPendingFetch=null;
+/* ══ ?cid= 兩種格式都要吃(0808,照上線 SOP §3)══════════════════════
+   兩種來源、兩種格式,只認一種的下場是「另一種來源的使用者全部拿不到自己的
+   資料,而且無聲無息」:
+     · App 深連結給的 cid 是 Base64URL(RFC 4648)包過的條碼
+     · FCM 分眾推播的 {barcode} 動態變數換出來的是條碼原文(/XXXXXXX),沒包過
+   解法同 bored 0731:先看是不是已經是合法條碼原文,是就直接用,不是才當
+   Base64URL 解。
+
+   ⚠️ 個資鐵律(與 bcTest 同一套,不因為來源是 App 就放寬):
+     · 只存在這支模組變數裡,不寫 localStorage、不寫 console、不進 track 參數
+     · 畫面一律只顯示遮罩後的字樣(/WS***GQ)
+     · 送查詢走 POST body(URL 會落 access log)
+     · UK.ga.cleanUrl 已把 cid 從 GA4 的 page_location 剝掉 */
+function b64url(s){                       /* -_ 換回 +/,再補 padding */
+  try{
+    var t=String(s).replace(/-/g,'+').replace(/_/g,'/');
+    while(t.length%4) t+='=';
+    return atob(t);
+  }catch(e){ return ''; }
+}
+var _bcFromCid=(function(){
+  try{
+    var q=new URLSearchParams(location.search).get('cid');
+    if(!q) return '';
+    var b=/^\/[0-9A-Z.+\-]{7}$/.test(q) ? q : b64url(q);
+    return /^\/[0-9A-Z.+\-]{7}$/.test(b) ? b : '';
+  }catch(e){ return ''; }
+})();
 /* ?inv=abc → 0;?inv=-5 → 0(負數不該印在畫面上) */
 var INV=(function(){ try{ var q=new URLSearchParams(location.search).get('inv'); return q===null?47:Math.max(0,+q||0); }catch(e){ return 47; } })();
 var ST=(function(){ try{ return JSON.parse(localStorage.getItem('wc_state')||'{}')||{}; }catch(e){ return {}; } })();
@@ -621,7 +649,35 @@ delete ST.on; delete ST.inv;   /* 0727 移除「啟用」與「投資留位」�
 function save(){ try{ ST.at=Date.now(); localStorage.setItem('wc_state', JSON.stringify(ST)); }catch(e){} }
 function ago(t){ if(!t) return ''; var d=Math.floor((Date.now()-t)/86400000);
   return d<=0?'今天':(d===1?'昨天':(d<30?d+' 天前':'很久以前')); }
-function track(ev,extra){ try{ console.log('[track]', ev, extra||{}); /* TODO: POST platform-api /track */ }catch(e){} }
+/* ══ GA4 埋點三道防線(0808,照上線 SOP §2 補;抄 bored 0731 的實作)══════
+   在此之前本單元的 track() 只是 console.log,等於整個繞過共用層——
+   GA4 一筆都收不到、?debug=1 的即時事件面板也長不出來(那是 UK.debugLog 畫的)。
+   GA4 資料不能回補,所以這件事一定要在上線前做完,不能「先上再補」。
+
+   ① 只有真的部署到 ailab 才送:localhost / GitHub Pages 上的每一次走查
+      都會寫進正式 property,上架初期分母小,假流量會把完成率整組灌歪。
+   ② 個資不進 GA4:UK.ga.cleanUrl 會把 cid/phone/barcode 這類參數從
+      page_location 剝掉(SENSITIVE 清單在共用層),下面每個 track 事件
+      本來就沒有帶條碼——載具條碼不進 GA4、不寫 console、不寫 localStorage。
+   ③ 外開連結走 UK.openExternal(0807 已改完,見 goApp/copyShareLink)。
+
+   ⚠️ 事件前綴刻意維持 wc_ 而不是 SOP 字面寫的 <slug>_:
+      _kit/ANALYTICS.md 的埋點規格登記的就是 bored_view / dx_view / wc_view
+      三種,detox 實際也是 dx_(不等於它的 slug)。SOP 那條規則的目的是
+      「前綴唯一、SAD 報表過濾得出來」,wc_ 完全滿足;硬改成 wealth_ 反而
+      和已登記的規格與另兩支的慣例對不上。unit 參數照樣帶 'wealth'(slug),
+      報表要用 slug 切也切得到。 */
+var GA4_ID='G-MTZ5H145TC';   /* InvoiceManager property 的「官方自營小程序(H5)」串流 15352956337 */
+function gaShouldSend(){
+  var h=location.hostname;
+  return h==='ailab-dev.cmoney.tw' || h==='ailab-prod.cmoney.tw';
+}
+var GA_ON=gaShouldSend();
+if(GA_ON) UK.ga.init(GA4_ID,'wealth');
+else if(window.console) console.info('[wealth] 非 ailab 環境 → GA4 不啟動(只留 console 與 ?debug=1 面板)');
+/* 一律走共用層:console(永遠有)/ 中台 /track(本單元沒設 apiBase,跳過)/ GA4(init 過才送),
+   順帶把事件餵給 ?debug=1 的即時記錄面板,走查時才驗得出「每個可點的地方都有埋」。 */
+function track(ev,extra){ try{ UK.track(ev, extra||{}); }catch(e){} }
 function toast(m){ var t=document.getElementById('tst'); t.textContent=m; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(function(){t.classList.remove('show');},2400); }
 function nt(n){ return '$'+n.toLocaleString(); }
 function reduceMotion(){ try{ return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){ return false; } }
@@ -656,7 +712,13 @@ function closeSheets(){
 }
 function goBack(){
   killScan();
-  if(closeSheets()) return;                 /* 系統返回:浮層開著就只關浮層(逐層退的語意) */
+  /* 0808 補埋點:本單元手寫 nav,拿不到 UK.nav 自動發的 nav_back。
+     事件形狀刻意跟共用層的 nav_back 一致(from/sheet/depth),報表才拼得起來——
+     sheet=1 代表這一下只是關浮層,sheet=0 才是真的退頁,兩者混在一起算的話
+     退出率會看起來比實際嚴重(這是 kit 註解裡點名過的坑)。 */
+  var _from=CUR||'', _depth=STACK.length;
+  if(closeSheets()){ track('nav_back',{from:_from, sheet:1, depth:_depth}); return; }  /* 系統返回:浮層開著就只關浮層(逐層退的語意) */
+  track('nav_back',{from:_from, sheet:0, depth:_depth});
   var top=STACK[STACK.length-1];
   if(CUR!==top){ if(top){ CUR=top; _show(top); } else { CUR='v0'; _show('v0'); } return; }
   STACK.pop(); var prev=STACK[STACK.length-1];
@@ -697,16 +759,21 @@ function entryRender(){
   if(typeof ST.age==='number'){
     box.style.display='';
     box.innerHTML='<div class="lastbox"><div><small>上次倒數 · '+ago(ST.at)+'</small><b>'+ST.age+'<span> 歲歸零</span></b></div>'
-      +'<button class="lastgo" onclick="showResult()">看上次結果 ›</button></div>';
+      /* 埋點掛在按鈕上而不是 showResult() 裡:skipScan() 也會呼叫 showResult(),
+         埋在函式內會跟 wc_result 重複計算「看到結果的人」 */
+      +'<button class="lastgo" onclick="track(\'wc_last_result\');showResult()">看上次結果 ›</button></div>';
     cta.textContent='再算一次';
     age=ST.age;
   } else { box.style.display='none'; cta.textContent='我敢看'; }
 }
 function enter(){
-  if(INV<MIN_INV){ document.getElementById('invN').textContent=INV; CUR='v6'; _show('v6'); return; }
+  /* 0808 補埋點:發票不足被擋在門外的人原本一個事件都不發,等於「按了我敢看
+     但算不出來」這群人在漏斗上完全隱形——而這恰好是最該量的分母之一
+     (要不要導去綁載具,就看這個數字)。帶 inv 筆數,但不帶任何條碼。 */
+  if(INV<MIN_INV){ track('wc_empty',{inv:INV}); document.getElementById('invN').textContent=INV; CUR='v6'; _show('v6'); return; }
   resetAns(); show('v1'); track('wc_interview_start');
 }
-function demoFill(){ INV=47; toast('(示範)已灌入近 90 天發票'); resetAns(); show('v1'); }
+function demoFill(){ track('wc_demo_fill'); INV=47; toast('(示範)已灌入近 90 天發票'); resetAns(); show('v1'); }
 
 /* ── 三題:再點一次可取消並回中性值;Q1 沒選不放行(落差不靠預設值製造) ── */
 function resetAns(){
@@ -942,6 +1009,11 @@ function goApp(k){
    三支一起受惠,這裡才換過來。home:true 保留「回發票載具首頁」那一項
    (頂部列只負責回第一頁,離開單元的出口刻意收在選單裡)。 */
 function menuOpen(){
+  /* 0808:UK.menu.open() 本身不發事件(選單裡的動作 menu_copy/menu_share/
+     menu_reload 都有埋,唯獨「打開選單」這一下沒有),所以在這裡補。
+     ⚠️ 這是共用層的缺口,四支單元都一樣——已回報,見 _kit/LANES.md 待辦。
+     依 LANES.md「解法留在自己資料夾裡就自己做」,先在本單元補上。 */
+  track('wc_menu_open',{from:CUR||''});
   UK.menu.open(shLink(), { title:'幾歲破產', text:'我的錢撐到幾歲?你敢算嗎?', home:true });
   /* 0730:「📤 分享」原本走 kit 預設(純文字+連結,沒有圖)——量測到的行為是
      navigator.share 在非 https 的區網環境常常整個不存在,結果按了「分享」
@@ -1104,16 +1176,16 @@ function share(){ track('wc_share'); UK.share.open(card); }
    (走 POST body,URL 會落 access log);畫面回饋一律遮罩(/WS***GQ)。 */
 function validBc(b){ return /^\/[0-9A-Z.+\-]{7}$/.test(b||''); }
 function bcMask(b){ return b.slice(0,3)+'***'+b.slice(-2); }
-function bcTest(){
-  var inp=document.getElementById('bcIn'), msg=document.getElementById('bcMsg'), btn=document.getElementById('bcBtn');
-  var bc=(inp.value||'').trim().toUpperCase();
-  if(bc && bc.charAt(0)!=='/') bc='/'+bc;
-  if(!validBc(bc)){ msg.textContent='格式不對:/ 開頭共 8 碼(斜線可省略,系統會補)'; return; }
+/* 查詢本體抽出來共用:手動輸入(bcTest)與 App 深連結帶進來的 cid 都走這支。
+   src 只記來源('input'/'cid'),不是條碼——可以安全進 track。 */
+function bcRun(bc, src){
+  var msg=document.getElementById('bcMsg'), btn=document.getElementById('bcBtn');
   btn.disabled=true;
   /* 非阻塞:送出條碼後馬上讓使用者繼續操作,不用在這頁等 30~60 秒。
      _bcPendingFetch 讓 scan() 知道有查詢在跑,掃描動畫會自動等到它回來
      再進結果頁——Q3 漏財點和結果卡都會拿到真實資料。 */
-  msg.innerHTML='⏳ 已送出 <b>'+bcMask(bc)+'</b> → <code>api/leaks</code>'
+  msg.innerHTML=(src==='cid' ? '⏳ 偵測到 App 帶進來的載具 <b>'+bcMask(bc)+'</b> → <code>api/leaks</code>'
+                             : '⏳ 已送出 <b>'+bcMask(bc)+'</b> → <code>api/leaks</code>')
     +'<br><span style="color:var(--teal)">可以先填答題,發票讀完 Q3 會自動更新！</span>';
   _bcPendingFetch=fetch('api/leaks',{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({bc:bc}) })
     .then(function(r){ return r.json(); })
@@ -1121,27 +1193,42 @@ function bcTest(){
       btn.disabled=false; _bcPendingFetch=null;
       if(!d.ok){
         msg.innerHTML='❌ <b>'+bcMask(bc)+'</b> → api/leaks → 查不到：'+(d.error||'稍後再試');
-        track('wc_bctest',{ok:0}); return;
+        track('wc_bctest',{ok:0,src:src}); return;
       }
       if(!d.cats||!d.cats.length){
         msg.innerHTML='⚠️ <b>'+bcMask(bc)+'</b> → api/leaks ✓ → '+d.month+' 無可分類發票 (共 '+d.n+' 筆)';
-        track('wc_bctest',{ok:1,n:d.n}); return;
+        track('wc_bctest',{ok:1,n:d.n,src:src}); return;
       }
       applyCats(d.cats);
       var top3=d.cats.slice(0,3).map(function(c){ return c.ic+' '+c.nm+'<b style="color:var(--red)"> $'+c.leak.toLocaleString()+'</b>'; }).join(' / ');
       msg.innerHTML='✅ <b>'+bcMask(bc)+'</b> → api/leaks → <b>'+d.n+'</b> 筆 ('+d.month+')'
         +'<br>Q3 已更新 → '+top3
         +(d.uncat?'<br>另有 <b>$'+d.uncat.toLocaleString()+'</b> 未分類':'');
-      track('wc_bctest',{ok:1,n:d.n});
+      track('wc_bctest',{ok:1,n:d.n,src:src});
     })
     .catch(function(){ btn.disabled=false; _bcPendingFetch=null; msg.textContent='連不到查詢服務——這個環境沒有接發票查詢'; });
 }
+function bcTest(){
+  var inp=document.getElementById('bcIn'), msg=document.getElementById('bcMsg');
+  var bc=(inp.value||'').trim().toUpperCase();
+  if(bc && bc.charAt(0)!=='/') bc='/'+bc;      /* 忘了打斜線的幫他補,不當作錯 */
+  if(!validBc(bc)){ msg.textContent='格式不對:/ 開頭共 8 碼(斜線可省略,系統會補)'; return; }
+  bcRun(bc,'input');
+}
 /* 開頁探測 /api/health:只有 dev server 在的環境(本機/LAN)才顯示測試區。
-   GitHub Pages / ailab 探測 404 → 區塊維持隱藏,一般使用者看不到。 */
+   GitHub Pages / ailab 探測 404 → 區塊維持隱藏,一般使用者看不到。
+   ⚠️ 已知落差(0808):?cid= 兩種格式都解得出來了,但真正把它換成「你的」
+      漏財點要靠 /api/leaks,而那支只活在這台開發機(Anya 授權在本機)。
+      ailab-dev 上沒有這個端點 → 帶 cid 進來的使用者仍然看到示範數字。
+      要讓 cid 在正式環境真的有用,得先有一支production 的發票查詢 API,
+      那是中台的事,不是這支單元補得完的。 */
 (function(){
   try{
     fetch('api/health').then(function(r){ return r.ok?r.json():null; }).then(function(d){
-      if(d&&d.ok) document.getElementById('apiTest').style.display='';
+      if(!d||!d.ok) return;
+      document.getElementById('apiTest').style.display='';
+      /* App 深連結帶了 cid → 不用他自己再打一次,直接用他本人的發票算 */
+      if(_bcFromCid) bcRun(_bcFromCid,'cid');
     }).catch(function(){});
   }catch(e){}
 })();

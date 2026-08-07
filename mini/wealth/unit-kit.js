@@ -342,12 +342,18 @@
     cleanUrl: function (u) {
       if (!u) return '';
       try {
-        var url = new URL(u, global.location.href), hit = [];
-        this.SENSITIVE.forEach(function (k) {
-          /* 參數名大小寫不一定,逐一比對現有的 key */
-          Array.prototype.slice.call(url.searchParams.keys()).forEach(function (real) {
-            if (real.toLowerCase() === k) { url.searchParams.delete(real); hit.push(real); }
-          });
+        var url = new URL(u, global.location.href), hit = [], keys = [], self = this;
+        /* 0808 從 _kit 補回這段修正:本地這份副本 fork 得早,停在壞掉的版本上。
+           先把現有 key 蒐集成陣列再刪 —— 邊迭代邊刪會漏掉。
+           ⚠️ 不要用 Array.prototype.slice.call(searchParams.keys()):
+           keys() 是迭代器、沒有 length,slice 會回傳空陣列 → 一個參數都剝不掉,
+           而且因為 hit 是空的,連「已剝掉敏感參數」那行 console 都不會印,
+           看起來就像「這個環境剛好沒有敏感參數」。實測到才發現(見下方回報)。 */
+        url.searchParams.forEach(function (v, k) { keys.push(k); });
+        keys.forEach(function (real) {
+          if (self.SENSITIVE.indexOf(real.toLowerCase()) !== -1) {
+            url.searchParams.delete(real); hit.push(real);
+          }
         });
         if (hit.length && global.console) {
           console.info('[unit-kit] 已從 GA4 的 page_location 剝掉敏感參數:', hit.join(', '));
@@ -373,6 +379,15 @@
         var s = document.createElement('script');
         s.async = true;
         s.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(id);
+        /* 0808 從 _kit 補回:分得出「腳本真的載到」與「只是把標籤插進去了」。
+           ⚠️ 底下的 this.ready = true 只代表沒丟例外,**不代表 gtag.js 載得到**。
+           在 App 的 WebView 裡如果 googletagmanager.com 被內容阻擋／網域白名單擋掉,
+           整個 GA4 會靜默失效:畫面完全正常、console 乾淨、一個事件都不會到——
+           這正是 SOP §5 要在 TestFlight 實機驗互動事件的原因。
+           self 而不是 this:onload 觸發時的 this 是 script 元素。 */
+        var self = this;
+        s.onload  = function () { self.scriptOk = true; };
+        s.onerror = function () { self.scriptFail = true; };
         document.head.appendChild(s);
         global.gtag('js', new Date());
         /* 單元是獨立頁面,page_view 就讓 GA4 自己送(不像 SPA 要自己補);
