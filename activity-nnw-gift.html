@@ -117,19 +117,20 @@
     border-radius:13px;font-size:15px;font-weight:700;box-shadow:0 4px 12px rgba(1,175,162,0.28);}
   .cta .s{display:block;font-size:11px;font-weight:400;opacity:0.9;margin-top:2px;}
 
-  /* ===== 四隻毛孩貼圖（貼在詳情頁周圍，會動） ===== */
-  .sticker{position:absolute;width:74px;height:74px;z-index:5;
-    filter:drop-shadow(0 4px 10px rgba(90,60,30,0.3));}
+  /* ===== 四隻毛孩貼圖（貼在手機畫面「內」，從邊緣探頭，超出部分被手機框裁掉） ===== */
+  .frame .scr{position:relative;}
+  .sticker{position:absolute;width:62px;height:62px;z-index:5;
+    filter:drop-shadow(0 4px 10px rgba(90,60,30,0.32));}
   .sticker img{width:100%;height:100%;display:block;}
-  .s1{top:118px;left:-42px;animation:bob1 3.4s ease-in-out infinite;}
-  .s2{top:300px;right:-40px;animation:bob2 3.9s ease-in-out infinite;}
-  .s3{bottom:210px;left:-40px;animation:bob3 4.3s ease-in-out infinite;}
-  .s4{bottom:74px;right:-38px;animation:bob4 3.1s ease-in-out infinite;}
+  .s1{top:66px;left:-16px;animation:bob1 3.4s ease-in-out infinite;}
+  .s2{top:190px;right:-16px;animation:bob2 3.9s ease-in-out infinite;}
+  .s3{bottom:238px;left:-16px;animation:bob3 4.3s ease-in-out infinite;}
+  .s4{bottom:92px;right:-16px;animation:bob4 3.1s ease-in-out infinite;}
   @keyframes bob1{0%,100%{transform:translateY(0) rotate(-7deg);}50%{transform:translateY(-11px) rotate(3deg);}}
   @keyframes bob2{0%,100%{transform:translateY(0) rotate(6deg);}50%{transform:translateY(-13px) rotate(-4deg);}}
   @keyframes bob3{0%,100%{transform:translateY(0) rotate(-4deg);}50%{transform:translateY(-10px) rotate(6deg);}}
   @keyframes bob4{0%,100%{transform:translateY(0) rotate(5deg);}50%{transform:translateY(-12px) rotate(-6deg);}}
-  .bubble{position:absolute;top:88px;left:-58px;z-index:6;background:#fff;border:2px solid var(--coral);
+  .bubble{position:absolute;top:34px;left:52px;z-index:6;background:#fff;border:2px solid var(--coral);
     color:#D5604C;font-size:12px;padding:5px 11px;border-radius:14px;white-space:nowrap;
     box-shadow:0 3px 9px rgba(90,60,30,0.2);animation:pop 3.4s ease-in-out infinite;}
   .bubble::after{content:'';position:absolute;bottom:-7px;left:26px;width:10px;height:10px;
@@ -338,16 +339,16 @@
         帶我去暖暖窩
         <span class="s">板橋文化路一段286巷16號・近新埔站</span>
       </div>
+
+      <!-- 四隻毛孩貼圖：貼在手機畫面內，從左右邊緣探頭 -->
+      <div class="bubble hand">快來找我玩！</div>
+      <div class="sticker s1"><img src="assets/nnw-activity/dog-mi.png" alt="小米"></div>
+      <div class="sticker s2"><img src="assets/nnw-activity/dog-caibao.png" alt="財寶"></div>
+      <div class="sticker s3"><img src="assets/nnw-activity/dog-xuye.png" alt="序耶"></div>
+      <div class="sticker s4"><img src="assets/nnw-activity/dog-ruby.png" alt="露比媽媽"></div>
     </div>
   </div>
   <div class="len">內容高度 732px（實測）· 需捲動約一屏</div>
-
-  <!-- 四隻毛孩貼圖 -->
-  <div class="bubble hand">快來找我玩！</div>
-  <div class="sticker s1"><img src="assets/nnw-activity/dog-mi.png" alt="小米"></div>
-  <div class="sticker s2"><img src="assets/nnw-activity/dog-caibao.png" alt="財寶"></div>
-  <div class="sticker s3"><img src="assets/nnw-activity/dog-xuye.png" alt="序耶"></div>
-  <div class="sticker s4"><img src="assets/nnw-activity/dog-ruby.png" alt="露比媽媽"></div>
 </div>
 
 <!-- ========== 畫面 C ========== -->
