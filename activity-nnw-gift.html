@@ -36,7 +36,8 @@
   .promo{height:86px;border-radius:12px;overflow:hidden;background:#fff;display:flex;align-items:stretch;
     box-shadow:0 1px 3px rgba(0,0,0,0.08);}
   .promo .ph{width:86px;flex-shrink:0;background:linear-gradient(135deg,var(--orange100),var(--orange300));
-    display:flex;align-items:center;justify-content:center;font-size:34px;}
+    display:flex;align-items:center;justify-content:center;font-size:34px;overflow:hidden;}
+  .promo .ph img{width:100%;height:100%;object-fit:cover;}
   .promo .body{flex:1;padding:10px 12px;display:flex;flex-direction:column;justify-content:center;gap:4px;min-width:0;}
   .promo .tag{align-self:flex-start;background:var(--orange100);color:var(--orange700);font-size:11px;
     font-weight:700;padding:1px 8px;border-radius:6px;}
@@ -45,12 +46,11 @@
   .promo.other{margin-top:10px;opacity:0.55;}
 
   /* ===== 畫面 B：活動詳情頁 ===== */
-  .hero{height:200px;background:linear-gradient(135deg,var(--orange100) 0%,#fff 55%,var(--orange100) 100%);
-    display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;position:relative;
-    border-bottom:1px solid var(--black400);}
-  .hero .big{font-size:64px;}
-  .hero .ph-label{font-size:11px;color:var(--orange700);background:#fff;border:1px dashed var(--orange600);
-    border-radius:20px;padding:3px 10px;}
+  .hero{height:200px;display:flex;border-bottom:1px solid var(--black400);}
+  .hero .half{flex:1;position:relative;overflow:hidden;}
+  .hero .half img{width:100%;height:100%;object-fit:cover;display:block;}
+  .hero .half .cap{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(transparent,rgba(0,0,0,0.55));
+    color:#fff;font-size:12px;font-weight:700;text-align:center;padding:16px 4px 6px;}
   .detail-body{padding:16px;}
   .store{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
   .store .logo{width:36px;height:36px;border-radius:8px;background:var(--green600);color:#fff;
@@ -109,11 +109,13 @@
   <b>這個活動實際會出現在 App 的哪裡，目前還沒定案</b>——這裡先假設放在既有的「活動」分頁 → 「推薦活動」區塊
   （這是 App 裡本來就有的一個位置，不是我們新開的），因為它是既有結構裡最合理的位置，但正式位置要等產品/工程確認。
   <br><br>
-  <b>橘色虛線框的圖都是佔位符，不是真的照片。</b>我查了暖暖窩的 Facebook（
-  <a href="https://www.facebook.com/eva1216eve0529/" target="_blank">4.7K followers</a>）跟 Instagram（
-  <a href="https://www.instagram.com/sweethome_2014/" target="_blank">@sweethome_2014，902 followers</a>），
-  沒有登入的狀態下抓不到雞球/洋蔥圈的實際餐點照片——這兩張圖建議 D2 當面請老闆娘提供，或到店拍。
-  文案語氣有照他們粉專自介的用詞（用愛烹調、溫暖、家）去對齊。
+  <b>0807 更新：雞球/洋蔥圈的圖已換成你提供的照片。</b>原本規劃從暖暖窩的
+  <a href="https://www.facebook.com/eva1216eve0529/" target="_blank">Facebook</a>／
+  <a href="https://www.instagram.com/sweethome_2014/" target="_blank">Instagram</a> 抓實拍照，
+  但這個環境的瀏覽器工具把這兩個網域擋掉了（政策封鎖，不是登入牆問題），沒有抓到。
+  現在畫面 A／B 用的兩張圖是你直接提供的——<b>看起來是棚拍風格的參考圖，不是暖暖窩自己出餐時的實際擺盤照</b>，
+  D2 當面過目時務必請老闆娘確認「這是不是他們家會端出來的樣子」，不一致的話要換成她自己拍的實品照，
+  不要讓客人到店發現長得不一樣。文案語氣有照他們粉專自介的用詞（用愛烹調、溫暖、家）去對齊。
   <br><br>
   <b>0806 更新（老闆娘/你已確認）：僅限內用，一桌限兌換一份。</b>畫面 B 已改成這個規則，
   外帶／預訂那條 TBD 已拿掉。同桌多人重複出示的防呆，這輪先靠店員現場判斷（跟紙本優惠券一樣），
@@ -134,7 +136,7 @@
       <div class="sec">
         <div class="sec-h"><div class="t">推薦活動</div></div>
         <div class="promo">
-          <div class="ph">🧅</div>
+          <div class="ph"><img src="assets/nnw-activity/onion-ring.png" alt="洋蔥圈"></div>
           <div class="body">
             <span class="tag">暖暖窩限定</span>
             <div class="ti">用餐即贈｜洋蔥圈或雞球任選一份</div>
@@ -161,8 +163,14 @@
     <div class="nav"><span class="h">‹ 返回</span>活動詳情</div>
     <div class="scr" style="padding-bottom:0;">
       <div class="hero">
-        <div class="big">🧅🍗</div>
-        <div class="ph-label">真實照片待補（雞球／洋蔥圈擇一實拍）</div>
+        <div class="half">
+          <img src="assets/nnw-activity/onion-ring.png" alt="洋蔥圈">
+          <div class="cap">洋蔥圈</div>
+        </div>
+        <div class="half">
+          <img src="assets/nnw-activity/chicken-nugget.png" alt="雞球">
+          <div class="cap">雞球</div>
+        </div>
       </div>
       <div class="detail-body">
         <div class="store">
