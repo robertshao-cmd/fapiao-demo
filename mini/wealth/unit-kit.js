@@ -786,12 +786,26 @@
         UK.track('share_send', { title: d.title });
       });
     },
+    /* 0807(wealth 本地改,未回流 _kit):改用 toDataURL()——它是同步的。
+       原本的 toBlob(cb) 是非同步:等 callback 真的觸發時,已經跑出使用者
+       點擊當下的「user activation」視窗,手機瀏覽器(尤其 Safari)會把
+       這次 a.click() 當成「不是使用者觸發」,於是不走直接下載,改成
+       開一個新分頁顯示圖片——體感上就是「跳轉到分享頁面」而不是下載。
+       toDataURL() 在點擊的同一個呼叫堆疊裡執行完,活動視窗還在,
+       下載才會是下載。副作用是大圖片會頓一下(同步編碼),這張卡不大,可接受。
+       ⚠️ iOS Safari 從未支援 <a download> 屬性(蘋果的平台限制,所有網站都一樣)——
+       這個修法能讓 Android/桌機穩定直接下載,iOS 仍會開新分頁,
+       使用者要自己長按「儲存到照片」。這不是 bug,是 Apple 刻意擋的,
+       純網頁技術繞不過去。 */
     download: function () {
-      this._blob(function (blob) {
-        var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-        a.download = 'fapiao-card.png'; a.click();
-        setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
-      });
+      var cv = document.getElementById('uk-share-cv'); if (!cv) return;
+      var a = document.createElement('a');
+      a.href = cv.toDataURL('image/png');
+      a.download = 'fapiao-card.png';
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     }
   };
 
