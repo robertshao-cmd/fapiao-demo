@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>D2 活動頁面 mockup｜憑發票贈雞球/洋蔥圈（暖暖窩）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC&display=swap" rel="stylesheet">
 <style>
   :root{
     --black100:#FFFFFF;--black300:#F5F5F5;--black400:#F0F0F0;--black500:#D9D9D9;
@@ -68,10 +71,13 @@
   .promo .sub{font-size:12px;color:var(--black700);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .promo.other{margin-top:10px;opacity:0.55;}
 
+  /* ===== 手寫感（LXGW WenKai TC，Google Fonts 免費商用） ===== */
+  .hand{font-family:'LXGW WenKai TC','PingFang TC',cursive;}
+
   /* ===== 畫面 B：活動詳情頁 ===== */
-  .hero{height:240px;position:relative;overflow:hidden;border-bottom:1px solid var(--black400);
-    background:linear-gradient(180deg,#E6F7F6 0%,#FFF9EE 70%);}
-  .hero svg{display:block;width:100%;height:100%;}
+  .hero{height:300px;position:relative;overflow:hidden;border-bottom:1px solid var(--black400);
+    background:#6CC5C1;} /* 取樣自 Warm Nest 插畫的實際背景色，圖與底無縫 */
+  .hero img{display:block;width:100%;height:100%;object-fit:contain;}
   .hero .badge{position:absolute;top:12px;left:12px;background:rgba(255,255,255,0.95);border-radius:20px;
     padding:5px 12px;font-size:12px;font-weight:700;color:var(--orange700);display:flex;align-items:center;gap:4px;
     box-shadow:0 2px 6px rgba(0,0,0,0.12);}
@@ -79,11 +85,17 @@
     padding:5px 12px;font-size:12px;font-weight:700;color:var(--black1000);display:flex;align-items:center;gap:5px;
     box-shadow:0 2px 6px rgba(0,0,0,0.12);}
   .gift-row{display:flex;gap:10px;padding:14px 16px 0;}
-  .gift-row .g{flex:1;border-radius:12px;overflow:hidden;position:relative;height:88px;
+  .gift-row .g{flex:1;border-radius:12px;position:relative;height:72px;
     background:linear-gradient(180deg,#FFF7EC,#FFEFD8);box-shadow:0 1px 3px rgba(0,0,0,0.08);
-    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;}
-  .gift-row .g svg{width:56px;height:52px;display:block;}
-  .gift-row .g .cap{font-size:11px;font-weight:700;color:var(--orange700);}
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;}
+  .gift-row .g .gname{font-size:22px;color:#8A5A2B;line-height:1;}
+  .gift-row .g .squig{width:64px;height:8px;display:block;}
+  .quote-card{background:#FFFDF6;border-radius:12px;padding:16px 18px;margin-bottom:14px;
+    border:1px solid #F0E3C8;position:relative;}
+  .quote-card .qm{font-size:34px;line-height:0.6;color:#E8B563;font-family:Georgia,serif;}
+  .quote-card p{font-size:15px;color:#5C4A33;line-height:1.9;margin:6px 0 8px;}
+  .quote-card .qby{font-size:12px;color:var(--black700);text-align:right;}
+  .squig-title{width:150px;height:9px;display:block;margin:2px 0 10px;}
   .detail-body{padding:16px;}
   .store{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
   .store .logo{width:40px;height:40px;border-radius:10px;flex-shrink:0;overflow:hidden;background:#fff;
@@ -148,24 +160,23 @@
   <b>這個活動實際會出現在 App 的哪裡，目前還沒定案</b>——這裡先假設放在既有的「活動」分頁 → 「推薦活動」區塊
   （這是 App 裡本來就有的一個位置，不是我們新開的），因為它是既有結構裡最合理的位置，但正式位置要等產品/工程確認。
   <br><br>
-  <b>0807 二版：整頁改成插畫風，不再直接放生照片。</b>前一版把老闆娘的社群照片直接嵌進 UI，
-  照片跟 App 介面的視覺語言打架、很突兀——這版全部重畫成插畫角色：畫面 B 主視覺是照他們四隻
-  毛孩真實成員（1 白 3 黑）畫的向量插畫，坐姿抬頭的構圖呼應他們社群照的經典姿勢；黃色小屋
-  取自 Warm Nest 插畫 logo 的屋形元素；洋蔥圈/雞球也改成同風格的扁平插畫。發票載具主色
-  （#01AFA2 湖水綠）跟 Warm Nest 插畫的湖水綠背景本來就是同色系，兩個品牌的視覺天生合得起來。
-  設計方向參考了餐飲活動頁的通用做法——手繪/向量插畫風比實照更能傳達品牌個性與故事感，
-  特別適合主打「用心、溫暖」的餐飲品牌。原始照片檔仍保留在 assets/ 裡沒有刪，之後要用再拿。
+  <b>0807 三版：不再自己畫，改用他們自己的委託插畫當主角。</b>二版我用幾何圓形拼的小狗
+  被正確地打槍（太 AI、沒有溫度）——溫度的來源本來就在素材庫裡：Warm Nest 那張委託繪製的
+  全家福插畫（掌廚老闆、老闆娘、兩個女兒、四隻毛孩名字都標在旁邊），是他們家花錢請插畫師
+  畫的、有故事的東西。這版把它放大成畫面 B 整幅主視覺（hero 背景色 #6CC5C1 直接取樣自
+  插畫本身的背景，圖與底無縫），畫面 0 通知圖示、畫面 A 縮圖也統一用它。我畫的幾何狗、
+  幾何食物全部刪除。標題與重點文字改用 LXGW WenKai TC（Google Fonts 免費商用的手寫感字體），
+  配手繪波浪底線，補足「不完美感」。洋蔥圈/雞球改成手寫字卡（不再放假插畫，實拍照 D2 跟
+  老闆娘拿了再補）。
   <br><br>
-  <b>寵物友善賣點（老闆娘已同意用他們的素材）：</b>
-  暖暖窩是板橋少數毛孩可以一起內用的義式餐廳（這是他們真實的定位，不是我編的）。
-  Warm Nest 品牌插畫 logo 用在畫面 B 店家資訊列（它本來就是插畫，跟新風格一致）；
-  「🐾 為什麼特別提寵物友善」卡片把「暖暖窩愛毛孩」跟「發票載具也想幫愛毛孩的用戶
-  找到這種店」兩件事講在一起，不是硬貼標籤。
+  <b>新增「老闆娘的話」引用卡（目前是空格）：</b>溫度不只靠視覺，也靠真人的聲音——
+  D2 當面請老闆娘講一句真心話放進去。<b>這格空著就是空著，絕不用 AI 編一句假裝是她說的</b>，
+  卡片裡的佔位文字已寫明這個原則。
   <br><br>
-  <b>要給老闆娘確認的三件事：</b>①插畫裡四隻毛孩的毛色/隻數畫得對不對（照片上是 1 白 3 黑）
-  ②雞球/洋蔥圈插畫她能不能接受（插畫是示意，活動須知已有「贈品以店家提供為準」）
-  ③文案裡毛孩名字要跟她核對——Warm Nest logo 上標的是露比媽媽/財寶/皮耶/小米，
-  之前文案寫過「豆豆」可能是錯的，這版文案已改成照 logo 的名字。
+  <b>要給老闆娘確認的三件事：</b>①她的委託插畫拿來當活動主視覺，授權範圍要她點頭——
+  同意給社群照片跟同意插畫當 campaign 主視覺是兩回事 ②請她說一句話放引用卡
+  ③跟她要洋蔥圈/雞球實拍照（拍立得風處理後補進贈品區）。
+  毛孩名字已照 Warm Nest 插畫上標的改為露比媽媽/財寶/皮耶/小米，也一併請她核對。
   <br><br>
   <b>0807 新增：畫面 0，補上「入口→活動頁」這段 user journey 的第一步。</b>
   之前只有畫面 A（活動分頁）跟畫面 B（詳情頁），沒有畫出使用者一開始是怎麼看到這個活動的——
@@ -192,22 +203,7 @@
       <div class="vcard"><span>05-06月發票 <b>128 張</b></span><span>螢幕常亮</span></div>
       <div class="notif-wrap">
         <div class="notif">
-          <div class="ic" style="background:#E6F7F6;">
-            <svg viewBox="-30 -32 60 62" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="小白狗插畫">
-              <g fill="#FDFBF7">
-                <circle cx="-20" cy="4" r="9"/><circle cx="20" cy="4" r="9"/>
-                <circle cx="-15" cy="-13" r="11"/><circle cx="15" cy="-13" r="11"/>
-                <circle cx="-6" cy="-20" r="10"/><circle cx="6" cy="-20" r="10"/>
-                <circle cx="0" cy="0" r="21"/>
-              </g>
-              <circle cx="-7" cy="-2" r="3" fill="#231A17"/><circle cx="7" cy="-2" r="3" fill="#231A17"/>
-              <circle cx="-6" cy="-3" r="1" fill="#FFF"/><circle cx="8" cy="-3" r="1" fill="#FFF"/>
-              <ellipse cx="0" cy="6" rx="4" ry="3" fill="#231A17"/>
-              <path d="M0 9.5 Q0.5 13 4.5 13" stroke="#231A17" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-              <ellipse cx="-12" cy="5" rx="3.4" ry="2" fill="#FFB3A0" opacity="0.55"/>
-              <ellipse cx="12" cy="5" rx="3.4" ry="2" fill="#FFB3A0" opacity="0.55"/>
-            </svg>
-          </div>
+          <div class="ic"><img src="assets/nnw-activity/warmnest-illustration.jpg" alt="暖暖窩"></div>
           <div class="body">
             <div class="top"><span class="app">發票載具</span><span>剛剛</span></div>
             <div class="ti">🐾 暖暖窩想見你和你的毛小孩</div>
@@ -228,13 +224,8 @@
       <div class="sec">
         <div class="sec-h"><div class="t">推薦活動</div></div>
         <div class="promo">
-          <div class="ph" style="background:linear-gradient(135deg,#FFF7EC,#FFE9C8);">
-            <svg viewBox="0 0 56 52" width="52" height="48" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="洋蔥圈與雞球插畫">
-              <circle cx="19" cy="20" r="11" fill="none" stroke="#E8A34B" stroke-width="8"/>
-              <circle cx="19" cy="20" r="11" fill="none" stroke="#FBDA9B" stroke-width="3" stroke-dasharray="3.5 5.5" stroke-linecap="round"/>
-              <g fill="#E8963E"><circle cx="36" cy="36" r="9"/><circle cx="45" cy="28" r="7"/></g>
-              <g fill="#F5C36E" opacity="0.85"><circle cx="33" cy="33" r="2.2"/><circle cx="43" cy="26" r="1.9"/></g>
-            </svg>
+          <div class="ph" style="background:#6CC5C1;">
+            <img src="assets/nnw-activity/warmnest-illustration.jpg" alt="Warm Nest 暖暖窩插畫">
           </div>
           <div class="body">
             <span class="tag">暖暖窩限定</span>
@@ -262,97 +253,47 @@
     <div class="nav"><span class="h">‹ 返回</span>活動詳情</div>
     <div class="scr" style="padding-bottom:0;">
       <div class="hero">
-        <svg viewBox="0 0 375 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="暖暖窩的四隻毛孩插畫">
-          <defs>
-            <!-- 毛茸茸小狗（照暖暖窩真實成員：1白3黑，坐姿抬頭，呼應他們社群照的姿勢） -->
-            <symbol id="pup" viewBox="-32 -34 64 96">
-              <ellipse cx="0" cy="38" rx="21" ry="19" fill="currentColor"/>
-              <ellipse cx="-9" cy="55" rx="6.5" ry="5" fill="currentColor"/>
-              <ellipse cx="9" cy="55" rx="6.5" ry="5" fill="currentColor"/>
-              <circle cx="-21" cy="2" r="10" fill="currentColor"/>
-              <circle cx="21" cy="2" r="10" fill="currentColor"/>
-              <circle cx="-16" cy="-14" r="12" fill="currentColor"/>
-              <circle cx="16" cy="-14" r="12" fill="currentColor"/>
-              <circle cx="-7" cy="-22" r="11" fill="currentColor"/>
-              <circle cx="7" cy="-22" r="11" fill="currentColor"/>
-              <circle cx="0" cy="-2" r="23" fill="currentColor"/>
-              <circle cx="-7.5" cy="-4" r="3.2" fill="#231A17"/>
-              <circle cx="7.5" cy="-4" r="3.2" fill="#231A17"/>
-              <circle cx="-6.4" cy="-5.2" r="1.1" fill="#FFF"/>
-              <circle cx="8.6" cy="-5.2" r="1.1" fill="#FFF"/>
-              <ellipse cx="0" cy="4.5" rx="4.2" ry="3.2" fill="#231A17"/>
-              <path d="M0 8 Q0.5 12 5 12" stroke="#231A17" stroke-width="1.6" fill="none" stroke-linecap="round"/>
-              <ellipse cx="-13" cy="4" rx="3.6" ry="2.2" fill="#FFB3A0" opacity="0.55"/>
-              <ellipse cx="13" cy="4" rx="3.6" ry="2.2" fill="#FFB3A0" opacity="0.55"/>
-            </symbol>
-          </defs>
-          <!-- Warm Nest 的黃色小屋（照他們插畫 logo 的屋形元素） -->
-          <path d="M187 26 L296 92 L296 208 L78 208 L78 92 Z" fill="#FBE58A" opacity="0.7"/>
-          <path d="M187 26 L296 92 L78 92 Z" fill="#F5D254" opacity="0.75"/>
-          <!-- 地面 -->
-          <ellipse cx="187" cy="216" rx="160" ry="16" fill="#EFD9B8" opacity="0.6"/>
-          <!-- 四隻毛孩：小米(白) + 財寶/皮耶/露比(黑)，名字照 Warm Nest 插畫 logo 標的 -->
-          <g style="color:#FDFBF7"><use href="#pup" x="52" y="118" width="74" height="111"/></g>
-          <g style="color:#544A48"><use href="#pup" x="126" y="106" width="80" height="120"/></g>
-          <g style="color:#4A403E"><use href="#pup" x="204" y="112" width="77" height="115"/></g>
-          <g style="color:#5C5250"><use href="#pup" x="276" y="122" width="72" height="108"/></g>
-          <!-- 漂浮小元素：愛心/腳印/亮點 -->
-          <path d="M60 62 c-3-6-12-4-12 2 c0 5 7 9 12 12 c5-3 12-7 12-12 c0-6-9-8-12-2Z" fill="#FF8C7A" opacity="0.85"/>
-          <path d="M318 78 c-2-4-9-3-9 1.5 c0 3.6 5.2 6.6 9 8.8 c3.8-2.2 9-5.2 9-8.8 c0-4.5-7-5.5-9-1.5Z" fill="#FF8C7A" opacity="0.7"/>
-          <g fill="#C9A87E" opacity="0.7">
-            <ellipse cx="40" cy="150" rx="4.5" ry="3.6"/>
-            <circle cx="34" cy="143" r="1.8"/><circle cx="39" cy="141" r="1.8"/><circle cx="44" cy="143" r="1.8"/>
-          </g>
-          <g fill="#C9A87E" opacity="0.6">
-            <ellipse cx="336" cy="160" rx="4.5" ry="3.6"/>
-            <circle cx="330" cy="153" r="1.8"/><circle cx="335" cy="151" r="1.8"/><circle cx="340" cy="153" r="1.8"/>
-          </g>
-          <circle cx="96" cy="46" r="3" fill="#F5D254"/>
-          <circle cx="292" cy="40" r="2.4" fill="#8ADAD4"/>
-          <circle cx="30" cy="96" r="2.2" fill="#8ADAD4"/>
-        </svg>
+        <img src="assets/nnw-activity/warmnest-illustration.jpg"
+             alt="Warm Nest 暖暖窩全家福插畫：掌廚老闆、老闆娘、兩個女兒與四隻毛孩">
         <div class="badge">🐾 寵物友善</div>
         <div class="loc">📍 暖暖窩義式廚房</div>
       </div>
       <div class="gift-row">
         <div class="g">
-          <svg viewBox="0 0 56 52" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="洋蔥圈插畫">
-            <circle cx="21" cy="33" r="13" fill="none" stroke="#E8963E" stroke-width="9"/>
-            <circle cx="21" cy="33" r="13" fill="none" stroke="#F5C36E" stroke-width="3.5" stroke-dasharray="4 6" stroke-linecap="round"/>
-            <circle cx="37" cy="21" r="12" fill="none" stroke="#E8A34B" stroke-width="8.5"/>
-            <circle cx="37" cy="21" r="12" fill="none" stroke="#FBDA9B" stroke-width="3" stroke-dasharray="3.5 5.5" stroke-linecap="round"/>
-          </svg>
-          <div class="cap">洋蔥圈</div>
+          <div class="hand gname">洋蔥圈</div>
+          <svg class="squig" viewBox="0 0 64 8"><path d="M2 5 Q 10 2 18 5 T 34 5 T 50 5 T 62 4"
+            fill="none" stroke="#E8963E" stroke-width="2.2" stroke-linecap="round"/></svg>
         </div>
         <div class="g">
-          <svg viewBox="0 0 56 52" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="雞球插畫">
-            <g fill="#E8963E">
-              <circle cx="18" cy="34" r="11"/><circle cx="38" cy="33" r="12"/><circle cx="28" cy="20" r="11"/>
-            </g>
-            <g fill="#F5C36E" opacity="0.85">
-              <circle cx="14" cy="30" r="3"/><circle cx="22" cy="38" r="2.4"/>
-              <circle cx="34" cy="28" r="2.8"/><circle cx="42" cy="36" r="2.4"/>
-              <circle cx="24" cy="16" r="2.6"/><circle cx="32" cy="23" r="2.2"/>
-            </g>
-          </svg>
-          <div class="cap">雞球</div>
+          <div class="hand gname">雞　球</div>
+          <svg class="squig" viewBox="0 0 64 8"><path d="M2 4 Q 12 6 22 4 T 42 5 T 62 4"
+            fill="none" stroke="#E8963E" stroke-width="2.2" stroke-linecap="round"/></svg>
         </div>
       </div>
       <div class="detail-body">
         <div class="store">
-          <div class="logo"><img src="assets/nnw-activity/warmnest-logo.jpg" alt="Warm Nest 暖暖窩義式廚房"></div>
+          <div class="logo"><img src="assets/nnw-activity/warmnest-illustration.jpg" alt="Warm Nest 暖暖窩義式廚房"></div>
           <div>
             <div class="name-row"><span class="name">暖暖窩義式廚房</span><span class="paw-tag">🐾 毛孩友善</span></div>
             <div class="addr">板橋區文化路一段286巷16號・近新埔站</div>
           </div>
         </div>
 
-        <h1 class="act-title">用心料理的溫暖，這次多送你一份</h1>
+        <h1 class="act-title hand">用心料理的溫暖，這次多送你一份</h1>
+        <svg class="squig-title" viewBox="0 0 150 9"><path d="M2 6 Q 15 2 30 6 T 60 6 T 90 5 T 120 6 T 148 4"
+          fill="none" stroke="#FF8C7A" stroke-width="2.4" stroke-linecap="round"/></svg>
         <p class="act-desc">
           暖暖窩用二十多年的手藝，把每一道菜都當成給家人的料理——連家裡的毛孩露比媽媽、財寶、皮耶、小米，
           都是店裡的一份子。這次想讓第一次認識我們的你，多帶一份「洋蔥圈」或「雞球」回家，
           選一份就好，慢慢吃，不用急。
         </p>
+
+        <div class="quote-card">
+          <div class="qm">“</div>
+          <p class="hand">【D2 當面請老闆娘講一句真心話，原話放這——例如她怎麼看待帶毛孩來的客人。
+          這格空著就是空著，不要用 AI 編一句假裝是她說的。】</p>
+          <div class="qby">—— 暖暖窩老闆娘</div>
+        </div>
 
         <div class="ethos">
           <h3>🐾 為什麼特別提寵物友善</h3>
@@ -367,7 +308,7 @@
           <h3>🎯 怎麼兌換</h3>
           <div class="step"><div class="n">1</div><div class="t">在暖暖窩<b>內用</b>消費（不含外帶／預訂自取）</div></div>
           <div class="step"><div class="n">2</div><div class="t">結帳時由一位客人出示這個畫面給店員看即可，不用同桌每個人都出示</div></div>
-          <div class="step"><div class="n">3</div><div class="t">店員在核銷畫面（見畫面 C）點一下核銷，現場兌換洋蔥圈或雞球一份（兩選一）</div></div>
+          <div class="step"><div class="n">3</div><div class="t">跟店員說今天想吃哪一款——洋蔥圈還是雞球，店員核銷後（見畫面 C）現場就給你</div></div>
         </div>
 
         <div class="card">
