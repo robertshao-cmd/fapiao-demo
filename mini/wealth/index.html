@@ -9,8 +9,8 @@
 <title>幾歲破產|發票載具</title>
 <!-- vendored / 共用層:不改。unit-kit 這裡只用到 UK.selfCheck()(唯讀機械自檢),
      nav/state/share 依 0726 決策維持本單元手寫版本。 -->
-<script src="qrcode.min.js?v=a7c2f43b"></script>
-<script src="unit-kit.js?v=a7c2f43b"></script>
+<script src="qrcode.min.js?v=eb392b1a"></script>
+<script src="unit-kit.js?v=eb392b1a"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--red-deep:#A50011;--gold:#FFD34D;--teal:#0E7C7B;--mut:#7A8494;--bg:#FFF6F5;--line:#F0E0E1}
@@ -296,15 +296,8 @@
       <div class="hint" id="medNote" style="display:none">收入未提供 → 以台灣受僱員工每月經常性薪資中位數 NT$38,406 為基準(主計總處,2025 年)</div>
     </div>
     <button class="btn p" onclick="share()">📤 直接曬這張,看誰撐得久</button>
-    <!-- 0807:三個社群的專用追蹤連結(Robert:之後要分渠道追點擊)。
-         圖卡是同一張,連結帶不同 utm_source——貼去哪就複製哪一顆,
-         GA4 的 page_location 會自動收 utm(kit 的 cleanUrl 只剝個資參數,utm 會留)。 -->
-    <div style="display:flex;gap:8px;margin-top:8px">
-      <button class="chip" style="flex:1" onclick="copyShareLink('instagram','IG')">📸 IG 連結</button>
-      <button class="chip" style="flex:1" onclick="copyShareLink('threads','Threads')">🧵 Threads 連結</button>
-      <button class="chip" style="flex:1" onclick="copyShareLink('facebook','Meta')">👥 Meta 連結</button>
-    </div>
-    <div class="hint" style="text-align:center">貼到哪個社群,就複製哪一顆——連結不一樣,點擊才追得回來</div>
+    <!-- 0807 二修:三個社群的追蹤連結搬進分享浮層(Robert:應該在分享動作裡,
+         不是攤在結果頁上)——card() 的 channels 欄位帶進去,kit 浮層底部長出來。 -->
     <div class="card"><b style="font-size:13.5px;color:#5A0E14">💧 三大漏財點(來自發票)</b>
       <div id="leaks"></div></div>
     <!-- 0727:結果頁只留一條主路(省錢處方)。原本並列的「讓錢長大」已移除。 -->
@@ -826,7 +819,14 @@ function card(){
     qrHint:'掃碼,算你自己的',
     title:'我的破產倒數',
     text:'我 '+age+' 歲那年存款歸零。你撐到幾歲?',
-    url: shLink()
+    url: shLink(),
+    /* 分享浮層底部的社群專用連結列(0807):同一張卡、不同 utm_source,
+       之後 GA4 用 utm_source 切「點擊各自從哪個社群來」 */
+    channels:[
+      {ic:'📸', label:'IG 連結',      onTap:function(){ copyShareLink('instagram','IG'); }},
+      {ic:'🧵', label:'Threads 連結', onTap:function(){ copyShareLink('threads','Threads'); }},
+      {ic:'👥', label:'Meta 連結',    onTap:function(){ copyShareLink('facebook','Meta'); }}
+    ]
   };
 }
 function share(){ track('wc_share'); UK.share.open(card); }

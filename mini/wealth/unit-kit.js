@@ -564,13 +564,29 @@
           + '<div class="uk-share-prev"><canvas id="uk-share-cv"></canvas></div>'
           + '<div class="uk-note">一張圖＋QR，IG／FB／LINE 都吃這張；掃碼直達</div>'
           + '<div class="uk-share-btns"><button class="uk-btn-share">📤 分享這張圖</button>'
-          + '<button class="uk-btn-dl">⬇️ 下載</button></div></div>';
+          + '<button class="uk-btn-dl">⬇️ 下載</button></div>'
+          + '<div class="uk-share-ch" style="display:none"></div>'
+          + '<div class="uk-note uk-share-chnote" style="display:none">要貼到哪個社群,就複製哪一顆連結——連結不一樣,點擊才追得回來</div></div>';
         m.onclick = function (e) { if (e.target === m) UK.share.close(); };
         m.querySelector('.uk-x').onclick = function () { UK.share.close(); };
         m.querySelector('.uk-btn-share').onclick = function () { UK.share.send(); };
         m.querySelector('.uk-btn-dl').onclick = function () { UK.share.download(); };
         document.body.appendChild(m);
       }
+      /* 0807(wealth 本地改,未回流 _kit):卡資料可帶 channels=[{ic,label,onTap}],
+         浮層底部長出社群專用連結列(分渠道 utm 追蹤用)。沒帶就整列不出現,
+         detox/bored 不受影響。每次 open 重建——channels 可能隨結果變。 */
+      var chBox = m.querySelector('.uk-share-ch'), chNote = m.querySelector('.uk-share-chnote');
+      var chs = (getCard && getCard() || {}).channels || [];
+      chBox.innerHTML = '';
+      chs.forEach(function (c) {
+        var b = document.createElement('button');
+        b.className = 'uk-share-chbtn'; b.textContent = (c.ic ? c.ic + ' ' : '') + c.label;
+        b.onclick = c.onTap;
+        chBox.appendChild(b);
+      });
+      chBox.style.display = chs.length ? '' : 'none';
+      chNote.style.display = chs.length ? '' : 'none';
       this.render(); m.classList.add('on');
       try { history.pushState({ uk: 1 }, ''); } catch (e) {}
       UK.track('share_open');
@@ -1038,6 +1054,8 @@
   + '.uk-share-btns button{flex:1;padding:13px;border-radius:12px;font-size:14px;font-weight:800;min-height:48px;border:none}'
   + '.uk-btn-share{background:#E4001A;color:#fff}'
   + '.uk-btn-dl{background:#fff;border:1.5px solid #D8DEE6!important;color:#33404F}'
+  + '.uk-share-ch{display:flex;gap:8px;margin-top:10px}'
+  + '.uk-share-chbtn{flex:1;padding:11px 6px;border-radius:99px;font-size:12.5px;font-weight:800;min-height:44px;background:#fff;border:1.5px solid #D8DEE6;color:#33404F}'
   + '.uk-poi-emoji{font-size:44px}'
   + '.uk-poi-sheet b.uk-poi-name{font-size:16px;font-weight:900;color:#1F2430;display:block;margin-top:4px}'
   + '.uk-poi-why{font-size:12.5px;font-weight:800;color:#8A5A00;margin-top:8px;line-height:1.7}'
