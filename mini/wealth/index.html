@@ -9,8 +9,8 @@
 <title>幾歲破產|發票載具</title>
 <!-- vendored / 共用層:不改。unit-kit 這裡只用到 UK.selfCheck()(唯讀機械自檢),
      nav/state/share 依 0726 決策維持本單元手寫版本。 -->
-<script src="qrcode.min.js?v=10e44218"></script>
-<script src="unit-kit.js?v=10e44218"></script>
+<script src="qrcode.min.js?v=65093253"></script>
+<script src="unit-kit.js?v=65093253"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--red-deep:#A50011;--gold:#FFD34D;--teal:#0E7C7B;--mut:#7A8494;--bg:#FFF6F5;--line:#F0E0E1}
@@ -603,12 +603,23 @@ function showResult(){
   renderCardHero();
   show('v3');
 }
-/* 結果頁主視覺=分享卡本人(0807)。畫兩次:APP_ICON 是 data URI,首次載入
-   可能晚幾十 ms,晚一拍重畫,右下徽章才不會停在替代 emoji。 */
+/* 結果頁主視覺=分享卡的上半段(0807 二修)。
+   只秀到內卡下緣(標題+數字+結論+法遵+角色)——QR/搜尋框/App 徽章那段
+   是給圖片「流出去」時當回程票用的,在結果頁裡就是雜訊,裁掉。
+   實際分享/存圖仍是整張卡(share() 開的浮層畫的是完整版)。
+   1132 = 內卡下緣(132+986)+邊框餘裕;kit 版面若改內卡尺寸,這裡要跟著對。
+   畫兩次:APP_ICON 是 data URI,首載可能晚幾十 ms,晚一拍重畫。 */
+var HERO_CROP=1132;
 function renderCardHero(){
   var cv=document.getElementById('cardHero'); if(!cv||!UK.share.renderTo) return;
-  UK.share.renderTo(cv, card);
-  setTimeout(function(){ try{ UK.share.renderTo(cv, card); }catch(e){} }, 450);
+  function draw(){
+    var off=document.createElement('canvas');
+    UK.share.renderTo(off, card);
+    cv.width=off.width; cv.height=Math.min(HERO_CROP, off.height);
+    cv.getContext('2d').drawImage(off, 0,0,off.width,cv.height, 0,0,off.width,cv.height);
+  }
+  draw();
+  setTimeout(function(){ try{ draw(); }catch(e){} }, 450);
 }
 /* ── 省錢處方:唯讀 ──
    0727:拿掉「啟用／已啟用」三顆開關。那是假的——按了不會真的設定任何東西,
