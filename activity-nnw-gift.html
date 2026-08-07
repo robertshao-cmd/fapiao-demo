@@ -24,6 +24,29 @@
   .status{height:24px;background:var(--black100);}
   .col-title{font-size:12px;color:var(--black700);text-align:center;padding:4px 0;background:#333;color:#fff;}
 
+  /* ===== 畫面 0：首頁入口通知 ===== */
+  .home-bg{background:linear-gradient(180deg,#dff5f3 0%,var(--black300) 220px);min-height:520px;position:relative;}
+  .home-hdr{padding:16px 16px 0;display:flex;justify-content:space-between;align-items:center;}
+  .home-hdr .greet{font-size:13px;color:var(--black700);}
+  .home-hdr .code{font-size:12px;color:var(--green700);font-weight:700;}
+  .tree-area{height:120px;display:flex;align-items:flex-end;justify-content:center;font-size:56px;opacity:0.85;}
+  .vcard{margin:0 16px;background:#fff;border-radius:16px;padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,0.06);
+    display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--black700);}
+  .vcard b{color:var(--black1000);font-size:15px;}
+  .notif-wrap{position:absolute;top:14px;left:10px;right:10px;animation:none;}
+  .notif{background:rgba(255,255,255,0.98);border-radius:16px;padding:12px 14px;display:flex;gap:10px;
+    box-shadow:0 6px 20px rgba(0,0,0,0.18);border:1px solid var(--black400);}
+  .notif .ic{width:38px;height:38px;border-radius:10px;flex-shrink:0;overflow:hidden;background:var(--green600);
+    display:flex;align-items:center;justify-content:center;font-size:20px;}
+  .notif .ic img{width:100%;height:100%;object-fit:cover;}
+  .notif .body{flex:1;min-width:0;}
+  .notif .top{display:flex;justify-content:space-between;font-size:11px;color:var(--black700);margin-bottom:2px;}
+  .notif .app{font-weight:700;color:var(--black1000);}
+  .notif .ti{font-size:13px;font-weight:700;color:var(--black1000);margin-bottom:2px;}
+  .notif .sub{font-size:12px;color:var(--black800,#595959);line-height:1.4;}
+  .paw-tag{display:inline-flex;align-items:center;gap:3px;background:var(--orange100);color:var(--orange700);
+    font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;}
+
   /* ===== 畫面 A：活動 tab 裡的推薦活動卡（.act-promo 規格） ===== */
   .nav{height:44px;display:flex;align-items:center;justify-content:center;background:var(--black100);
     font-size:17px;font-weight:600;color:var(--black1000);position:relative;}
@@ -46,17 +69,31 @@
   .promo.other{margin-top:10px;opacity:0.55;}
 
   /* ===== 畫面 B：活動詳情頁 ===== */
-  .hero{height:200px;display:flex;border-bottom:1px solid var(--black400);}
-  .hero .half{flex:1;position:relative;overflow:hidden;}
-  .hero .half img{width:100%;height:100%;object-fit:cover;display:block;}
-  .hero .half .cap{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(transparent,rgba(0,0,0,0.55));
-    color:#fff;font-size:12px;font-weight:700;text-align:center;padding:16px 4px 6px;}
+  .hero{height:230px;position:relative;overflow:hidden;border-bottom:1px solid var(--black400);}
+  .hero img{width:100%;height:100%;object-fit:cover;display:block;}
+  .hero .badge{position:absolute;top:12px;left:12px;background:rgba(255,255,255,0.95);border-radius:20px;
+    padding:5px 12px;font-size:12px;font-weight:700;color:var(--orange700);display:flex;align-items:center;gap:4px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.15);}
+  .hero .loc{position:absolute;left:12px;bottom:12px;background:rgba(255,255,255,0.95);border-radius:20px;
+    padding:5px 12px;font-size:12px;font-weight:700;color:var(--black1000);display:flex;align-items:center;gap:5px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.15);}
+  .gift-row{display:flex;gap:10px;padding:14px 16px 0;}
+  .gift-row .g{flex:1;border-radius:12px;overflow:hidden;position:relative;height:76px;box-shadow:0 1px 3px rgba(0,0,0,0.08);}
+  .gift-row .g img{width:100%;height:100%;object-fit:cover;}
+  .gift-row .g .cap{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(transparent,rgba(0,0,0,0.6));
+    color:#fff;font-size:11px;font-weight:700;text-align:center;padding:14px 2px 4px;}
   .detail-body{padding:16px;}
-  .store{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
-  .store .logo{width:36px;height:36px;border-radius:8px;background:var(--green600);color:#fff;
-    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}
+  .store{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .store .logo{width:40px;height:40px;border-radius:10px;flex-shrink:0;overflow:hidden;background:#fff;
+    border:1px solid var(--black400);}
+  .store .logo img{width:100%;height:100%;object-fit:cover;}
+  .store .name-row{display:flex;align-items:center;gap:6px;}
   .store .name{font-size:14px;font-weight:700;color:var(--black1000);}
   .store .addr{font-size:12px;color:var(--black700);}
+  .ethos{background:linear-gradient(135deg,#fff7ec,#fff);border:1px solid var(--orange300);border-radius:12px;
+    padding:14px;margin-bottom:14px;}
+  .ethos h3{font-size:13px;font-weight:700;color:var(--orange700);margin:0 0 6px;display:flex;align-items:center;gap:5px;}
+  .ethos p{font-size:12px;color:var(--black800,#595959);line-height:1.7;margin:0;}
   h1.act-title{font-size:20px;font-weight:700;color:var(--black1000);margin:0 0 6px;line-height:1.4;}
   .act-desc{font-size:14px;color:var(--black800,#595959);line-height:1.7;margin:0 0 18px;}
   .card{background:#fff;border-radius:12px;padding:16px;margin-bottom:14px;}
@@ -113,9 +150,20 @@
   <a href="https://www.facebook.com/eva1216eve0529/" target="_blank">Facebook</a>／
   <a href="https://www.instagram.com/sweethome_2014/" target="_blank">Instagram</a> 抓實拍照，
   但這個環境的瀏覽器工具把這兩個網域擋掉了（政策封鎖，不是登入牆問題），沒有抓到。
-  現在畫面 A／B 用的兩張圖是你直接提供的——<b>看起來是棚拍風格的參考圖，不是暖暖窩自己出餐時的實際擺盤照</b>，
+  現在食物圖是你直接提供的——<b>看起來是棚拍風格的參考圖，不是暖暖窩自己出餐時的實際擺盤照</b>，
   D2 當面過目時務必請老闆娘確認「這是不是他們家會端出來的樣子」，不一致的話要換成她自己拍的實品照，
   不要讓客人到店發現長得不一樣。文案語氣有照他們粉專自介的用詞（用愛烹調、溫暖、家）去對齊。
+  <br><br>
+  <b>0807 新增：老闆娘同意用他們的社群照片，這次把寵物友善這個賣點做進去。</b>
+  暖暖窩是板橋少數毛孩可以一起內用的義式餐廳（這是他們真實的定位，不是我編的），
+  這次用了老闆娘提供的三張圖——毛孩在店內地板的合照（畫面 B 主視覺）、去背版（畫面 0 通知圖示）、
+  Warm Nest 品牌插畫 logo（畫面 B 店家資訊列）。文案新增一張「🐾 為什麼特別提寵物友善」卡片，
+  把「暖暖窩愛毛孩」跟「發票載具也想幫愛毛孩的用戶找到這種店」兩件事講在一起，不是硬貼標籤。
+  <br><br>
+  <b>0807 新增：畫面 0，補上「入口→活動頁」這段 user journey 的第一步。</b>
+  之前只有畫面 A（活動分頁）跟畫面 B（詳情頁），沒有畫出使用者一開始是怎麼看到這個活動的——
+  畫面 0 模擬首頁跳出的推播通知，點下去才進到畫面 B。完整順序：<b>畫面 0（首頁通知）→ 畫面 B（活動詳情，
+  也可以從畫面 A 的活動分頁點進來，兩條路都通）→ 畫面 C（店員核銷）</b>。
   <br><br>
   <b>0806 更新（老闆娘/你已確認）：僅限內用，一桌限兌換一份。</b>畫面 B 已改成這個規則，
   外帶／預訂那條 TBD 已拿掉。同桌多人重複出示的防呆，這輪先靠店員現場判斷（跟紙本優惠券一樣），
@@ -125,6 +173,28 @@
   {活動ID、店家ID、會員載具ID、核銷時間}——這樣我們才能算「核銷次數」「去重會員數」「新客占比」
   這三個 Sales Kit 已經定義過的試辦期指標（核銷率 ≥15%、可歸因來客數 ≥10 位），不是核銷完就沒了。
   詳細規格見下方衡量機制卡片。
+</div>
+
+<div>
+  <div class="col-title">畫面 0 · 入口：首頁跳出的活動通知（user journey 第一步）</div>
+  <div class="phone">
+    <div class="status"></div>
+    <div class="home-bg">
+      <div class="home-hdr"><span class="greet">/ABC1234　複製</span><span class="code">共 128 張發票</span></div>
+      <div class="tree-area">🌳</div>
+      <div class="vcard"><span>05-06月發票 <b>128 張</b></span><span>螢幕常亮</span></div>
+      <div class="notif-wrap">
+        <div class="notif">
+          <div class="ic"><img src="assets/nnw-activity/dogs-cutout.jpg" alt="暖暖窩"></div>
+          <div class="body">
+            <div class="top"><span class="app">發票載具</span><span>剛剛</span></div>
+            <div class="ti">🐾 暖暖窩想見你和你的毛小孩</div>
+            <div class="sub">用餐即贈洋蔥圈或雞球一份，點開看看→</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div>
@@ -163,29 +233,38 @@
     <div class="nav"><span class="h">‹ 返回</span>活動詳情</div>
     <div class="scr" style="padding-bottom:0;">
       <div class="hero">
-        <div class="half">
-          <img src="assets/nnw-activity/onion-ring.png" alt="洋蔥圈">
-          <div class="cap">洋蔥圈</div>
-        </div>
-        <div class="half">
-          <img src="assets/nnw-activity/chicken-nugget.png" alt="雞球">
-          <div class="cap">雞球</div>
-        </div>
+        <img src="assets/nnw-activity/dogs-floor.jpg" alt="暖暖窩的毛孩們">
+        <div class="badge">🐾 寵物友善</div>
+        <div class="loc">📍 暖暖窩義式廚房</div>
+      </div>
+      <div class="gift-row">
+        <div class="g"><img src="assets/nnw-activity/onion-ring.png" alt="洋蔥圈"><div class="cap">洋蔥圈</div></div>
+        <div class="g"><img src="assets/nnw-activity/chicken-nugget.png" alt="雞球"><div class="cap">雞球</div></div>
       </div>
       <div class="detail-body">
         <div class="store">
-          <div class="logo">暖</div>
+          <div class="logo"><img src="assets/nnw-activity/warmnest-logo.jpg" alt="Warm Nest 暖暖窩義式廚房"></div>
           <div>
-            <div class="name">暖暖窩義式廚房</div>
+            <div class="name-row"><span class="name">暖暖窩義式廚房</span><span class="paw-tag">🐾 毛孩友善</span></div>
             <div class="addr">板橋區文化路一段286巷16號・近新埔站</div>
           </div>
         </div>
 
         <h1 class="act-title">用心料理的溫暖，這次多送你一份</h1>
         <p class="act-desc">
-          暖暖窩用二十多年的手藝，把每一道菜都當成給家人的料理。這次想讓第一次認識我們的你，
-          多帶一份「洋蔥圈」或「雞球」回家——選一份就好，慢慢吃，不用急。
+          暖暖窩用二十多年的手藝，把每一道菜都當成給家人的料理——連家裡的毛孩露比、豆豆、小米，
+          都是店裡的一份子。這次想讓第一次認識我們的你，多帶一份「洋蔥圈」或「雞球」回家，
+          選一份就好，慢慢吃，不用急。
         </p>
+
+        <div class="ethos">
+          <h3>🐾 為什麼特別提寵物友善</h3>
+          <p>
+            暖暖窩是板橋少數毛孩能一起入內用餐的義式餐廳，用愛烹調每一道料理，也用愛對待每一位家人——
+            不管是兩隻腳還是四隻腳的。我們（發票載具）也想把這樣的店介紹給同樣愛毛小孩的你，
+            讓你知道附近有一間吃飯不用把毛孩留在家裡的地方。
+          </p>
+        </div>
 
         <div class="card">
           <h3>🎯 怎麼兌換</h3>
