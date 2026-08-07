@@ -89,11 +89,11 @@
     padding:4px 11px;font-size:11px;font-weight:700;color:var(--orange700);box-shadow:0 2px 6px rgba(0,0,0,0.1);}
   .hero .storebar{position:absolute;left:0;right:0;bottom:0;padding:20px 12px 9px;
     background:linear-gradient(transparent,rgba(45,30,20,0.72));color:#fff;display:flex;
-    justify-content:space-between;align-items:flex-end;}
+    justify-content:space-between;align-items:flex-end;gap:8px;}
   .hero .storebar .n{font-size:15px;font-weight:700;line-height:1.3;}
   .hero .storebar .a{font-size:11px;opacity:0.9;}
 
-  .gift-row{display:flex;gap:9px;padding:10px 14px 0;}
+  .gift-row{display:flex;gap:8px;padding:10px 14px 0;align-items:center;}
   .gift-row .g{flex:1;border-radius:13px;height:78px;background:linear-gradient(180deg,#FFF3DE,#FFE7C4);
     border:1px solid #F3DCB8;display:flex;flex-direction:column;align-items:center;justify-content:center;}
   .gift-row .g svg{width:54px;height:40px;display:block;}
@@ -105,7 +105,8 @@
   .act-desc{font-size:13px;color:var(--ink2);line-height:1.75;margin:0 0 10px;}
   .card{background:var(--card);border-radius:13px;padding:12px 14px;margin-bottom:10px;
     border:1px solid var(--line);}
-  .card h3{font-size:13px;font-weight:700;color:var(--ink);margin:0 0 8px;}
+  .card h3{font-size:13px;font-weight:700;color:var(--ink);margin:0 0 8px;
+    display:flex;align-items:center;justify-content:space-between;gap:8px;}
   .step{display:flex;gap:8px;margin-bottom:7px;}
   .step:last-child{margin-bottom:0;}
   .step .n{width:19px;height:19px;border-radius:50%;background:var(--gold);color:#fff;font-size:11px;
@@ -117,21 +118,16 @@
     border-radius:13px;font-size:15px;font-weight:700;box-shadow:0 4px 12px rgba(1,175,162,0.28);}
   .cta .s{display:block;font-size:11px;font-weight:400;opacity:0.9;margin-top:2px;}
 
-  /* ===== 四隻毛孩：縮小成「區塊角落」的小圖示，不壓內容 ===== */
-  .frame .scr{position:relative;}
-  .dogc{position:absolute;width:36px;height:36px;z-index:5;pointer-events:none;
-    filter:drop-shadow(0 2px 6px rgba(90,60,30,0.3));}
-  .dogc img{width:100%;height:100%;display:block;}
-  /* 各自貼在所屬區塊的角落（父層 position:relative） */
-  .d-hero{right:8px;bottom:8px;animation:bob1 3.4s ease-in-out infinite;}
-  .d-gift{top:-11px;right:-5px;animation:bob2 3.9s ease-in-out infinite;}
-  .d-step{top:-12px;right:-6px;animation:bob3 4.3s ease-in-out infinite;}
-  .d-tos{top:-12px;right:-6px;animation:bob4 3.1s ease-in-out infinite;}
-  .gift-row,.card{position:relative;}
-  @keyframes bob1{0%,100%{transform:translateY(0) rotate(-7deg);}50%{transform:translateY(-11px) rotate(3deg);}}
-  @keyframes bob2{0%,100%{transform:translateY(0) rotate(6deg);}50%{transform:translateY(-13px) rotate(-4deg);}}
-  @keyframes bob3{0%,100%{transform:translateY(0) rotate(-4deg);}50%{transform:translateY(-10px) rotate(6deg);}}
-  @keyframes bob4{0%,100%{transform:translateY(0) rotate(5deg);}50%{transform:translateY(-12px) rotate(-6deg);}}
+  /* ===== 四隻毛孩：改成「內嵌排版」的小圖示，跟文字並排，不覆蓋、零碰撞風險 ===== */
+  .dogc{width:30px;height:30px;flex-shrink:0;border-radius:50%;overflow:hidden;
+    box-shadow:0 2px 5px rgba(90,60,30,0.25);display:inline-block;}
+  .dogc.big{width:34px;height:34px;border:2px solid rgba(255,255,255,0.85);}
+  .dogc img{width:100%;height:100%;display:block;object-fit:cover;}
+  .d-hero,.d-gift,.d-step,.d-tos{animation:bob 3.6s ease-in-out infinite;}
+  .d-gift{animation-delay:0.3s;}
+  .d-step{animation-delay:0.6s;}
+  .d-tos{animation-delay:0.9s;}
+  @keyframes bob{0%,100%{transform:translateY(0);}50%{transform:translateY(-4px);}}
   @media (prefers-reduced-motion:reduce){
     .dogc{animation:none;}
   }
@@ -304,12 +300,11 @@
             <div class="n">暖暖窩義式廚房</div>
             <div class="a">板橋文化路一段286巷16號・近新埔站</div>
           </div>
+          <div class="dogc big d-hero"><img src="assets/nnw-activity/dog-mi.png" alt="小米"></div>
         </div>
-        <div class="dogc d-hero"><img src="assets/nnw-activity/dog-mi.png" alt="小米"></div>
       </div>
 
       <div class="gift-row">
-        <div class="dogc d-gift"><img src="assets/nnw-activity/dog-caibao.png" alt="財寶"></div>
         <div class="g">
           <!-- 手繪風洋蔥圈：半徑刻意不等、外框粗細有變化 -->
           <svg viewBox="0 0 62 50" role="img" aria-label="洋蔥圈">
@@ -347,6 +342,7 @@
           </svg>
           <div class="hand gname">雞　球</div>
         </div>
+        <div class="dogc d-gift"><img src="assets/nnw-activity/dog-caibao.png" alt="財寶"></div>
       </div>
 
       <div class="detail-body">
@@ -360,16 +356,14 @@
         </p>
 
         <div class="card">
-          <div class="dogc d-step"><img src="assets/nnw-activity/dog-xuye.png" alt="序耶"></div>
-          <h3>🎯 怎麼兌換</h3>
+          <h3><span>🎯 怎麼兌換</span><div class="dogc d-step"><img src="assets/nnw-activity/dog-xuye.png" alt="序耶"></div></h3>
           <div class="step"><div class="n">1</div><div class="t">在暖暖窩<b>內用</b>消費</div></div>
           <div class="step"><div class="n">2</div><div class="t">結帳時一位客人出示這個畫面就好</div></div>
           <div class="step"><div class="n">3</div><div class="t">跟店員說想吃哪一款，現場就給你</div></div>
         </div>
 
         <div class="card">
-          <div class="dogc d-tos"><img src="assets/nnw-activity/dog-ruby.png" alt="露比媽媽"></div>
-          <h3>📋 活動須知</h3>
+          <h3><span>📋 活動須知</span><div class="dogc d-tos"><img src="assets/nnw-activity/dog-ruby.png" alt="露比媽媽"></div></h3>
           <ul class="tos">
             <li><b>僅限內用</b>，一桌一份（不論幾位同行）；兩款擇一</li>
             <li>期間與每日名額：<span class="tbd">［待老闆娘確認］</span></li>
