@@ -9,8 +9,8 @@
 <title>幾歲破產|發票載具</title>
 <!-- vendored / 共用層:不改。unit-kit 這裡只用到 UK.selfCheck()(唯讀機械自檢),
      nav/state/share 依 0726 決策維持本單元手寫版本。 -->
-<script src="qrcode.min.js?v=786b1e0e"></script>
-<script src="unit-kit.js?v=786b1e0e"></script>
+<script src="qrcode.min.js?v=cc415488"></script>
+<script src="unit-kit.js?v=cc415488"></script>
 <script>/* 靜態發佈版:回首頁指向同層的殼 */UK.HOME = "../";</script>
 <style>
   :root{--ink:#1F2430;--red:#E4001A;--red-deep:#A50011;--gold:#FFD34D;--teal:#0E7C7B;--mut:#7A8494;--bg:#FFF6F5;--line:#F0E0E1}
@@ -696,7 +696,7 @@ function showResult(){
 var HERO_CROP=1132;
 /* hero 版的卡不畫沙漏——那個位置現在由 DOM 動畫(流浪的人+雷雨)接手,
    靜態沙漏墊在動畫底下會穿幫。分享浮層畫的整張卡仍然有沙漏。 */
-function heroCard(){ var d=card(); d.emoji=''; d.acc=''; return d; }
+function heroCard(){ var d=card(); d.emoji=''; d.acc=''; d.drawChar=null; return d; }
 function renderCardHero(){
   var cv=document.getElementById('cardHero'); if(!cv||!UK.share.renderTo) return;
   function draw(){
@@ -817,6 +817,57 @@ function menuClose(){ UK.menu.close(); }
    數字只出現一次:kit 的版面 ② 是數字塊(score+unitTxt)、③ 是大字結論(sub+tint)。
    bored 在 sub 又寫一次「無聊值 94／100」,所以同一個數字出現兩遍;
    這裡 sub/tint 一律不帶數字,破產歲數只由 ② 呈現。 */
+/* 分享卡的角色區畫「小樹安慰」靜態版(0807 四修):
+   結果頁看到的是這一幕的動畫,分享出去的圖是同一幕的定格——
+   兩邊不一致的話,收到圖的人跟本人看到的故事會對不上。
+   樹的素材直接抓 DOM 動畫那顆 img(同一張 data URI,不重複內嵌)。 */
+var TREE_IMG=null;
+function treeImg(){
+  if(TREE_IMG) return TREE_IMG;
+  var el=document.querySelector('.storm .tree img');
+  if(!el) return null;
+  TREE_IMG=new Image(); TREE_IMG.src=el.src;
+  return TREE_IMG;
+}
+function drawComfortScene(ctx, g){
+  var cy=g.cy1, cx=g.cx;
+  /* 雨雲兩朵 */
+  ctx.font='64px sans-serif'; ctx.textAlign='center';
+  ctx.fillText('🌧️', cx-250, cy-190);
+  ctx.fillText('⛈️', cx+250, cy-210);
+  /* 斜雨線(輕,不搶戲) */
+  ctx.save();
+  ctx.strokeStyle='rgba(96,125,180,.38)'; ctx.lineWidth=3;
+  for(var i=0;i<11;i++){
+    var rx=g.cx0+40+i*((g.cw-80)/10), ry=cy-180+(i%3)*22;
+    ctx.beginPath(); ctx.moveTo(rx,ry); ctx.lineTo(rx-14,ry+40); ctx.stroke();
+  }
+  ctx.restore();
+  /* 躺著的人:🧍 轉 90 度(頭朝右),躺在樹左邊 */
+  ctx.save();
+  ctx.translate(cx-150, cy-46);
+  ctx.rotate(Math.PI/2);
+  ctx.font='104px sans-serif'; ctx.textAlign='center';
+  ctx.fillText('🧍', 0, 34);
+  ctx.restore();
+  /* 💤 在人頭上、💛 在人與樹之間(安慰的那一拍) */
+  ctx.font='44px sans-serif';
+  ctx.fillText('💤', cx-40, cy-120);
+  ctx.font='40px sans-serif';
+  ctx.fillText('💛', cx+16, cy-88);
+  /* 小樹:站人旁邊,微微向人傾(定格在「俯身安慰」那一拍) */
+  var t=treeImg();
+  if(t && t.complete && t.naturalWidth){
+    ctx.save();
+    ctx.translate(cx+120, cy-4);            /* 樹根落點 */
+    ctx.rotate(-0.16);                       /* 約 -9 度,朝人傾 */
+    ctx.drawImage(t, -72, -158, 144, 158);
+    ctx.restore();
+  } else {
+    ctx.font='120px sans-serif'; ctx.fillText('🌳', cx+120, cy-20);
+  }
+}
+
 /* 結果文案跟著使用者填的年齡走(0807):
    30 前=青春 vs 錢、30-39=0728 定調的經典句、40-49=退休焦慮、50+=身體現實。
    都是「照你這個花法」的下一句,語氣同一掛,只是刺的點不同。 */
@@ -856,7 +907,8 @@ function card(){
     sub:'照你這個花法',                  /* ③ 大字結論:不帶數字 */
     tint:tintByAge(),                    /* 0807:同一句嚇法對 25 歲和 55 歲刺點不同 */
     punch:'情境試算・非財務預測',        /* ④ 說明行拿來擺法遵(kit 版式沒有獨立的免責欄位) */
-    emoji:'⏳',
+    emoji:'⏳',                          /* drawChar 失敗時 kit 的退路 */
+    drawChar:drawComfortScene,           /* 0807:分享卡角色區=結果頁同一幕(靜態) */
     stamp: age<=35 ? '快歸零' : (age<=45 ? '有點險' : (age<=60 ? '還算穩' : '很能撐')),
     qrHint:'掃碼,算你自己的',
     title:'我的破產倒數',

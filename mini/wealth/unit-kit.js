@@ -694,10 +694,17 @@
         ctx.fillStyle = T.sub2; fit(d.punch, '700', 36, CW - 120);
         ctx.fillText(d.punch, cx, y + 60);
       }
-      /* ⑤ 主視覺角色:被內卡下緣裁掉,裁切感=有設計過 */
-      var fs = 400;
-      ctx.font = fs + 'px sans-serif'; ctx.fillText(d.emoji || '', cx, CY1 + 76);
-      if (d.acc) { ctx.font = (fs * .34) + 'px sans-serif'; ctx.fillText(d.acc, cx + fs * .46, CY1 + 76 - fs * .58); }
+      /* ⑤ 主視覺角色:被內卡下緣裁掉,裁切感=有設計過。
+         0807(wealth 本地改,未回流 _kit):卡資料可帶 drawChar(ctx, geom) 回呼,
+         由單元自己畫角色區——分享出去的圖才能跟結果頁的場景一致
+         (結果頁是 DOM 動畫,分享卡畫同一幕的靜態版)。沒帶照舊畫 emoji。 */
+      if (typeof d.drawChar === 'function') {
+        try { d.drawChar(ctx, { cx: cx, cy1: CY1, cx0: CX0, cw: CW }); } catch (e) {}
+      } else {
+        var fs = 400;
+        ctx.font = fs + 'px sans-serif'; ctx.fillText(d.emoji || '', cx, CY1 + 76);
+        if (d.acc) { ctx.font = (fs * .34) + 'px sans-serif'; ctx.fillText(d.acc, cx + fs * .46, CY1 + 76 - fs * .58); }
+      }
       ctx.restore();                                 /* 解除裁切 */
 
       /* ⑥ CTA:0727 二次修正——使用者指出「應該是叫人去搜尋發票載具本身」。
